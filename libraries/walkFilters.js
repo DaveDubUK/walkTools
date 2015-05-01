@@ -341,10 +341,7 @@ filter = (function() {
             // Bezier functions for more natural transitions
             // based on script by Dan Pupius (www.pupius.net) http://13thparallel.com/archive/bezier-curves/
             input = 1 - input;
-            var pos = {x: 0, y: 0};
-            pos.x = _C1.x * _B1(input) + C2.x * _B2(input) + C3.x * _B3(input) + _C4.x * _B4(input);
-            pos.y = _C1.y * _B1(input) + C2.y * _B2(input) + C3.y * _B3(input) + _C4.y * _B4(input);
-            return pos.y;
+            return _C1.y * _B1(input) + C2.y * _B2(input) + C3.y * _B3(input) + _C4.y * _B4(input);
         },
 
         // simple clipping filter (clips bottom of wave only, special case for hips y-axis skeleton offset)

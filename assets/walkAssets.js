@@ -13,59 +13,52 @@
 
 walkAssets = (function () {
 
+    var _animationSetPath = 'animation-sets/standard-male/';
+
     // load the sounds
     var _footsteps = [];
-
-    _footsteps.push(SoundCache.getSound(pathToAssets + "sounds/FootstepW2Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + "sounds/FootstepW2Right-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + "sounds/FootstepW3Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + "sounds/FootstepW3Right-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + "sounds/FootstepW5Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + "sounds/FootstepW5Right-12db.wav"));
+    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW2Left-12db.wav"));
+    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW2Right-12db.wav"));
+    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW3Left-12db.wav"));
+    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW3Right-12db.wav"));
+    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW5Left-12db.wav"));
+    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW5Right-12db.wav"));
 
     // load the animation datafiles
-    Script.include(pathToAssets + "animations/dd-male-walk-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-walk-backwards-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-idle-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-fly-up-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-fly-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-fly-down-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-soar-fly.js");
-    Script.include(pathToAssets + "animations/dd-male-rapid-fly.js");
-    Script.include(pathToAssets + "animations/dd-male-hover-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-sidestep-left-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-sidestep-right-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-turn-left-animation.js");
-    Script.include(pathToAssets + "animations/dd-male-turn-right-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-walk-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-walk-backwards-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-idle-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-up-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-down-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-soar-fly.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-rapid-fly.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-hover-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-sidestep-left-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-sidestep-right-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-turn-left-animation.js");
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-turn-right-animation.js");
 
-    // load reach pose datafiles - transitions
-    Script.include(pathToAssets + "reach-poses/dd-male-idle-to-walk-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-male-idle-to-walk-2-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-male-idle-to-walk-3-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-male-walk-to-idle-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-male-fly-to-walk-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-male-walk-to-fly-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-male-hover-to-idle-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-rapid-flying-slowdown-reach-pose.js");
-    Script.include(pathToAssets + "reach-poses/dd-coming-in-to-land-forwards-reach-pose.js");
+    // load reach pose datafiles
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-reach-pose.js");
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-2-reach-pose.js");
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-3-reach-pose.js");
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-walk-to-idle-reach-pose.js");
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-fly-to-walk-reach-pose.js");
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-walk-to-fly-reach-pose.js");
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-hover-to-idle-reach-pose.js");
 
-    // load reach pose datafiles - reactions
-    Script.include(pathToAssets + "reach-poses/dd-male-protect-head-reach-pose.js");
+    // load the transitions datafile
+    Script.include(pathToAssets +_animationSetPath +  "walk-transitions.js");
 
-    // load reach pose datafiles - gestures
-    Script.include(pathToAssets + "reach-poses/dd-shrug-reach-pose.js");
+    // load the actions datafile
+    Script.include(pathToAssets +_animationSetPath +  "walk-actions.js");
 
     // animation buffer prototype
     Script.include(pathToAssets + "miscellaneous/animation-buffer.js");
 
     // load the animation reference datafile
     Script.include(pathToAssets + "miscellaneous/animation-reference.js");
-
-    // load the transition datafiles
-    Script.include(pathToAssets + "miscellaneous/walk-transitions.js");
-
-    // load the action datafiles
-    Script.include(pathToAssets + "miscellaneous/walk-actions.js");
 
     // animations
     var _animations = [];
@@ -98,11 +91,6 @@ walkAssets = (function () {
     _reachPoses.push(new MaleFlyToWalkRP());
     _reachPoses.push(new MaleWalkToFlyRP());
     _reachPoses.push(new MaleHoverToIdleRP());
-
-    _reachPoses.push(new RapidFlyingSlowdownRP());
-    _reachPoses.push(new ComingInToLand());
-    _reachPoses.push(new MaleProtectHeadRP());
-    _reachPoses.push(new ShrugRP());
 
     // transitions
     var _transitions = transitions;

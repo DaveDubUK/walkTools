@@ -1,5 +1,5 @@
 //
-//  walkObjects.js
+//  walkApi.js
 //
 //  version 1.003
 //
@@ -13,20 +13,12 @@
 
 Avatar = function() {
 
-    // locomotion status
-    this.isNotMoving = true;
-    this.isAtWalkingSpeed = false;
-    this.isAtFlyingSpeed = false;
-    this.isAccelerating = false;
-    this.isDecelerating = false;
-    this.isDeceleratingFast = false;
-    this.isGoingUp = false;
-    this.isGoingDown = false;
-    this.isUnderGravity = false;
+    // motion, locomotion, spatial awareness
     this.distanceToSurface = 0;
     this.isOnSurface = true;
     this.isComingInToLand = false;
     this.isTakingOff = false;
+    this.isUnderGravity = false;
 
     // if Hydras are connected, the only way to enable use is by never setting any rotations on the arm joints
     this.hydraCheck = function() {
@@ -43,7 +35,7 @@ Avatar = function() {
     // settings
     this.armsFree = this.hydraCheck(); // automatically sets true for Hydra support - temporary fix
     this.makesFootStepSounds = false;
-    this.animationSet = undefined;
+    this.animationSet = undefined; // currently just one animation set
     this.setAnimationSet = function(animationSet) {
 
         this.animationSet = animationSet;
@@ -83,7 +75,7 @@ Avatar = function() {
 
     this.calibrate = function() {
 
-        // Bug 1: measurements are taken three times to ensure accuracy - the first result is often too large
+        // Triple check: measurements are taken three times to ensure accuracy - the first result is often too large
         var attempts = 3;
         var extraAttempts = 0;
 
@@ -103,7 +95,7 @@ Avatar = function() {
 
             if (this.calibration.hipsToFeet === 0 && extraAttempts < 100) {
 
-                // Bug 2: Interface can sometimes report zero for hips to feet, so we keep doing it until it's non-zero
+                // Interface can sometimes report zero for hips to feet. if so, we repeat.
                 attempts++;
                 extraAttempts++;
             }
@@ -159,7 +151,8 @@ Avatar = function() {
         var MIN_VOLUME = 0.08;
         var options = {
             position: Vec3.sum(MyAvatar.position, {x:0, y: -this.calibration.hipsToFeet, z:0}),
-            volume: motion.speed > SPEED_THRESHOLD ? VOLUME_ATTENUATION * motion.speed / MAX_WALK_SPEED : MIN_VOLUME
+            volume: Vec3.length(motion.velocity) > SPEED_THRESHOLD ?
+                    VOLUME_ATTENUATION * Vec3.length(motion.velocity) / MAX_WALK_SPEED : MIN_VOLUME
         };
 
         // different sounds for male / female
@@ -185,145 +178,6 @@ Avatar = function() {
     }
 };
 
-// this string functionality will be in the ECMAScript 6 specification. polyfilling for now.
-if (!('contains' in String.prototype)) {
-
-    String.prototype.contains = function(str, startIndex) {
-
-        return ''.indexOf.call(this, str, startIndex) !== -1;
-    };
-}
-
-// provides user feedback whilst loading assets (typically 5 to 10 seconds)
-fingerCounter = (function () {
-
-    var _countOnFingers = 0;
-
-    return {
-
-        incrementCounter: function() {
-
-            // can't use animation reference here, as has not loaded yet. Using string matching instead
-            var jointNames = MyAvatar.getJointNames();
-
-            for (i in jointNames) {
-
-                var poseAngle = 90;
-                var isFingerJoint = false;
-                var joint = jointNames[i];
-
-                if (joint.contains("RightHandThumb") && _countOnFingers > 0) {
-
-                    poseAngle = 4;
-                }
-                if (joint.contains("RightHandIndex")) {
-
-                    if (_countOnFingers > 1) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("RightHandMiddle")) {
-
-                    if (_countOnFingers > 2) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("RightHandRing")) {
-
-                    if (_countOnFingers > 3) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("RightHandPinky")) {
-
-                    if (_countOnFingers > 4) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("LeftHandThumb") && _countOnFingers > 5) {
-
-                    poseAngle = 4;
-                }
-                if (joint.contains("LeftHandIndex")) {
-
-                    if (_countOnFingers > 6) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("LeftHandMiddle")) {
-
-                    if (_countOnFingers > 7) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("LeftHandRing")) {
-
-                    if (_countOnFingers > 8) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("LeftHandPinky")) {
-
-                    if (_countOnFingers > 9) {
-
-                        poseAngle = 4;
-                    }
-                    isFingerJoint = true;
-                }
-                if (joint.contains("RightHandThumb")) {
-
-                    poseAngle = poseAngle === 90 ? 20 : poseAngle;
-                    MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(poseAngle, 0, poseAngle));
-
-                } else if (joint.contains("LeftHandThumb")) {
-
-                    poseAngle = poseAngle === 90 ? 20 : poseAngle;
-                    MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(poseAngle, 0, -poseAngle));
-
-                } else if (isFingerJoint) {
-
-                    MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(poseAngle, 0, 0));
-                }
-            }
-            if (_countOnFingers++ > 10) {
-
-                _countOnFingers = 0;
-            }
-        }
-    }
-
-})(); // end fingerCounter object literal
-
-
-// 3D throbber whilst loading assets
-LoadingThrobber = function() {
-
-    this.intervalTimer = Script.setInterval(function(){
-
-        fingerCounter.incrementCounter();
-
-    }, 500);
-
-    this.stop = function() {
-
-        Script.clearInterval(this.intervalTimer);
-    }
-};
-
 // JS motor
 jsMotor = (function () {
 
@@ -335,8 +189,8 @@ jsMotor = (function () {
 
     function _update() {
 
-        MyAvatar.motorVelocity = _motorVelocity;
-        MyAvatar.motorTimescale = _motorTimeScale;
+        //MyAvatar.motorVelocity = _motorVelocity;
+        //MyAvatar.motorTimescale = _motorTimeScale;
     }
 
     return {
@@ -363,7 +217,7 @@ jsMotor = (function () {
             _motorTimeScale = SHORT_TIME;
             _motoring = true;
 
-            //print('jsMotor: started motoring at speed '+speed.toFixed(2)+' in direction '+_direction);
+            //print('jsMotor: started motoring at speed '+speed.toFixed(2)+' in direction '+_direction+'. current speed is '+Vec3.length(MyAvatar.getVelocity()));
 
             _update();
         },
@@ -378,22 +232,26 @@ jsMotor = (function () {
             _motorTimeScale = timeScale;
             _motoring = true;
 
-            //print('jsMotor: set motor speed to '+speed.toFixed(2)+ ' in direction '+_direction);
+            //print('jsMotor: set motor speed to '+speed.toFixed(2)+ ' in direction '+_direction+'. current speed is '+Vec3.length(MyAvatar.getVelocity()));
 
             _update();
         },
 
-        applyBrakes: function() { // aka apply brakes
+        applyBrakes: function() {
 
             // stop the motion quickly
             _motorVelocity = {x:0.0, y:0.0, z:0};
             _motorTimeScale = VERY_SHORT_TIME;
-            _motoring = false;
             _braking = true;
 
-            //print('jsMotor: set motor speed to zero - stopping');
+            //print('jsMotor: applyBrakes - set motor speed to zero - stopping. current speed is '+Vec3.length(MyAvatar.getVelocity()));
 
             _update();
+
+            if(Vec3.length(Motion.velocity) < (MOVE_THRESHOLD/100)) {
+
+                _motoring = false;
+            }
         },
 
         stopBraking: function() {
@@ -402,11 +260,10 @@ jsMotor = (function () {
             _motorTimeScale = VERY_LONG_TIME;
             _braking = false;
 
-            //print('jsMotor: reset braking');
+            //print('jsMotor: stopBraking. current speed is '+Vec3.length(MyAvatar.getVelocity()));
 
             _update();
         }
-
     }
 
 })(); // end jsMotor object literal
@@ -417,6 +274,19 @@ Motion = function(avatar) {
 
     // link the motion to the avatar
     this.avatar = avatar;
+
+    // locomotion status
+    this.locomotionMode = state.STATIC;
+    this.isMoving = true;
+    this.isWalkingSpeed = false;
+    this.isFlyingSpeed = false;
+    this.isAccelerating = false;
+    this.isDecelerating = false;
+    this.isDeceleratingFast = false;
+    //this.isGoingUp = false;
+    //this.isGoingDown = false;
+
+    this.directedAcceleration = 0;
 
     // calibration
     this.calibration = {
@@ -435,9 +305,7 @@ Motion = function(avatar) {
     this.currentTransition = null;
 
     // orientation, locomotion and timing
-    this.speed = 0;
     this.velocity = {x:0, y:0, z:0};
-    this.accelerationMagnitude = 0;
     this.acceleration = {x:0, y:0, z:0};
     this.direction = FORWARDS;
     this.transitionCount = 0;
@@ -445,15 +313,13 @@ Motion = function(avatar) {
 
     // historical orientation, locomotion and timing
     this.lastDirection = FORWARDS;
-    this.lastSpeed = 0;
     this.lastVelocity = {x:0, y:0, z:0};
-    this.lastAccelerationMagnitude = 0;
-    this.lastAcceleration ={x:0, y:0, z:0};
+    this.lastAcceleration = {x:0, y:0, z:0};
 
     // calculate local velocity, speed, acceleration and proximity to voxel surface for the current frame
-    this.initialise = function(deltaTime) {
+    this.quantify = function(deltaTime) {
 
-        if (jsMotor.isBraking()) {
+        if (jsMotor.isBraking() && Vec3.length(Motion.velocity) < MOVE_THRESHOLD) {
 
             // reset any braking
             jsMotor.stopBraking();
@@ -461,40 +327,41 @@ Motion = function(avatar) {
 
         // calculate avatar frame speed, velocity and acceleration
         this.deltaTime = deltaTime;
-        var inverseOrientation = Quat.inverse(MyAvatar.orientation);
-        this.velocity = Vec3.multiplyQbyV(inverseOrientation, MyAvatar.getVelocity());
-        this.speed = Vec3.length(this.velocity);
+        this.velocity = Vec3.multiplyQbyV(Quat.inverse(MyAvatar.orientation), MyAvatar.getVelocity());
+        var lateralVelocity = Math.sqrt(Math.pow(this.velocity.x, 2) + Math.pow(this.velocity.z, 2));
 
-        if (this.speed < MOVE_THRESHOLD) {
 
-            this.avatar.isNotMoving = true;
-            this.avatar.isAtWalkingSpeed = false;
-            this.avatar.isAtFlyingSpeed = false;
+        // TODO: Don't use MyAvatar.getVelocity() to calculate acceleration, use MyAvatar.getAcceleration()?
+        var acceleration = {x:0, y:0, z:0};
+        this.acceleration.x = (this.velocity.x - this.lastVelocity.x) / deltaTime;
+        this.acceleration.y = (this.velocity.y - this.lastVelocity.y) / deltaTime;
+        this.acceleration.z = (this.velocity.z - this.lastVelocity.z) / deltaTime;
 
-        } else if (this.speed < MAX_WALK_SPEED) {
+        /*this.acceleration = MyAvatar.getAcceleration();
+        this.acceleration = Vec3.multiplyQbyV(Quat.inverse(MyAvatar.orientation), MyAvatar.getAcceleration());*/
 
-            this.avatar.isNotMoving = false;
-            this.avatar.isAtWalkingSpeed = true;
-            this.avatar.isAtFlyingSpeed = false;
-
-        } else {
-
-            this.avatar.isNotMoving = false;
-            this.avatar.isAtWalkingSpeed = false;
-            this.avatar.isAtFlyingSpeed = true;
-        }
+        // how far above the suface is the avatar?
+        var pickRay = {origin: MyAvatar.position, direction: {x:0, y:-1, z:0}};
+        var distanceToSurface = Entities.findRayIntersectionBlocking(pickRay).distance;
+        this.avatar.distanceToSurface = distanceToSurface - this.avatar.calibration.hipsToFeet;
 
         // determine principle direction of movement
-        if (this.avatar.isNotMoving) {
+        /*if (!this.isMoving) {
 
             this.direction = NONE;
+            this.directedAcceleration = 0;
 
-        } else if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y) &&
+        } else */if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y) &&
                    Math.abs(this.velocity.x) > Math.abs(this.velocity.z)) {
 
             if (this.velocity.x < 0) {
+
+                this.directedAcceleration = -this.acceleration.x;
                 this.direction = LEFT;
+
             } else if (this.velocity.x > 0){
+
+                this.directedAcceleration = this.acceleration.x;
                 this.direction = RIGHT;
             }
 
@@ -502,8 +369,13 @@ Motion = function(avatar) {
                    Math.abs(this.velocity.y) > Math.abs(this.velocity.z)) {
 
             if (this.velocity.y > 0) {
+
+                this.directedAcceleration = this.acceleration.y;
                 this.direction = UP;
-            } else {
+
+            } else if (this.velocity.y < 0) {
+
+                this.directedAcceleration = -this.acceleration.y;
                 this.direction = DOWN;
             }
 
@@ -511,98 +383,83 @@ Motion = function(avatar) {
                    Math.abs(this.velocity.z) > Math.abs(this.velocity.y)) {
 
             if (this.velocity.z < 0) {
+
                 this.direction = FORWARDS;
-            } else {
+                this.directedAcceleration = -this.acceleration.z;
+
+            } else if (this.velocity.z > 0) {
+
+                this.directedAcceleration = this.acceleration.z;
                 this.direction = BACKWARDS;
             }
-        }
-
-        //if (walkTools.editMode.editing) {
-
-        //    this.direction = walkTools.editMode.editDirection;
-        //}// REMOVE_FOR_RELEASE - no walktools
-
-        // determine locomotion status
-        if (this.velocity.y > MOVE_THRESHOLD) {
-
-            this.avatar.isGoingUp = true;
-            this.avatar.isGoingDown = false;
-
-        } else if (this.velocity.y < -MOVE_THRESHOLD) {
-
-            this.avatar.isGoingUp = false;
-            this.avatar.isGoingDown = true;
 
         } else {
 
-            this.avatar.isGoingUp = false;
-            this.avatar.isGoingDown = false;
+            this.direction = NONE;
+            this.directedAcceleration = 0;
         }
 
-        // TODO: Don't use MyAvatar.getVelocity() to calculate acceleration, use MyAvatar.getAcceleration()
-        var acceleration = {x:0, y:0, z:0};
-        acceleration.x = (this.velocity.x - this.lastVelocity.x) / deltaTime;
-        acceleration.y = (this.velocity.y - this.lastVelocity.y) / deltaTime;
-        acceleration.z = (this.velocity.z - this.lastVelocity.z) / deltaTime;
-        this.acceleration.x = acceleration.x;
-        this.acceleration.y = acceleration.y;
-        this.acceleration.z = acceleration.z;
-        this.accelerationMagnitude = Vec3.length(acceleration);
+        if (walkTools.editMode.editing) {
+            this.direction = walkTools.editMode.editDirection;
+        }// REMOVE_FOR_RELEASE - no walktools
 
-        var directedAcceleration = 0;
+        // determine if at static, walking or flying speed
+        if (Vec3.length(this.velocity) < MOVE_THRESHOLD) {
 
-        if (this.direction === FORWARDS) {
+            this.isMoving = false;
+            this.isWalkingSpeed = false;
+            this.isFlyingSpeed = false;
 
-            directedAcceleration = acceleration.z;
+        } else if (Vec3.length(this.velocity) < MAX_WALK_SPEED) {
 
-        } else if (this.direction === BACKWARDS) {
+            this.isMoving = true;
+            this.isWalkingSpeed = true;
+            this.isFlyingSpeed = false;
 
-            directedAcceleration = -acceleration.z;
+        /*} else if (this.avatar.distanceToSurface < ON_SURFACE_THRESHOLD && this.direction === DOWN && lateralVelocity > MOVE_THRESHOLD) {
+            // special case to debounce flying to walking
+            this.isMoving = true;
+            this.isWalkingSpeed = true;
+            this.isFlyingSpeed = false;
+*/
+        } else {
 
-        } else if (this.direction === LEFT) {
-
-            directedAcceleration = acceleration.x;
-
-        } else if (this.direction === RIGHT) {
-
-            directedAcceleration = -acceleration.x;
-
+            this.isMoving = true;
+            this.isWalkingSpeed = false;
+            this.isFlyingSpeed = true;
         }
 
-        if (directedAcceleration < ACCELERATION_THRESHOLD) {
 
-            this.avatar.isAccelerating = true;
-            this.avatar.isDecelerating = false;
-            this.avatar.isDeceleratingFast = false;
+        // set acceleration flags
+        if (this.directedAcceleration > ACCELERATION_THRESHOLD) {
 
-        } else if (directedAcceleration > DECELERATION_THRESHOLD) {
+            this.isAccelerating = true;
+            this.isDecelerating = false;
+            this.isDeceleratingFast = false;
 
-            this.avatar.isAccelerating = false;
-            this.avatar.isDecelerating = true;
+        } else if (this.directedAcceleration < DECELERATION_THRESHOLD) {
 
-            if (directedAcceleration > FAST_DECELERATION_THRESHOLD) {
+            this.isAccelerating = false;
+            this.isDecelerating = true;
 
-                this.avatar.isDeceleratingFast = true;
+            if (this.directedAcceleration < FAST_DECELERATION_THRESHOLD) {
+
+                this.isDeceleratingFast = true;
 
             } else {
 
-                this.avatar.isDeceleratingFast = false;
+                this.isDeceleratingFast = false;
             }
 
         } else {
 
-            this.avatar.isAccelerating = false;
-            this.avatar.isDecelerating = false;
-            this.avatar.isDeceleratingFast = false;
+            this.isAccelerating = false;
+            this.isDecelerating = false;
+            this.isDeceleratingFast = false;
         }
 
-        // how far above the voxel suface is the avatar?
-        var pickRay = {origin: MyAvatar.position, direction: {x:0, y:-1, z:0}};
-        var distanceToSurface = Entities.findRayIntersectionBlocking(pickRay).distance;
-        this.avatar.distanceToSurface = distanceToSurface - this.avatar.calibration.hipsToFeet;
-
+        // use the gathered info to build up some spatial awareness for the avatar
         this.avatar.isOnSurface = false;
-        //this.avatar.isJustAboveSurface = false;
         this.avatar.isComingInToLand = false;
         this.avatar.isTakingOff = false;
         this.avatar.isUnderGravity = false;
@@ -610,19 +467,91 @@ Motion = function(avatar) {
         if (this.avatar.distanceToSurface < ON_SURFACE_THRESHOLD) {
 
             this.avatar.isOnSurface = true;
-
         }
-        if (distanceToSurface < GRAVITY_THRESHOLD) {
+        if (this.avatar.distanceToSurface < GRAVITY_THRESHOLD) {
 
             this.avatar.isUnderGravity = true;
         }
-        if (this.avatar.isUnderGravity && this.avatar.isGoingDown) {
+        if (this.avatar.isUnderGravity && this.velocity.y < -GRAVITY_REACTION_THRESHOLD) {
 
             this.avatar.isComingInToLand = true;
 
-        } else if (this.avatar.isUnderGravity && this.avatar.isGoingUp) {
+        } else if (this.avatar.isUnderGravity && this.velocity.y > GRAVITY_REACTION_THRESHOLD) {
 
             this.avatar.isTakingOff = true;
+        }
+
+        // we now have enough information to set the appropriate locomotion mode
+        var SURFACE_MOTION = this.avatar.isOnSurface && this.isWalkingSpeed;
+        var ACCELERATING_AND_AIRBORNE = this.isAccelerating && !this.avatar.isOnSurface;
+        var GOING_TOO_FAST_TO_WALK = !this.isDecelerating && this.isAtFlyingSpeed;
+        var MOVING_DIRECTLY_UP_OR_DOWN = (this.direction === UP || this.direction === DOWN) &&
+                                         lateralVelocity < MOVE_THRESHOLD; //
+        var ABOUT_TO_LAND = this.avatar.isComingInToLand && this.avatar.distanceToSurface < LANDING_THRESHOLD;
+
+        switch(state.currentState) {
+
+            case state.STATIC:
+
+                if (ACCELERATING_AND_AIRBORNE || GOING_TOO_FAST_TO_WALK ||
+                   (MOVING_DIRECTLY_UP_OR_DOWN && !this.avatar.isOnSurface)) {
+
+                    this.locomotionMode = state.AIR_MOTION;
+                    //print('static to air motion. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
+
+                } else if (SURFACE_MOTION && !jsMotor.isMotoring() && lateralVelocity > MOVE_THRESHOLD) {
+
+                    this.locomotionMode = state.SURFACE_MOTION;
+                    //print('static to surface motion. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
+
+                } else {
+
+                    this.locomotionMode = state.STATIC;
+                }
+                break;
+
+            case state.SURFACE_MOTION:
+
+                if (!this.isMoving) { //!this.isMoving || this.isDecelerating)) {
+
+                    // stopping walk, so immediately start the motor so we can complete the current walk half cycle
+                    if (!jsMotor.isMotoring() && this.avatar.isOnSurface) {
+
+                        jsMotor.startMotoring();
+                    }
+                    this.locomotionMode = state.STATIC;
+                    //print('surface motion to static. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
+
+                } else if ((!SURFACE_MOTION || ACCELERATING_AND_AIRBORNE ||
+                    GOING_TOO_FAST_TO_WALK || MOVING_DIRECTLY_UP_OR_DOWN) && this.avatar.isTakingOff) {
+
+                    this.locomotionMode = state.AIR_MOTION;
+                    //print('surface motion to air motion. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
+
+                } else {
+
+                    this.locomotionMode = state.SURFACE_MOTION;
+                }
+                break;
+
+            case state.AIR_MOTION:
+
+                if ((SURFACE_MOTION || ABOUT_TO_LAND) && !MOVING_DIRECTLY_UP_OR_DOWN){
+
+                    this.locomotionMode = state.SURFACE_MOTION;
+                    //print('air motion to surface motion. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
+
+                } else if (Vec3.length(this.velocity) < FLY_THRESHOLD || this.isDeceleratingFast ||
+                           this.avatar.isOnSurface) {
+
+                    this.locomotionMode = state.STATIC;
+                    //print('air motion to static. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
+
+                } else {
+
+                    this.locomotionMode = state.AIR_MOTION;
+                }
+                break;
         }
     }
 
@@ -656,9 +585,7 @@ Motion = function(avatar) {
     this.saveHistory = function() {
 
         this.lastDirection = this.direction;
-        this.lastSpeed = this.speed;
         this.lastVelocity = this.velocity;
-        this.lastAccelerationMagnitude = this.accelerationMagnitude;
         this.lastAcceleration = this.acceleration;
         this.lastdistanceToSurface = avatar.distanceToSurface;
     }
@@ -678,7 +605,7 @@ animationOperations = (function() {
             var jointTranslations = {x:0, y:0, z:0};
 
             // gather modifiers and multipliers
-            modifiers = new JointModifiers(joint, direction);
+            modifiers = new FrequencyMultipliers(joint, direction);
 
             // calculate translations. Use synthesis filters where specified by the animation data file.
 
@@ -737,7 +664,7 @@ animationOperations = (function() {
             var jointRotations = {x:0, y:0, z:0};
 
             // gather modifiers and multipliers for this joint
-            modifiers = new JointModifiers(joint, direction);
+            modifiers = new FrequencyMultipliers(joint, direction);
 
             // calculate rotations. Use synthesis filters where specified by the animation data file.
 
@@ -900,25 +827,17 @@ animationOperations = (function() {
 // finite state machine. Avatar locomotion modes represent states in the FSM
 state = (function () {
 
-    // REMOVE_FOR_RELEASE
-    //var walkTools = null;
     var _powerOn = true;
 
     return {
 
-        // REMOVE_FOR_RELEASE
-        //setTools: function(tools) {
-            //walkTools = tools;
-        //},
-
         // the finite list of states
-        STANDING: 1,
-        WALKING: 2,
-        SIDE_STEP: 3,
-        FLYING: 4,
+        STATIC: 1,
+        SURFACE_MOTION: 2,
+        AIR_MOTION: 4,
         EDIT: 8,  // REMOVE_FOR_RELEASE
 
-        currentState: this.STANDING,
+        currentState: this.STATIC,
 
         // status vars
         powerOn: _powerOn,
@@ -927,19 +846,14 @@ state = (function () {
 
             switch (newInternalState) {
 
-                case this.WALKING:
+                case this.SURFACE_MOTION:
 
-                    this.currentState = this.WALKING;
+                    this.currentState = this.SURFACE_MOTION;
                     return;
 
-                case this.FLYING:
+                case this.AIR_MOTION:
 
-                    this.currentState = this.FLYING;
-                    return;
-
-                case this.SIDE_STEP:
-
-                    this.currentState = this.SIDE_STEP;
+                    this.currentState = this.AIR_MOTION;
                     return;
 
                 case this.EDIT:
@@ -947,10 +861,10 @@ state = (function () {
                     this.currentState = this.EDIT; // REMOVE_FOR_RELEASE (all editing state references need removal)
                     return;
 
-                case this.STANDING:
+                case this.STATIC:
                 default:
 
-                    this.currentState = this.STANDING;
+                    this.currentState = this.STATIC;
                     return;
             }
         }
@@ -958,7 +872,7 @@ state = (function () {
 })(); // end state object literal
 
 
-// action object
+// Action objects
 Action = function(actionName, duration, strength) {
 
     this.name = actionName;
@@ -1034,130 +948,7 @@ Action = function(actionName, duration, strength) {
     }
 };
 
-spatialAwareness = (function () {
-
-    var _distancesToObstacle = 100;
-    var _lastDistanceToObstacle = 100;
-    var _collidingWithSurface = false;
-    var COLLISION_THRESHOLD = 0.7;
-
-    return {
-
-        update: function() {
-
-            if (motion.speed > MOVE_THRESHOLD) {
-/*
-                // look ahead for obstacles
-                var inverseOrientation = Quat.inverse(MyAvatar.orientation);
-                var pickRay = {origin: MyAvatar.position, direction: Vec3.multiplyQbyV(inverseOrientation, {x:0, y:0, z:1})};
-                _distancesToObstacle = Entities.findRayIntersectionBlocking(pickRay).distance;
-
-                if (_distancesToObstacle < COLLISION_THRESHOLD &&
-                    _lastDistanceToObstacle > _distancesToObstacle &&
-                   !_collidingWithSurface) {
-
-                    _collidingWithSurface = true;
-                    liveActions.addAction(new Action("MaleProtectHeadRP"));
-
-                } else if (_distancesToObstacle > COLLISION_THRESHOLD) {
-
-                    _collidingWithSurface = false;
-                }
-                _lastDistanceToObstacle = _distancesToObstacle;
-
-
-                // respond to sudden, rapid deceleration
-                if (avatar.isDeceleratingFast ||
-                   (avatar.selectedAnimation === avatar.selectedFlyBlend && avatar.isDecelerating)) {
-
-                    // if not a live action already
-                    if (!liveActions.alreadyHasAction("RapidFlyingSlowdownRP")) {
-
-                        liveActions.addAction(new Action("RapidFlyingSlowdownRP"));
-                    }
-                }
-
-                // fly to walk 'arms up' action when slowing ascent under gravity
-                var MIN_JUMP_HEIGHT = 0.15;
-                if (motion.acceleration.y < 0 &&
-                    avatar.isUnderGravity &&
-                    avatar.distanceToSurface > MIN_JUMP_HEIGHT &&
-                    motion.direction !== UP &&
-                    motion.direction !== DOWN) {
-
-                    // if not a live action already
-                    if (!liveActions.alreadyHasAction("ComingInToLand")) {
-
-                        // add the action
-                        var heightToThresholdRatio = avatar.distanceToSurface / (GRAVITY_THRESHOLD
-                                                   + avatar.calibration.hipsToFeet);
-                        var SHORT_DURATION = 0.85;
-                        var actionIntensity = 6.5 * heightToThresholdRatio;
-                        var duration = actionIntensity < SHORT_DURATION ? SHORT_DURATION : actionIntensity
-                        var strength = actionIntensity > 1 ? 1 : actionIntensity;
-                        liveActions.addAction(new Action("ComingInToLand", duration, strength));
-                        print('new ComingInToLand action started. actionIntensity is '+actionIntensity.toFixed(2)+' duration is '+duration.toFixed(2));
-                    }
-                } */
-            }
-        }
-    }
-
-})();
-
-// holds the current list of live actions being played (separate from actions owned by Transitions)
-liveActions = (function () {
-
-    var _actions = [];
-
-    return {
-
-        addAction: function(newAction) {
-
-            _actions.push(newAction);
-        },
-
-        update: function() {
-
-            for(action in _actions) {
-
-                _actions[action].progress += (motion.deltaTime / _actions[action].duration);
-
-                if (_actions[action].progress >= 1) {
-
-                    // time to kill off this action
-                    _actions.splice(action, 1);
-                }
-            }
-        },
-
-        actionsCount: function() {
-
-            return _actions.length;
-        },
-
-        actions: _actions,
-
-        alreadyHasAction: function(actionName) {
-
-            for(action in _actions) {
-
-                if (_actions[action].name === actionName) {
-
-                    return true;
-                }
-            }
-            return false;
-        },
-
-        getAction: function(actionNumber) {
-
-            return _actions[actionNumber];
-        }
-    }
-
-})(); // end liveActions
-
+// constructor for animation Transition parameters with default settings
 TransitionParameters = function() {
 
     this.duration = 0.7;
@@ -1173,7 +964,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         playTransitionActions = true;
     }
 
-    if(isDefined(lastAnimation)) print('New Transition from '+lastAnimation.name+' to '+ nextAnimation.name +' created.');
+    //if(isDefined(lastAnimation)) print('New Transition from '+lastAnimation.name+' to '+ nextAnimation.name +' created. Using actions: '+playTransitionActions);
 
     this.id = motion.transitionCount++; // serial number for this transition REMOVE_FOR_RELEASE
 
@@ -1224,53 +1015,45 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     if (jsMotor.isMotoring()) {
 
         // decide at which angle we should stop the frequency time wheel
-        var stopAngle = 0;
+        //var STOP_ANGLE = 0;
         var degreesToTurn = 0;
         var lastFrequencyTimeWheelPos = this.lastFrequencyTimeWheelPos;
         var lastElapsedFTDegrees = this.lastElapsedFTDegrees;
 
-        var debug = '';
+        //var debug = '';
 
         // set the stop angle depending on which quadrant of the walk cycle we are currently in
         // and decide whether we need to take an extra step to complete the walk cycle or not
-        if(lastFrequencyTimeWheelPos <= stopAngle && lastElapsedFTDegrees < 180) {
+        if(lastFrequencyTimeWheelPos <= 0 && lastElapsedFTDegrees < 180) {
 
             // we have not taken a complete step yet, so we advance to the second stop angle
-            stopAngle += 180;
-            degreesToTurn = stopAngle  - lastFrequencyTimeWheelPos;
-            debug += 'case 1';
+            degreesToTurn = 180  - lastFrequencyTimeWheelPos;
+            //debug += 'case 1';
 
-        } else if(lastFrequencyTimeWheelPos > stopAngle && lastFrequencyTimeWheelPos <= stopAngle + 90) {
+        } else if(lastFrequencyTimeWheelPos > 0 && lastFrequencyTimeWheelPos <= 90) {
 
             // take an extra step to complete the walk cycle and stop at the second stop angle
-            stopAngle += 180;
-            degreesToTurn = stopAngle - lastFrequencyTimeWheelPos;
-            debug += 'case 2';
+            degreesToTurn = 180 - lastFrequencyTimeWheelPos;
+            //debug += 'case 2';
 
-        } else if(lastFrequencyTimeWheelPos > stopAngle + 90 && lastFrequencyTimeWheelPos <= stopAngle + 180) {
+        } else if(lastFrequencyTimeWheelPos > 90 && lastFrequencyTimeWheelPos <= 180) {
 
             // stop on the other foot at the second stop angle for this walk cycle
-            stopAngle += 180;
-            degreesToTurn = stopAngle - lastFrequencyTimeWheelPos;
-            debug += 'case 3';
+            degreesToTurn = 180 - lastFrequencyTimeWheelPos;
+            //debug += 'case 3';
 
-        } else if(lastFrequencyTimeWheelPos > stopAngle + 180 && lastFrequencyTimeWheelPos <= stopAngle + 270) {
+        } else if(lastFrequencyTimeWheelPos > 180 && lastFrequencyTimeWheelPos <= 270) {
 
             // take an extra step to complete the walk cycle and stop at the first stop angle
-            degreesToTurn = stopAngle + 360 - lastFrequencyTimeWheelPos;
-            debug += 'case 4';
-
-        } else if(lastFrequencyTimeWheelPos <= stopAngle) {
-
-            degreesToTurn = stopAngle - lastFrequencyTimeWheelPos;
-            debug += 'case 5';
+            degreesToTurn = 360 - lastFrequencyTimeWheelPos;
+            //debug += 'case 4';
 
         } else {
 
-            degreesToTurn = 360 - lastFrequencyTimeWheelPos + stopAngle;
-            debug += 'case 6';
+            degreesToTurn = 360 - lastFrequencyTimeWheelPos;
+            //debug += 'case 5';
         }
-        this.stopAngle = stopAngle;
+        this.stopAngle = 0; // TODO: finish clearing out stop angle
         this.degreesToTurn = degreesToTurn;
         this.degreesRemaining = degreesToTurn;
 
@@ -1278,13 +1061,13 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         var distance = degreesToTurn * avatar.calibration.strideLength / 180;
 
         // work out the duration for this transition (assuming starting from MAX_WALK_SPEED as we have already set that on the JS motor)
-        //if (Math.abs(motion.speed) < 1.0 ) {
+        //if (Vec3.length(motion.velocity) < 1.0 ) {
 
             this.continuedMotionDuration = distance / MAX_WALK_SPEED;
 
         //} else {
 
-        //    this.continuedMotionDuration = distance / motion.speed;
+        //    this.continuedMotionDuration = distance / Vec3.length(motion.velocity);
         //}
 
         // do we need more time to complete the cyccle than the set duration allows?
@@ -1439,6 +1222,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         }
 
         this.filteredProgress = filter.bezier(this.progress, this.parameters.easingLower, this.parameters.easingUpper);
+
         return this.progress >= 1 ? TRANSITION_COMPLETE : false;
     };
 
@@ -1446,8 +1230,8 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
 
         var lastTranslations = {x:0, y:0, z:0};
         var nextTranslations = animationOperations.calculateTranslations(this.nextAnimation,
-                                                     frequencyTimeWheelPos,
-                                                     direction);
+                                                                         frequencyTimeWheelPos,
+                                                                         direction);
 
         // are we blending with a previous, still live transition?
         if(this.lastTransition !== nullTransition) {
@@ -1592,8 +1376,8 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
 }; // end Transition constructor
 
 
-// individual joint modiers
-JointModifiers = function(joint, direction) {
+// individual joint modifiers
+FrequencyMultipliers = function(joint, direction) {
 
     // gather multipliers
     this.pitchFrequencyMultiplier = 1;

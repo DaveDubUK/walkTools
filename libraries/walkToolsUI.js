@@ -689,10 +689,9 @@ walkInterface = (function() {
                 return;
             }
 
-            case _state.STANDING:
-            case _state.WALKING:
-            case _state.FLYING:
-            case _state.SIDE_STEP:
+            case _state.STATIC:
+            case _state.SURFACE_MOTION:
+            case _state.AIR_MOTION:
             default: {
 
                 hideJointSelectors();
@@ -1131,7 +1130,7 @@ walkInterface = (function() {
                 // exit edit mode
                 walkTools.stopEditing();
                 _avatar.currentAnimation = _avatar.selectedIdle;
-                _state.setInternalState(_state.STANDING);
+                _state.setInternalState(_state.STATIC);
                 break;
 
             case _animationSelectButton:

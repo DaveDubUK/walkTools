@@ -14,7 +14,7 @@
 walkInterface = (function() {
 
     // references to walk.js objects
-    var _state = null;
+    //var state = null;
     var _walkAssets = null;
     var _avatar = null;
 
@@ -138,7 +138,7 @@ walkInterface = (function() {
         Overlays.editOverlay(_controlsMinimisedTab, {visible: minimise});
         Overlays.editOverlay(_controlsMinimiseButton, {visible: !minimise});
 
-        if(_state.powerOn) {
+        if(state.powerOn) {
 
             Overlays.editOverlay(_onButton, {visible: !minimise});
             Overlays.editOverlay(_offButton, {visible: false});
@@ -181,29 +181,29 @@ walkInterface = (function() {
             case _controlsMinimiseButton:
 
                 minimiseDialog(true);
-                _state.setInternalState(_state.STANDING);
+                state.setInternalState(state.STATIC);
                 return;
 
             case _controlsMinimisedTab:
 
                 minimiseDialog(false);
-                _state.setInternalState(_state.STANDING);
+                state.setInternalState(state.STATIC);
                 return;
 
             case _onButton:
 
-                _state.powerOn = false;
+                state.powerOn = false;
                 Overlays.editOverlay(_offButton, {visible: true});
                 Overlays.editOverlay(_onButton, {visible: false});
-                _state.setInternalState(state.STANDING);
+                state.setInternalState(state.STATIC);
                 return;
 
             case _offButton:
 
-                _state.powerOn = true;
+                state.powerOn = true;
                 Overlays.editOverlay(_offButton, {visible: false});
                 Overlays.editOverlay(_onButton, {visible: true});
-                _state.setInternalState(state.STANDING);
+                state.setInternalState(state.STATIC);
                 return;
 
 
@@ -238,60 +238,12 @@ walkInterface = (function() {
         }
     };
 
-    // advanced editing
-    function keyPressEvent(event) {
-
-        if (event.text == '1') {
-
-            Camera.mode = "first person";
-            cameraMode = 1;
-
-        } else if (event.text == '2') {
-
-            Camera.mode = "mirror";
-            cameraMode = 2;
-
-        } else if (event.text == '3') {
-
-            Camera.mode = "third person";
-            cameraMode = 3;
-
-        } else if (event.text == '4') {
-
-            Camera.mode = "independent";
-            cameraMode = 4;
-
-        } else if (event.text == '5') {
-
-            Camera.mode = "independent";
-            cameraMode = 5;
-
-        }  else if (event.text == '0') {
-
-            Camera.mode = originalCameraMode;
-            cameraMode = 0;
-
-        } else if (event.text == ')') {
-
-            liveActions.addAction(new Action("ShrugRP"));
-        }
-    };
-
-    Controller.keyPressEvent.connect(keyPressEvent);
+    //Controller.keyPressEvent.connect(keyPressEvent);
     Controller.mousePressEvent.connect(mousePressEvent);
 
     Script.update.connect(function(deltaTime) {
 
-        if(cameraMode === 5) {
-
-            var aviPosition = MyAvatar.position;
-            var translationOffset = {x: 0, y: 0, z: 5};
-            var newCamPos = Vec3.sum(translationOffset, aviPosition);
-            Camera.setPosition(newCamPos);
-            Camera.setOrientation({x:0, y:0, z:0, w:1});
-        }
-
-        // make sure the minimise overlay stays in place
+        // make sure the minimise tab / button stays in place
         Overlays.editOverlay(_controlsMinimisedTab, {x: Window.innerWidth - 58, y: Window.innerHeight - 145});
     });
 
@@ -310,9 +262,9 @@ walkInterface = (function() {
     return {
 
         // gather references to objects from the walk.js script
-        initialise: function(state, walkAssets, avatar) {
+        initialise: function(stated, walkAssets, avatar, motion) {
 
-            _state = state;
+            //state = state;
             _walkAssets = walkAssets;
             _avatar = avatar;
         },

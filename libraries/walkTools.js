@@ -22,7 +22,8 @@ walkTools = (function () {
         wStatsVisible: true,
         frequencyTimeWheelVisible: false,
         transportVisible: true,
-        walkJSUIVisible: true
+        walkJSUIVisible: true,
+        scopeVisible: true
     };
 
     var _editMode = {
@@ -371,26 +372,11 @@ walkTools = (function () {
                 _movingSliderThree = true;
                 return;
 
-            // if it's a scope overlay pass the message on
-            /*case _oscilloscope.walkToolsScopeControlsPanel:
-            case _oscilloscope.walkToolsBezierControlsPanel:
-            case _oscilloscope.walkToolsMenuPanel:
-            case _oscilloscope.walkToolsScopePanel:
-            case _oscilloscope.walkToolsScopeOnRadio:
-            case _oscilloscope.walkToolsPeakStopOnRadio:
-            case _oscilloscope.walkToolsBezierOnRadio:
-            case _oscilloscope.sliderOne:
-            case _oscilloscope.sliderTwo:
-            case _oscilloscope.sliderThree:
-            case _oscilloscope.sliderFour:
-            case _oscilloscope.sliderFive:
-            case _oscilloscope.sliderSix:
-            case _oscilloscope.bezierOne:
-            case _oscilloscope.bezierTwo:
-            case _oscilloscope.scopeToolsAuxThumb:
+            // could be a scope overlay click - pass the message on
+            default:
 
-                _oscilloscope.mousePressEvent(event);
-                return;*/
+                if (_oscilloscope) _oscilloscope.mousePressEvent(event);
+                return;
         }
     };
 
@@ -428,19 +414,19 @@ walkTools = (function () {
                 // walk cycle position
                 _cyclePosition = thumbPositionNormalised * 360;
 
-                var inverseRotation = Quat.inverse(MyAvatar.orientation);
-                var footRPos = Vec3.multiplyQbyV(inverseRotation, MyAvatar.getJointPosition("RightFoot"));
-                var footLPos = Vec3.multiplyQbyV(inverseRotation, MyAvatar.getJointPosition("LeftFoot"));
+                var footRPos = MyAvatar.getJointPosition("RightFoot");
+                var footLPos = MyAvatar.getJointPosition("LeftFoot");
+                _avatar.calibration.strideLength = Vec3.distance(footRPos, footLPos);
                 // since we go heel to toe, we must include that distance too
-                var toeRPos = Vec3.multiplyQbyV(inverseRotation, MyAvatar.getJointPosition("RightToeBase"));
-                var heelToToe = Math.abs(toeRPos.z - footRPos.z) / 2; // div 2, as only happens once per stride
-                _avatar.calibration.strideLength = Math.abs(footRPos.z - footLPos.z) + heelToToe;
+                //var toeRPos = Vec3.multiplyQbyV(inverseRotation, MyAvatar.getJointPosition("RightToeBase"));
+                //var heelToToe = Math.abs(toeRPos.z - footRPos.z) / 2; // div 2, as only happens once per stride
+                //_avatar.calibration.strideLength = Math.abs(footRPos.z - footLPos.z) + heelToToe;
 
                 walkTools.toLog('cycle position: '+_cyclePosition.toFixed(1) +
                                 ' walk stride is '+_avatar.calibration.strideLength.toFixed(4)+
                                 ' at '+_motion.frequencyTimeWheelPos.toFixed(1)+
-                                ' mm and heel to toe is '+heelToToe.toFixed(4) +
-                                ' mm'); // REMOVE_FOR_RELEASE
+                                ' degrees');// and heel to toe is '+heelToToe.toFixed(4) +
+                                //' mm');
 
                 return;
         }
@@ -513,7 +499,7 @@ walkTools = (function () {
             case BACKWARDS:
                 return 'backwards';
             case NONE:
-                return 'still';
+                return 'none';
             default:
                 return 'unknown';
         }
@@ -523,14 +509,14 @@ walkTools = (function () {
     function stateAsString(state) {
 
         switch (state) {
-            case _state.STANDING:
-                return 'standing';
-            case _state.WALKING:
-                return 'walking';
-            case _state.SIDE_STEP:
-                return 'side stepping';
-            case _state.FLYING:
-                return 'flying';
+            case _state.STATIC:
+                return 'Static';
+            case _state.SURFACE_MOTION:
+                return 'Surface motion';
+            //case _state.SIDE_STEP:
+            //    return 'Side stepping';
+            case _state.AIR_MOTION:
+                return 'Air motion';
             case _state.EDIT:
                 return 'Editing';
             default:
@@ -757,6 +743,31 @@ walkTools = (function () {
             _nFrames++;
         },
 
+        dumpState: function() {
+
+            var currentState =  'State: ' + stateAsString(state.currentState) + ' ' + directionAsString(_motion.direction) + '\n\n' +
+                                'Playing: '+ avatar.currentAnimation.name + '\n' +
+                                'Velocity: ' + Vec3.length(motion.velocity).toFixed(3) + ' m/s\n' +
+                                'Velocity.x: ' + motion.velocity.x.toFixed(3) + ' m/s\n' +
+                                'Velocity.y: ' + motion.velocity.y.toFixed(3) + ' m/s\n' +
+                                'Velocity.z: ' + motion.velocity.z.toFixed(3) + ' m/s\n' +
+                                'Acceleration mag: ' + Vec3.length(motion.acceleration).toFixed(2) + ' m/s/s\n' +
+                                'Directed acceleration: '+ motion.directedAcceleration.toFixed(2) + ' m/s/s\n' +
+                                'Direction: '+ directionAsString(motion.direction) +
+                                'Above surface: ' + avatar.distanceToSurface.toFixed(3) + ' m\n' +
+                                'Under gravity: '+avatar.isUnderGravity + '\n' +
+                                'Accelerating: '+ motion.isAccelerating + '\n' +
+                                'Decelerating: '+ motion.isDecelerating + '\n' +
+                                'DeceleratingFast: '+ motion.isDeceleratingFast + '\n' +
+                                'Walking speed: '+motion.isWalkingSpeed + '\n' +
+                                'Flying speed: '+motion.isFlyingSpeed + '\n' +
+                                'Coming in to land: '+avatar.isComingInToLand + '\n' +
+                                'Taking off: '+avatar.isTakingOff + '\n' +
+                                'On surface: '+avatar.isOnSurface + '\n' +
+                                'jsMotor running: '+jsMotor.isMotoring();
+            return currentState;
+        },
+
         updateStats: function() {
 
             var cumuTimeMS = Math.floor(_cumulativeTime * 1000);
@@ -767,43 +778,51 @@ walkTools = (function () {
             else if(aboveSurface > 10000) aboveSurface = Infinity;
             if (frameExecutionTime > _frameExecutionTimeMax) _frameExecutionTimeMax = frameExecutionTime;
 
-            var debugInfo = '                   Stats\n--------------------------------------' +
-                '\nEditing: ' + _currentlySelectedAnimation.name +
-                '\nEditing: '+ _currentlySelectedJoint +
-                '\nAvatar frame speed: ' + motion.speed.toFixed(3) +
-                ' m/s\nFrame number: ' + _nFrames +
-                '\nFrame time: ' + deltaTimeMS.toFixed(2) +
-                ' ms\nAbove surface: ' + aboveSurface.toFixed(3) +
-                ' m\nCumulative Time ' + cumuTimeMS.toFixed(0) +
-                ' mS\nState: ' + stateAsString(state.currentState) +
-                ' ' + directionAsString(_motion.direction) +
-                '\nAnimation: '+ avatar.currentAnimation.name +
-                '\nYaw: ' + Quat.safeEulerAngles(MyAvatar.orientation).y.toFixed(1) +
-                ' degrees\nAngular speed: ' + Vec3.length(MyAvatar.getAngularVelocity()).toFixed(3) +
-                ' rad/s\nAngular acceleration: '+ Vec3.length(MyAvatar.getAngularAcceleration()).toFixed(3) +
-                ' rad/s/s';
+            var debugInfo = '                   Stats\n--------------------------------------\n' +
+                'State: ' + stateAsString(state.currentState) + ' ' + directionAsString(_motion.direction) + '\n' +
+                'Playing: '+ avatar.currentAnimation.name + '\n' +
+                'Editing: ' + _currentlySelectedAnimation.name + '\n' +
+                'Editing: '+ _currentlySelectedJoint + '\n' +
+                //'Avatar frame speed: ' + Vec3.length(motion.velocity).toFixed(3) + '\n' +
+                'Frame number: ' + _nFrames + '\n' +
+                'Frame time: ' + deltaTimeMS.toFixed(2) + ' ms\n' +
+                'Above surface: ' + aboveSurface.toFixed(3) + ' m\n' +
+                //'Cumulative Time ' + cumuTimeMS.toFixed(0) + ' mS\n' +
+                'jsMotor running: '+jsMotor.isMotoring() + '\n' +
+                'Yaw: ' + Quat.safeEulerAngles(MyAvatar.orientation).y.toFixed(1) + ' degrees\n' +
+                'Angular speed: ' + Vec3.length(MyAvatar.getAngularVelocity()).toFixed(3) + ' rad/s\n' +
+                'Angular acceleration: '+ Vec3.length(MyAvatar.getAngularAcceleration()).toFixed(3) + ' rad/s/s';
+
             if (_visibility.visible && _visibility.statsVisible) Overlays.editOverlay(_animationStats, {text: debugInfo});
 
             if (motion.acceleration.magnitude > _localAccelerationPeak) _localAccelerationPeak = motion.acceleration.magnitude;
 
-            if (_visibility.visible && _visibility.pStatsVisible && _nFrames % 15 === 0) {
+            if (_visibility.visible && _visibility.pStatsVisible && _nFrames % 2 === 0) {
 
-                // update these every 250 mS (assuming 60 fps)
-                var debugInfo = '           Periodic Stats\n--------------------------------------' +
-                    '\nRender time peak hold: ' + _frameExecutionTimeMax.toFixed(0) +
-                    ' mS\nAcceleration Peak: ' + _localAccelerationPeak.toFixed(1) +
-                    ' m/s/s\nVelocity' +
-                    ' \nlocal velocity.x: ' + motion.velocity.x.toFixed(1) +
-                    ' m/s\nlocal velocity.y: ' + motion.velocity.y.toFixed(1) +
-                    ' m/s\nlocal velocity.z: ' + motion.velocity.z.toFixed(1) +
-                    ' m/s\nlocal speed: ' + motion.speed.toFixed(1) +
-                    ' m/s\nAcceleration ' +
-                    ' \nacceleration.x: ' + motion.acceleration.x.toFixed(1) +
-                    ' m/s/s\nacceleration.y: ' + motion.acceleration.y.toFixed(1) +
-                    ' m/s/s\nacceleration.z: ' + motion.acceleration.z.toFixed(1) +
-                    ' m/s\nacceleration mag: ' + motion.accelerationMagnitude.toFixed(1) +
-                    ' m/s/s\nComing in to land: '+avatar.isComingInToLand +
-                    '\nOn surface: '+avatar.isOnSurface;
+                // update these every ... mS
+                var debugInfo = '           Periodic Stats\n--------------------------------------\n' +
+                    'Render time peak hold: ' + _frameExecutionTimeMax.toFixed(0) + ' m/s\n' +
+                    'Acceleration Peak: ' + _localAccelerationPeak.toFixed(1) + ' m/s/s\n' +
+                    'Velocity: ' + Vec3.length(motion.velocity).toFixed(3) + ' m/s\n' +
+                    //'local velocity.x: ' + motion.velocity.x.toFixed(1) + ' m/s\n' +
+                    //'local velocity.y: ' + motion.velocity.y.toFixed(1) + ' m/s\n' +
+                    //'local velocity.z: ' + motion.velocity.z.toFixed(1) + ' m/s\n' +
+                    //'local speed: ' + Vec3.length(motion.velocity).toFixed(1) + ' m/s\n' +
+                    //'Acceleration ' + ' m/s/s\n' +
+                    //'acceleration.x: ' + motion.acceleration.x.toFixed(1) + ' m/s/s\n' +
+                    //'acceleration.y: ' + motion.acceleration.y.toFixed(1) + ' m/s/s\n' +
+                    //'acceleration.z: ' + motion.acceleration.z.toFixed(1) + ' m/s/s\n' +
+                    'Acceleration mag: ' + Vec3.length(motion.acceleration).toFixed(2) + ' m/s/s\n' +
+                    'Directed acceleration: '+ motion.directedAcceleration.toFixed(2) + ' m/s/s\n' +
+                    'Accelerating: '+ motion.isAccelerating + '\n' +
+                    'Decelerating: '+ motion.isDecelerating + '\n' +
+                    'DeceleratingFast: '+ motion.isDeceleratingFast + '\n' +
+                    'Walking speed: '+motion.isWalkingSpeed + '\n' +
+                    'Coming in to land: '+avatar.isComingInToLand + '\n' +
+                    'Taking off: '+avatar.isTakingOff + '\n' +
+                    'On surface: '+avatar.isOnSurface + '\n' +
+                    'Under gravity: '+avatar.isUnderGravity + '\n' +
+                    'Direction: '+ directionAsString(motion.direction);
 
                 Overlays.editOverlay(_animationStatsPeriodic, {text: debugInfo});
                 _frameExecutionTimeMax = 0;
@@ -850,15 +869,21 @@ walkTools = (function () {
                         // draw the frequency time turning around the x axis for walking forwards or backwards
                         var forwardModifier = 1;
                         if (_motion.direction === BACKWARDS) forwardModifier = -1;
-                        var yOffset = avatar.calibration.hipsToFeet - (wheelRadius / 1.2);
-                        var sinWalkWheelPosition = wheelRadius * Math.sin(filter.degToRad((forwardModifier * -1) * _motion.frequencyTimeWheelPos));
-                        var cosWalkWheelPosition = wheelRadius * Math.cos(filter.degToRad((forwardModifier * -1) * -_motion.frequencyTimeWheelPos));
-                        var wheelZPos = {x: 0, y: -sinWalkWheelPosition - yOffset, z: cosWalkWheelPosition};
-                        var wheelZEnd = {x: 0, y: sinWalkWheelPosition - yOffset, z: -cosWalkWheelPosition};
-                        sinWalkWheelPosition = wheelRadius * Math.sin(filter.degToRad(forwardModifier * _motion.frequencyTimeWheelPos + 90));
-                        cosWalkWheelPosition = wheelRadius * Math.cos(filter.degToRad(forwardModifier * _motion.frequencyTimeWheelPos + 90));
-                        var wheelYPos = {x: 0, y: sinWalkWheelPosition - yOffset, z: cosWalkWheelPosition};
-                        var wheelYEnd = {x: 0, y: -sinWalkWheelPosition - yOffset, z: -cosWalkWheelPosition};
+                        var yOffset = 0;//- avatar.calibration.hipsToFeet - (wheelRadius / 1.2);
+
+                        sinFTWheelPosition = wheelRadius * Math.sin(filter.degToRad(forwardModifier * _motion.frequencyTimeWheelPos));
+                        cosFTWheelPosition = wheelRadius * Math.cos(filter.degToRad(forwardModifier * _motion.frequencyTimeWheelPos));
+
+                        var wheelYPos = {x: 0, y: sinFTWheelPosition - yOffset, z: cosFTWheelPosition};
+                        var wheelYEnd = {x: 0, y: -sinFTWheelPosition - yOffset, z: -cosFTWheelPosition};
+
+                        var wheelZPos = {x: 0, y: -sinFTWheelPosition - yOffset, z: cosFTWheelPosition};
+                        var wheelZEnd = {x: 0, y: sinFTWheelPosition - yOffset, z: -cosFTWheelPosition};
+
+                        //print('wheelYPos: '+wheelYPos.y.toFixed(1)+', '+wheelYPos.z.toFixed(1));
+                        //print('sinFTWheelPosition: '+sinFTWheelPosition.toFixed(1)+
+                        //      ' cosFTWheelPosition '+cosFTWheelPosition.toFixed(1)+
+                        //      ' Ft wheeel: '+_motion.frequencyTimeWheelPos.toFixed(1));
 
                         Overlays.editOverlay(_frequencyTimeWheelYLine, {position: wheelYPos, end: wheelYEnd});
                         Overlays.editOverlay(_frequencyTimeWheelZLine, {position: wheelZPos, end: wheelZEnd});
@@ -869,17 +894,16 @@ walkTools = (function () {
 
                     // populate stats overlay
                     var frequencyTimeWheelInfo =
-                        '\n         Walk Wheel Stats\n-------------------------------------- ' +
-                        '\nFrame time: ' + deltaTimeMS.toFixed(2) +
-                        ' mS\nSpeed: ' + speed.toFixed(3) +
-                        ' m/s\nDistance covered: ' + distanceTravelled.toFixed(3) +
-                        ' m\nOmega: ' + angularVelocity.toFixed(3) +
-                        ' rad / s\nDeg to turn: ' + degreesTurnedSinceLastFrame.toFixed(2) +
-                        ' deg\nWheel position: ' + _motion.frequencyTimeWheelPos.toFixed(1) +
-                        ' deg\nWheel radius: ' + wheelRadius.toFixed(3) +
-                        ' m\nHips To Feet: ' + avatar.calibration.hipsToFeet.toFixed(3) +
-                        ' m\nStride: ' + avatar.calibration.strideLength.toFixed(3) +
-                        ' m';
+                        '\n         Walk Wheel Stats\n--------------------------------------  \n' +
+                        'Frame time: ' + deltaTimeMS.toFixed(2) + ' mS\n' +
+                        'Speed: ' + speed.toFixed(3) + ' m/s\n' +
+                        'Distance covered: ' + distanceTravelled.toFixed(3) + ' m\n' +
+                        'Omega: ' + angularVelocity.toFixed(3) + ' rad / s\n' +
+                        'Deg to turn: ' + degreesTurnedSinceLastFrame.toFixed(2) + ' deg\n' +
+                        'Wheel position: ' + _motion.frequencyTimeWheelPos.toFixed(1) + ' deg\n' +
+                        'Wheel radius: ' + wheelRadius.toFixed(3) + ' m\n' +
+                        'Hips To Feet: ' + avatar.calibration.hipsToFeet.toFixed(3) + ' m\n' +
+                        'Stride: ' + avatar.calibration.strideLength.toFixed(3) + 'm';
                     Overlays.editOverlay(_frequencyTimeWheelStats, {text: frequencyTimeWheelInfo});
                 }
             }
@@ -894,8 +918,10 @@ walkTools = (function () {
                 var angularVelocity = velocity / _motion.currentTransition.lastFrequencyTimeWheelRadius;
 
                 if(_motion.currentTransition.progress > 0) {
+
                     Overlays.editOverlay(_transFTWheelYLine, {alpha: _motion.currentTransition.progress, visible: true});
                     Overlays.editOverlay(_transFTWheelZLine, {alpha: _motion.currentTransition.progress, visible: true});
+
                 } else {
                     Overlays.editOverlay(_transFTWheelYLine, {visible: false});
                     Overlays.editOverlay(_transFTWheelZLine, {visible: false});

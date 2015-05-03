@@ -58,9 +58,9 @@ walkInterface = (function() {
             "pitchRange": 12,
             "yawRange": 90,
             "rollRange": 12,
-            "pitchOffsetRange": 90,
-            "yawOffsetRange": 90,
-            "rollOffsetRange": 90,
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180,
             "swayRange": 0.3,
             "bobRange": 0.05,
             "thrustRange": 0.05,
@@ -72,65 +72,65 @@ walkInterface = (function() {
             "pitchRange": 30,
             "yawRange": 35,
             "rollRange": 35,
-            "pitchOffsetRange": 50,
-            "yawOffsetRange": 20,
-            "rollOffsetRange": 20
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "RightUpLeg": {
             "pitchRange": 30,
             "yawRange": 35,
             "rollRange": 35,
-            "pitchOffsetRange": 50,
-            "yawOffsetRange": 20,
-            "rollOffsetRange": 20
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "LeftLeg": {
             "pitchRange": 90,
             "yawRange": 20,
             "rollRange": 20,
             "pitchOffsetRange": 180,
-            "yawOffsetRange": 20,
-            "rollOffsetRange": 20
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "RightLeg": {
             "pitchRange": 90,
             "yawRange": 20,
             "rollRange": 20,
             "pitchOffsetRange": 180,
-            "yawOffsetRange": 20,
-            "rollOffsetRange": 20
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "LeftFoot": {
             "pitchRange": 90,
             "yawRange": 20,
             "rollRange": 20,
             "pitchOffsetRange": 180,
-            "yawOffsetRange": 50,
-            "rollOffsetRange": 50
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "RightFoot": {
             "pitchRange": 90,
             "yawRange": 20,
             "rollRange": 20,
             "pitchOffsetRange": 180,
-            "yawOffsetRange": 50,
-            "rollOffsetRange": 50
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "LeftToeBase": {
             "pitchRange": 90,
             "yawRange": 20,
             "rollRange": 20,
-            "pitchOffsetRange": 90,
-            "yawOffsetRange": 20,
-            "rollOffsetRange": 20
+            "pitchOffsetRange": 390,
+            "yawOffsetRange": 320,
+            "rollOffsetRange": 320
         },
         "RightToeBase": {
             "pitchRange": 90,
             "yawRange": 20,
             "rollRange": 20,
-            "pitchOffsetRange": 90,
-            "yawOffsetRange": 20,
-            "rollOffsetRange": 20
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "Spine": {
             "pitchRange": 40,
@@ -144,17 +144,17 @@ walkInterface = (function() {
             "pitchRange": 20,
             "yawRange": 40,
             "rollRange": 20,
-            "pitchOffsetRange": 90,
-            "yawOffsetRange": 50,
-            "rollOffsetRange": 50
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "Spine2": {
             "pitchRange": 20,
             "yawRange": 40,
             "rollRange": 20,
-            "pitchOffsetRange": 90,
-            "yawOffsetRange": 50,
-            "rollOffsetRange": 50
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "LeftShoulder": {
             "pitchRange": 35,
@@ -224,17 +224,17 @@ walkInterface = (function() {
             "pitchRange": 20,
             "yawRange": 20,
             "rollRange": 20,
-            "pitchOffsetRange": 90,
-            "yawOffsetRange": 90,
-            "rollOffsetRange": 90
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         },
         "Head": {
             "pitchRange": 20,
             "yawRange": 20,
             "rollRange": 20,
-            "pitchOffsetRange": 90,
-            "yawOffsetRange": 90,
-            "rollOffsetRange": 90
+            "pitchOffsetRange": 180,
+            "yawOffsetRange": 180,
+            "rollOffsetRange": 180
         }
     };
 

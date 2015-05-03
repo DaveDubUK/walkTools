@@ -33,7 +33,7 @@ var TRANSITION_COMPLETE = 1000;
 // JS motor constants
 var VERY_LONG_TIME = 1000000.0;
 var VERY_SHORT_TIME = 0.001;
-var SHORT_TIME = 0.2;
+var SHORT_TIME = 0.01;
 // animation, locomotion and position
 var MOVE_THRESHOLD = 0.075;  //
 var FLY_THRESHOLD = 0.01;//
@@ -55,7 +55,6 @@ var oscilloscope = null; // REMOVE_FOR_RELEASE
 // IMPORTANT - if you want to see your local copy of the animations, change the path here //
 
 // path to animations, reach-poses, actions, transitions, overlay images, etc
-//var pathToAssets = './assets/'; // TODO: get this working ! - REMOVE_FOR_RELEASE
 var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
 //var pathToAssets = 'http://s3.amazonaws.com/hifi-public/procedural-animator/beta/assets/';
 
@@ -88,12 +87,12 @@ walkInterface.initialise(state, walkAssets, avatar, motion);
 // Begin by setting the STATIC internal state
 state.setInternalState(state.STATIC);
 
-/*////////////////////////////////////////////*/
+////////////////////////////////////////////
 //
 // load walkTools - REMOVE_FOR_RELEASE ...
 //
 // load any additional tools (camera controller, oscilloscope/bezier editor)
-Script.include("./libraries/walkToolsCameras.js");
+/**/Script.include("./libraries/walkToolsCameras.js");
 //Script.include("./libraries/walkToolsScopeBezier.js");
 
 var scopeProbe1 = 0;
@@ -135,7 +134,7 @@ function isDefined(value) {
         return false;
     }
 }
-
+var frameNo = 0;
 // Main loop
 Script.update.connect(function(deltaTime) {
 
@@ -145,7 +144,7 @@ Script.update.connect(function(deltaTime) {
         if(walkTools) walkTools.beginProfiling(deltaTime);
 
         // assess current locomotion
-        motion.quantify(deltaTime);
+        motion.quantify(deltaTime);//print('Frame number: '+ (frameNo++)+' Current speed is '+Vec3.length(motion.velocity).toFixed(1)+' m/s and decelerating is '+motion.isDecelerating);//+' '+walkTools.dumpState());
 
         // decide which animation should be playing
         selectAnimation();
@@ -230,7 +229,7 @@ function updateTransitions() {
 function selectAnimation() {
 
     // check for editing modes first, as these require no positioning calculations REMOVE_FOR_RELEASE
-    if (!walkTools.editMode()) { // REMOVE_FOR_RELEASE - not possible to edit in release version
+    //if (!walkTools.editMode()) { // REMOVE_FOR_BETA, REMOVE_FOR_RELEASE - not possible to edit in release version
 
         // will we use the Transition's Actions?
         var playTransitionActions = true;
@@ -244,7 +243,7 @@ function selectAnimation() {
 
                 if (state.currentState !== state.STATIC) {
 
-                    if (motion.currentTransition !== nullTransition) {
+                    //if (motion.currentTransition !== nullTransition) {
 
                         //if (motion.currentTransition.direction === BACKWARDS) {
 
@@ -252,7 +251,7 @@ function selectAnimation() {
                             //walkTools.toLog('setting playTransitionActions false, as there is already another transition playing ('+
                             //                 motion.currentTransition.lastAnimation.name+' to '+ motion.currentTransition.nextAnimation.name +')');
                         //}
-                    }
+                    //}
                     // must always set the transition before changing the state
                     if (avatar.isOnSurface && avatar.currentAnimation !== avatar.selectedIdle) {
 
@@ -307,19 +306,19 @@ function selectAnimation() {
 
                     // transition actions will cause glitches if a matching animation is continuing from
                     // a previous transition, so in this case we don't play the transition's actions.
-                    if (motion.currentTransition !== nullTransition) {
+                    //if (motion.currentTransition !== nullTransition) {
 
                         //playTransitionActions = false;
                         //walkTools.toLog('setting playTransitionActions false, as there is already another transition playing ('+
                         //                 motion.currentTransition.lastAnimation.name+' to '+ motion.currentTransition.nextAnimation.name +')');
-                    }
+                    //}
                     if (avatar.currentAnimation === avatar.selectedIdle && motion.direction !== FORWARDS) {
 
                         playTransitionActions = false;
                         //walkTools.toLog('setting playTransitionActions false, as starting to walk, but not forwards (going '+motion.direction+')');
                     }
 
-                    // must always set the transition before changing the state
+                    // must always set the transition before changing the state (allow new transition to record the last state)
                     if (avatar.currentAnimation !== avatar.selectedWalkBlend) {
 
                         setTransition(avatar.selectedWalkBlend, playTransitionActions);
@@ -387,20 +386,20 @@ function selectAnimation() {
                                          avatar.selectedFlyBlend,
                                          Math.abs(forwardComponent));
 
-                if (state.currentState !== state.AIR_MOTION) {
-
-                    state.setInternalState(state.AIR_MOTION);
-                }
                 if (avatar.currentAnimation !== avatar.selectedFlyBlend) {
 
                     setTransition(avatar.selectedFlyBlend, playTransitionActions);
+                }
+                if (state.currentState !== state.AIR_MOTION) {
+
+                    state.setInternalState(state.AIR_MOTION);
                 }
                 break;
             }
 
         } // end switch(motion.locomotionMode)
 
-    } // end if editing REMOVE_FOR_RELEASE
+    //} // end if editing REMOVE_FOR_RELEASE REMOVE_FOR_BETA
 }
 
 // advance the frequency time wheels. advance frequency time wheels for any live transitions

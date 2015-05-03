@@ -95,11 +95,10 @@ Avatar = function() {
 
             if (this.calibration.hipsToFeet === 0 && extraAttempts < 100) {
 
-                // Interface can sometimes report zero for hips to feet. if so, we repeat.
                 attempts++;
-                extraAttempts++;
+                extraAttempts++;// Interface can sometimes report zero for hips to feet. if so, we repeat.
             }
-            print('calibration attempt '+attempts+' with '+extraAttempts+' extra attempts. Hips to feet calibrated to '+this.calibration.hipsToFeet.toFixed(3)+'m'); // REMOVIE_FOR_RELEASE
+            print('calibration '+attempts+' of 3 (with '+extraAttempts+' extra attempts). Hips to feet calibrated to '+this.calibration.hipsToFeet.toFixed(3)+'m'); // REMOVIE_FOR_RELEASE
 
         } while (attempts-- > 1)
 
@@ -107,6 +106,8 @@ Avatar = function() {
         if (this.calibration.hipsToFeet <= 0) {
 
             this.calibration.hipsToFeet = 1.0;
+            print('Error: Unable to get a non-zero measurement for the avatar hips to feet measure. Hips to feet set to default value ('+
+                  this.calibration.hipsToFeet.toFixed(3)+'m). It is unlikely that foot sliding whilst walking will be avoided.'); // REMOVIE_FOR_RELEASE
         }
     }
 
@@ -217,9 +218,14 @@ jsMotor = (function () {
             _motorTimeScale = SHORT_TIME;
             _motoring = true;
 
-            //print('jsMotor: started motoring at speed '+speed.toFixed(2)+' in direction '+_direction+'. current speed is '+Vec3.length(MyAvatar.getVelocity()));
+            ///print('jsMotor: started motoring at speed '+speed.toFixed(2)+' in direction '+_direction+'. current speed is '+Vec3.length(MyAvatar.getVelocity()));
 
             _update();
+        },
+
+        stopMotoring: function() {
+
+            _motoring = false;
         },
 
         setMotorSpeed: function(speed, timeScale) {
@@ -247,11 +253,6 @@ jsMotor = (function () {
             //print('jsMotor: applyBrakes - set motor speed to zero - stopping. current speed is '+Vec3.length(MyAvatar.getVelocity()));
 
             _update();
-
-            if(Vec3.length(Motion.velocity) < (MOVE_THRESHOLD/100)) {
-
-                _motoring = false;
-            }
         },
 
         stopBraking: function() {
@@ -399,9 +400,9 @@ Motion = function(avatar) {
             this.directedAcceleration = 0;
         }
 
-        if (walkTools.editMode.editing) {
-            this.direction = walkTools.editMode.editDirection;
-        }// REMOVE_FOR_RELEASE - no walktools
+        //if (walkTools.editMode.editing) {
+        //    this.direction = walkTools.editMode.editDirection;
+        //}// REMOVE_FOR_BETA, REMOVE_FOR_RELEASE - no walktools
 
         // determine if at static, walking or flying speed
         if (Vec3.length(this.velocity) < MOVE_THRESHOLD) {
@@ -415,8 +416,8 @@ Motion = function(avatar) {
             this.isMoving = true;
             this.isWalkingSpeed = true;
             this.isFlyingSpeed = false;
-
-        /*} else if (this.avatar.distanceToSurface < ON_SURFACE_THRESHOLD && this.direction === DOWN && lateralVelocity > MOVE_THRESHOLD) {
+/*
+        } else if (this.avatar.distanceToSurface < ON_SURFACE_THRESHOLD && this.direction === DOWN && lateralVelocity > MOVE_THRESHOLD) {
             // special case to debounce flying to walking
             this.isMoving = true;
             this.isWalkingSpeed = true;
@@ -499,7 +500,8 @@ Motion = function(avatar) {
                     this.locomotionMode = state.AIR_MOTION;
                     //print('static to air motion. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
 
-                } else if (SURFACE_MOTION && !jsMotor.isMotoring() && lateralVelocity > MOVE_THRESHOLD) {
+                } else if (SURFACE_MOTION && !jsMotor.isMotoring() &&
+                           !this.isDecelerating && lateralVelocity > MOVE_THRESHOLD) {
 
                     this.locomotionMode = state.SURFACE_MOTION;
                     //print('static to surface motion. lateralVelocity is '+lateralVelocity.toFixed(2));//print(walkTools.dumpState());
@@ -512,7 +514,7 @@ Motion = function(avatar) {
 
             case state.SURFACE_MOTION:
 
-                if (!this.isMoving) { //!this.isMoving || this.isDecelerating)) {
+                if (!this.isMoving || (this.isDecelerating && SURFACE_MOTION)) {
 
                     // stopping walk, so immediately start the motor so we can complete the current walk half cycle
                     if (!jsMotor.isMotoring() && this.avatar.isOnSurface) {
@@ -556,6 +558,7 @@ Motion = function(avatar) {
     }
 
     // frequency time wheel (foot / ground speed matching)
+    //this.walkWheelPos = 0;
     this.frequencyTimeWheelPos = 0;
     this.frequencyTimeWheelRadius = 0.5;
     this.recentFrequencyTimeIncrements = [];
@@ -568,7 +571,7 @@ Motion = function(avatar) {
 
         this.elapsedFTDegrees += angle;
 
-        // keep a running average of increments for use in transitions (used for non-walking cycles) - REMOVE_FOR_RELEASE - still used?
+        // keep a running average of increments for use in transitions (used for transitioning non-walking cycles)
         this.recentFrequencyTimeIncrements.push(angle);
         this.recentFrequencyTimeIncrements.shift();
         for(increment in this.recentFrequencyTimeIncrements) {
@@ -981,11 +984,12 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     this.lastFrequencyTimeWheelPos = motion.frequencyTimeWheelPos;
     this.lastFrequencyTimeIncrement = motion.averageFrequencyTimeIncrement;
     this.lastFrequencyTimeWheelRadius = motion.frequencyTimeWheelRadius;
-    this.stopAngle = 0; // what angle should we stop turning this frequency time wheel?
+    //this.stopAngle = 0; // what angle should we stop turning this frequency time wheel?
     this.degreesToTurn = 0; // total degrees to turn the ft wheel before the avatar stops (walk only)
     this.degreesRemaining = 0; // remaining degrees to turn the ft wheel before the avatar stops (walk only)
     this.lastElapsedFTDegrees = motion.elapsedFTDegrees; // degrees elapsed since last transition start
     motion.elapsedFTDegrees = 0; // reset ready for the next transtion
+    motion.frequencyTimeWheelPos = 0; // start the next animation's ftWheel from zero
 
     // set the inital parameters for the transition
     this.parameters = new TransitionParameters();
@@ -1011,76 +1015,80 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     this.filteredProgress = 0;
     this.startLocation = MyAvatar.position; // REMOVE_FOR_RELEASE - debug only?
 
-    // will we need to continue motion? if the motor has been turned on, then we do
+    // motor has been turned on? then need to continue the motion
     if (jsMotor.isMotoring()) {
 
         // decide at which angle we should stop the frequency time wheel
         //var STOP_ANGLE = 0;
+        var FULL_CYCLE = 360;
+        var HALF_CYCLE = 180;
         var degreesToTurn = 0;
-        var lastFrequencyTimeWheelPos = this.lastFrequencyTimeWheelPos;
-        var lastElapsedFTDegrees = this.lastElapsedFTDegrees;
+        //var lastFrequencyTimeWheelPos = this.lastFrequencyTimeWheelPos;
+        //var lastElapsedFTDegrees = this.lastElapsedFTDegrees;
 
-        //var debug = '';
+        var debug = '';
 
         // set the stop angle depending on which quadrant of the walk cycle we are currently in
-        // and decide whether we need to take an extra step to complete the walk cycle or not
-        if(lastFrequencyTimeWheelPos <= 0 && lastElapsedFTDegrees < 180) {
+        // decide if we need to take an extra step to complete the walk cycle
+        if(this.lastElapsedFTDegrees < 180) {
 
             // we have not taken a complete step yet, so we advance to the second stop angle
-            degreesToTurn = 180  - lastFrequencyTimeWheelPos;
-            //debug += 'case 1';
+            this.degreesToTurn = HALF_CYCLE  - this.lastFrequencyTimeWheelPos;
+            debug += 'quadrant 0 - we have not taken a complete step yet, -> 180';
 
-        } else if(lastFrequencyTimeWheelPos > 0 && lastFrequencyTimeWheelPos <= 90) {
+        } else if(this.lastFrequencyTimeWheelPos > 0 && this.lastFrequencyTimeWheelPos <= 90) {
 
-            // take an extra step to complete the walk cycle and stop at the second stop angle
-            degreesToTurn = 180 - lastFrequencyTimeWheelPos;
-            //debug += 'case 2';
+            // complete the step and stop at 180
+            this.degreesToTurn = HALF_CYCLE - this.lastFrequencyTimeWheelPos;
+            debug += 'quadrant 1 -> 180';
 
-        } else if(lastFrequencyTimeWheelPos > 90 && lastFrequencyTimeWheelPos <= 180) {
+        } else if(this.lastFrequencyTimeWheelPos > 90 && this.lastFrequencyTimeWheelPos <= 180) {
 
-            // stop on the other foot at the second stop angle for this walk cycle
-            degreesToTurn = 180 - lastFrequencyTimeWheelPos;
-            //debug += 'case 3';
+            // complete the step and next then stop at 0
+            this.degreesToTurn = HALF_CYCLE - this.lastFrequencyTimeWheelPos;
+            debug += 'quadrant 2 -> 180';
 
-        } else if(lastFrequencyTimeWheelPos > 180 && lastFrequencyTimeWheelPos <= 270) {
+        } else if(this.lastFrequencyTimeWheelPos > 180 && this.lastFrequencyTimeWheelPos <= 270) {
 
-            // take an extra step to complete the walk cycle and stop at the first stop angle
-            degreesToTurn = 360 - lastFrequencyTimeWheelPos;
-            //debug += 'case 4';
+            // complete the step and stop at 0
+            this.degreesToTurn = FULL_CYCLE - this.lastFrequencyTimeWheelPos;
+            debug += 'quadrant 3 -> 0';
 
         } else {
 
-            degreesToTurn = 360 - lastFrequencyTimeWheelPos;
-            //debug += 'case 5';
+            // complete the step and the next then stop at 180
+            this.degreesToTurn = FULL_CYCLE - this.lastFrequencyTimeWheelPos;// + 180;
+            debug += 'quadrant 4 -> 0';
         }
-        this.stopAngle = 0; // TODO: finish clearing out stop angle
-        this.degreesToTurn = degreesToTurn;
-        this.degreesRemaining = degreesToTurn;
+        this.degreesRemaining = this.degreesToTurn;
 
         // work out the distance we need to cover to complete the cycle
-        var distance = degreesToTurn * avatar.calibration.strideLength / 180;
+        var distance = this.degreesToTurn * avatar.calibration.strideLength / 180;
 
         // work out the duration for this transition (assuming starting from MAX_WALK_SPEED as we have already set that on the JS motor)
         //if (Vec3.length(motion.velocity) < 1.0 ) {
 
-            this.continuedMotionDuration = distance / MAX_WALK_SPEED;
+            this.continuedMotionDuration = distance / Vec3.length(motion.velocity); // REMOVE_FOR_RELEASE - need to double up, as average speed will be (roughly) half the current speed?
 
         //} else {
 
         //    this.continuedMotionDuration = distance / Vec3.length(motion.velocity);
         //}
 
-        // do we need more time to complete the cyccle than the set duration allows?
+        // do we need more time to complete the cycle than the set duration allows?
         if (this.continuedMotionDuration > this.parameters.duration) {
 
-            this.parameters.duration = this.continuedMotionDuration;
+            //this.parameters.duration = this.continuedMotionDuration;
+            //print('warning - the continued motion may take longer than the original transition...');
         }
 
-        //print('Will turn the ftwheel through '+degreesToTurn.toFixed(1) +
-        //                ' degrees to advance the avi '+distance.toFixed(3) +
-        //                'm in '+this.continuedMotionDuration.toFixed(2)+' seconds'+
-        //                ' motion.direction is '+motion.direction+
-        //                ' motion.lastDirection is '+motion.lastDirection +
+        //print('Stopping! ftwheel is at: ' + this.lastFrequencyTimeWheelPos.toFixed(1)+' degrees. ' +
+        //                'Current speed is ' + Vec3.length(motion.velocity).toFixed(2) + ' m/s. ' +
+        //                'Will turn the ftwheel through '+this.degreesToTurn.toFixed(1) +
+        //                //' degrees to advance the avi '+distance.toFixed(3) +
+        //                //'m in '+this.continuedMotionDuration.toFixed(2)+' seconds'+
+        //                //' motion.direction is '+motion.direction+
+        //                //' motion.lastDirection is '+motion.lastDirection +
         //                ' .'+debug);
     }
     //if (this.id > 0) print('Transition '+this.id+' started. Last anim is '+this.lastAnimation.name+' next is '+this.nextAnimation.name);
@@ -1114,12 +1122,12 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
 
     // end of transition initialisation. begin transition public methods
 
-
+    // keeps the pace for the frequency time wheel for the last animation
     this.advancePreviousFrequencyTimeWheel = function(deltaTime) {
 
         var wheelAdvance = undefined;
 
-        if (this.lastAnimation === avatar.selectedWalk &&
+        if (this.lastAnimation === avatar.selectedWalkBlend &&
             this.nextAnimation === avatar.selectedIdle) {
 
             if(this.degreesRemaining <= 0) {
@@ -1128,18 +1136,29 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                 wheelAdvance = 0;
                 if (jsMotor.isMotoring()) {
 
+                    //print('Final step/s complete. FTwheel at '+this.lastFrequencyTimeWheelPos.toFixed(1));//Distance travelled = ' +Vec3.distance(this.startLocation, MyAvatar.position).toFixed(3)+'m');
                     jsMotor.applyBrakes();
-                    //walkTools.toLog('Final step/s complete. Distance travelled = ' +Vec3.distance(this.startLocation, MyAvatar.position).toFixed(3)+'m');
+                    if (this.lastFrequencyTimeWheelPos < 90) {
+
+                        this.lastFrequencyTimeWheelPos = 0;
+
+                    } else {
+
+                        this.lastFrequencyTimeWheelPos = 180;
+                    }
                 }
 
             } else {
 
-                wheelAdvance = this.degreesRemaining * deltaTime / this.continuedMotionDuration;
+                wheelAdvance = 5;//5 * this.degreesRemaining * deltaTime / this.continuedMotionDuration; //
                 var distanceToTravel = avatar.calibration.strideLength * wheelAdvance / 180;
-                var MIN_BRAKING_DISTANCE = 0.01;
 
-                if (distanceToTravel < MIN_BRAKING_DISTANCE) {
 
+                if (this.degreesRemaining <= 0) {
+
+                    //print('distanceToTravel < MIN_BRAKING_DISTANCE - calling off the motor. wheelAdvance is '+
+                    //       wheelAdvance.toFixed(1)+' '+
+                    //       ' distanceToTravel is '+distanceToTravel);
                     distanceToTravel = 0;
                     this.degreesRemaining = 0;
 
@@ -1147,15 +1166,19 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
 
                     this.degreesRemaining -= wheelAdvance;
                 }
-                var newSpeed = distanceToTravel / deltaTime > MAX_WALK_SPEED ? MAX_WALK_SPEED : distanceToTravel / deltaTime;
+
+                this.continuedMotionDuration
+
+                var newSpeed = (deltaTime / this.continuedMotionDuration)  * (distanceToTravel / deltaTime);
 
                 jsMotor.setMotorSpeed(newSpeed, SHORT_TIME);
 
-                //print('Still motoring: degreesRemaining = '+this.degreesRemaining.toFixed(1)+
-                //      ' this.degreesToTurn: '+this.degreesToTurn.toFixed(2) +
-                //      ' this.continuedMotionDuration: '+this.continuedMotionDuration.toFixed(2)+
-                //      ' distance travelled: ' +Vec3.distance(this.startLocation, MyAvatar.position).toFixed(3)+
-                //      'm distance to travel is '+distanceToTravel.toFixed(3)+'m' +
+                //print('Still motoring: degreesRemaining = '+this.degreesRemaining.toFixed(1) +
+                //      //' this.degreesToTurn: '+this.degreesToTurn.toFixed(2) +
+                //      ' ftWheel at: ' + (this.lastFrequencyTimeWheelPos + wheelAdvance).toFixed(1) +
+                //      //' this.continuedMotionDuration: '+this.continuedMotionDuration.toFixed(2) +
+                //      ' distance travelled: ' +Vec3.distance(this.startLocation, MyAvatar.position).toFixed(3) +
+                //      //'m distance to travel is '+distanceToTravel.toFixed(3)+'m' +
                 //      ' at speed '+newSpeed.toFixed(2)+' m/s');
             }
 
@@ -1297,17 +1320,6 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                                                frequencyTimeWheelPos,
                                                direction);
 
-        // attenuate transition effects for shorter steps
-        var shortStepAdjust = 1;
-        var SHORT_STEP = 120; // minimum ft wheel degrees turned to define a short step
-
-        if (this.lastAnimation === avatar.selectedWalk &&
-            this.lastElapsedFTDegrees < SHORT_STEP) {
-
-            shortStepAdjust = 1 - ((SHORT_STEP - this.lastElapsedFTDegrees) / SHORT_STEP);
-            shortStepAdjust = filter.bezier(shortStepAdjust, {x:1, y:0}, {x:0, y:1});
-        }
-
         // are we blending with a previous, still live transition?
         if(this.lastTransition !== nullTransition) {
 
@@ -1322,14 +1334,14 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                                                this.lastDirection);
         }
 
-        nextRotations.x = shortStepAdjust * this.filteredProgress * nextRotations.x +
-                          (1 - shortStepAdjust * this.filteredProgress) * lastRotations.x;
+        nextRotations.x = this.filteredProgress * nextRotations.x +
+                          (1 - this.filteredProgress) * lastRotations.x;
 
-        nextRotations.y = shortStepAdjust * this.filteredProgress * nextRotations.y +
-                          (1 - shortStepAdjust * this.filteredProgress) * lastRotations.y;
+        nextRotations.y = this.filteredProgress * nextRotations.y +
+                          (1 - this.filteredProgress) * lastRotations.y;
 
-        nextRotations.z = shortStepAdjust * this.filteredProgress * nextRotations.z +
-                          (1 - shortStepAdjust * this.filteredProgress) * lastRotations.z;
+        nextRotations.z = this.filteredProgress * nextRotations.z +
+                          (1 - this.filteredProgress) * lastRotations.z;
 
 
         // are there actions defined for this transition?
@@ -1337,27 +1349,28 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
 
             for(action in this.liveActions) {
 
-                var actionStrength = filter.bezier(this.liveActions[action].currentStrength(), {x:1, y:0}, {x:0, y:1});
+                var actionStrength = this.liveActions[action].currentStrength();
+
                 var poseRotations = animationOperations.calculateRotations(jointName,
                                                        walkAssets.getReachPose(this.liveActions[action].reachPose),
                                                        frequencyTimeWheelPos,
                                                        direction);
                 if(Math.abs(poseRotations.x) > 0) {
 
-                    nextRotations.x = shortStepAdjust * actionStrength * poseRotations.x +
-                                     (1 - shortStepAdjust * actionStrength) * nextRotations.x;
+                    nextRotations.x = actionStrength * poseRotations.x +
+                                     (1 - actionStrength) * nextRotations.x;
                 }
 
                 if(Math.abs(poseRotations.y) > 0) {
 
-                    nextRotations.y = shortStepAdjust * actionStrength * poseRotations.y +
-                                     (1 - shortStepAdjust * actionStrength) * nextRotations.y;
+                    nextRotations.y = actionStrength * poseRotations.y +
+                                     (1 - actionStrength) * nextRotations.y;
                 }
 
                 if(Math.abs(poseRotations.z) > 0) {
 
-                    nextRotations.z = shortStepAdjust * actionStrength * poseRotations.z +
-                                     (1 - shortStepAdjust * actionStrength) * nextRotations.z;
+                    nextRotations.z = actionStrength * poseRotations.z +
+                                     (1 - actionStrength) * nextRotations.z;
                 }
             }
         }
@@ -1368,8 +1381,8 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     this.die = function() {
 
         if (jsMotor.isMotoring()) {
-
-            jsMotor.applyBrakes();
+//print('transition is setting motoring to stop');
+            jsMotor.stopMotoring();
         }
     };
 

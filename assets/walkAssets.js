@@ -5,7 +5,7 @@
 //
 //  Created by David Wooldridge, Autumn 2014
 //
-//  Loads up and makes available the assets for use by the walk.js script v1.2
+//  Organises, loads up and makes available the assets for use by the walk.js script v1.25
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -43,16 +43,17 @@ walkAssets = (function () {
     Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-reach-pose.js");
     Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-2-reach-pose.js");
     Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-3-reach-pose.js");
+    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-4-reach-pose.js");
     Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-walk-to-idle-reach-pose.js");
     Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-fly-to-walk-reach-pose.js");
     Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-walk-to-fly-reach-pose.js");
     Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-hover-to-idle-reach-pose.js");
 
     // load the transitions datafile
-    Script.include(pathToAssets +_animationSetPath +  "walk-transitions.js");
+    Script.include(pathToAssets +_animationSetPath +  "transitions.js");
 
     // load the actions datafile
-    Script.include(pathToAssets +_animationSetPath +  "walk-actions.js");
+    Script.include(pathToAssets +_animationSetPath +  "actions.js");
 
     // animation buffer prototype
     Script.include(pathToAssets + "miscellaneous/animation-buffer.js");
@@ -87,6 +88,7 @@ walkAssets = (function () {
     _reachPoses.push(new MaleIdleToWalkRP());
     _reachPoses.push(new MaleIdleToWalk2RP());
     _reachPoses.push(new MaleIdleToWalk3RP());
+    _reachPoses.push(new MaleIdleToWalk4RP());
     _reachPoses.push(new MaleWalkToIdleRP());
     _reachPoses.push(new MaleFlyToWalkRP());
     _reachPoses.push(new MaleWalkToFlyRP());

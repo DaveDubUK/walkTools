@@ -30,10 +30,6 @@ var SAWTOOTH = 1;
 var TRIANGLE = 2;
 var SQUARE = 4;
 var TRANSITION_COMPLETE = 1000;
-// JS motor constants
-var VERY_LONG_TIME = 1000000.0;
-var VERY_SHORT_TIME = 0.001;
-var SHORT_TIME = 0.01;
 // animation, locomotion and position
 var MOVE_THRESHOLD = 0.075;  //
 var FLY_THRESHOLD = 0.01;//
@@ -229,7 +225,7 @@ function updateTransitions() {
 function selectAnimation() {
 
     // check for editing modes first, as these require no positioning calculations REMOVE_FOR_RELEASE
-    //if (!walkTools.editMode()) { // REMOVE_FOR_BETA, REMOVE_FOR_RELEASE - not possible to edit in release version
+    if (!walkTools.editMode()) { // REMOVE_FOR_BETA, REMOVE_FOR_RELEASE - not possible to edit in release version
 
         // will we use the Transition's Actions?
         var playTransitionActions = true;
@@ -399,7 +395,7 @@ function selectAnimation() {
 
         } // end switch(motion.locomotionMode)
 
-    //} // end if editing REMOVE_FOR_RELEASE REMOVE_FOR_BETA
+    } // end if editing REMOVE_FOR_RELEASE REMOVE_FOR_BETA
 }
 
 // advance the frequency time wheels. advance frequency time wheels for any live transitions

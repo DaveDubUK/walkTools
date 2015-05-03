@@ -758,13 +758,13 @@ walkTools = (function () {
                                 'Under gravity: '+avatar.isUnderGravity + '\n' +
                                 'Accelerating: '+ motion.isAccelerating + '\n' +
                                 'Decelerating: '+ motion.isDecelerating + '\n' +
-                                'DeceleratingFast: '+ motion.isDeceleratingFast + '\n' +
+                                'Decelerating fast: '+ motion.isDeceleratingFast + '\n' +
+                                'Coming to a halt: '+motion.isComingToHalt + '\n' +
                                 'Walking speed: '+motion.isWalkingSpeed + '\n' +
                                 'Flying speed: '+motion.isFlyingSpeed + '\n' +
                                 'Coming in to land: '+avatar.isComingInToLand + '\n' +
                                 'Taking off: '+avatar.isTakingOff + '\n' +
-                                'On surface: '+avatar.isOnSurface + '\n' +
-                                'jsMotor running: '+jsMotor.isMotoring();
+                                'On surface: '+avatar.isOnSurface + '\n';
             return currentState;
         },
 
@@ -786,9 +786,11 @@ walkTools = (function () {
                 //'Avatar frame speed: ' + Vec3.length(motion.velocity).toFixed(3) + '\n' +
                 'Frame number: ' + _nFrames + '\n' +
                 'Frame time: ' + deltaTimeMS.toFixed(2) + ' ms\n' +
+                'Velocity: ' + Vec3.length(motion.velocity).toFixed(3) + ' m/s\n' +
+                'Acceleration mag: ' + Vec3.length(motion.acceleration).toFixed(2) + ' m/s/s\n' +
+                'Directed acceleration: '+ motion.directedAcceleration.toFixed(2) + ' m/s/s\n' +
                 'Above surface: ' + aboveSurface.toFixed(3) + ' m\n' +
                 //'Cumulative Time ' + cumuTimeMS.toFixed(0) + ' mS\n' +
-                'jsMotor running: '+jsMotor.isMotoring() + '\n' +
                 'Yaw: ' + Quat.safeEulerAngles(MyAvatar.orientation).y.toFixed(1) + ' degrees\n' +
                 'Angular speed: ' + Vec3.length(MyAvatar.getAngularVelocity()).toFixed(3) + ' rad/s\n' +
                 'Angular acceleration: '+ Vec3.length(MyAvatar.getAngularAcceleration()).toFixed(3) + ' rad/s/s';
@@ -803,7 +805,6 @@ walkTools = (function () {
                 var debugInfo = '           Periodic Stats\n--------------------------------------\n' +
                     'Render time peak hold: ' + _frameExecutionTimeMax.toFixed(0) + ' m/s\n' +
                     'Acceleration Peak: ' + _localAccelerationPeak.toFixed(1) + ' m/s/s\n' +
-                    'Velocity: ' + Vec3.length(motion.velocity).toFixed(3) + ' m/s\n' +
                     //'local velocity.x: ' + motion.velocity.x.toFixed(1) + ' m/s\n' +
                     //'local velocity.y: ' + motion.velocity.y.toFixed(1) + ' m/s\n' +
                     //'local velocity.z: ' + motion.velocity.z.toFixed(1) + ' m/s\n' +
@@ -812,11 +813,10 @@ walkTools = (function () {
                     //'acceleration.x: ' + motion.acceleration.x.toFixed(1) + ' m/s/s\n' +
                     //'acceleration.y: ' + motion.acceleration.y.toFixed(1) + ' m/s/s\n' +
                     //'acceleration.z: ' + motion.acceleration.z.toFixed(1) + ' m/s/s\n' +
-                    'Acceleration mag: ' + Vec3.length(motion.acceleration).toFixed(2) + ' m/s/s\n' +
-                    'Directed acceleration: '+ motion.directedAcceleration.toFixed(2) + ' m/s/s\n' +
                     'Accelerating: '+ motion.isAccelerating + '\n' +
                     'Decelerating: '+ motion.isDecelerating + '\n' +
                     'DeceleratingFast: '+ motion.isDeceleratingFast + '\n' +
+                    'Coming to a halt: '+motion.isComingToHalt + '\n' +
                     'Walking speed: '+motion.isWalkingSpeed + '\n' +
                     'Coming in to land: '+avatar.isComingInToLand + '\n' +
                     'Taking off: '+avatar.isTakingOff + '\n' +

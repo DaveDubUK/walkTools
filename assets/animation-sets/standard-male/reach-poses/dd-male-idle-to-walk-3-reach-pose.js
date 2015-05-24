@@ -17,17 +17,7 @@ MaleIdleToWalk3RP = function() {
 
     this.calibration = {
 
-        "frequency":6,
-        "strideLengthForwards":1.22152,
-        "forwardStrideMaxAt":74,
-        "startAngleForwards":0,//17.3,
-        "stopAngleForwards":0,
-        "strideLengthBackwards":1.0094,
-        "backwardsStrideMaxAt":263.5,
-        "startAngleBackwards":0,
-        "stopAngleBackwards":0,
-        "footDownLeft":0,
-        "footDownRight":180
+        "frequency":1.4
     };
 
 
@@ -56,7 +46,7 @@ MaleIdleToWalk3RP = function() {
 
         "Hips": {
 
-            "bobLPFilter": filter.createButterworthFilter2(5),
+            "bobLPFilter": filter.createButterworthFilter(),
             "yawFilter": filter.createWaveSynth(2, 3, 2)
         },
         "LeftUpLeg": {

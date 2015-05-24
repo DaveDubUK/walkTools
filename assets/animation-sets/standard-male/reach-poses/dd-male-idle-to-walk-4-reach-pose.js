@@ -34,7 +34,6 @@ MaleIdleToWalk4RP = function() {
             "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0,
-            "pitchFrequencyMultiplier":2,
             "thrust":0,
             "bob":0,
             "sway":0,
@@ -43,9 +42,7 @@ MaleIdleToWalk4RP = function() {
             "swayPhase":0,
             "thrustOffset":0,
             "bobOffset":0,
-            "swayOffset":0,
-            "thrustFrequencyMultiplier":2,
-            "bobFrequencyMultiplier":2
+            "swayOffset":0
         },
         "LeftUpLeg":{
             "pitch":0,
@@ -144,8 +141,7 @@ MaleIdleToWalk4RP = function() {
             "rollPhase":0,
             "pitchOffset":0,
             "yawOffset":0,
-            "rollOffset":0,
-            "pitchFrequencyMultiplier":2
+            "rollOffset":0
         },
         "Spine1":{
             "pitch":0,
@@ -200,8 +196,7 @@ MaleIdleToWalk4RP = function() {
             "rollPhase":0,
             "pitchOffset":0,
             "yawOffset":0,
-            "rollOffset":0,
-            "pitchFrequencyMultiplier":2
+            "rollOffset":0
         },
         "RightArm":{
             "pitch":0,
@@ -212,8 +207,7 @@ MaleIdleToWalk4RP = function() {
             "rollPhase":0,
             "pitchOffset":0,
             "yawOffset":0,
-            "rollOffset":0,
-            "pitchFrequencyMultiplier":2
+            "rollOffset":0
         },
         "LeftForeArm":{
             "pitch":0,

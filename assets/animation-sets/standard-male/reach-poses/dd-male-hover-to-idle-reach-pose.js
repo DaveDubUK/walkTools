@@ -31,7 +31,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":2.37736,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0,
             "sway":0,
@@ -41,7 +41,7 @@ MaleHoverToIdleRP = function() {
             "bobPhase":0,
             "thrustPhase":0,
             "swayOffset":0,
-            "bobOffset":-0.21792,
+            "bobOffset":0,
             "thrustOffset":0
         },
         "LeftUpLeg":{
@@ -51,7 +51,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":50,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -62,7 +62,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":50,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -73,7 +73,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-90,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -84,7 +84,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-90,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -95,7 +95,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":45,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -106,7 +106,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":45,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -139,7 +139,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":8,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -150,7 +150,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":5,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -161,7 +161,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":7,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -172,9 +172,9 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
-            "yawOffset":-14.26415,
-            "rollOffset":31.92453
+            "pitchOffset":10,
+            "yawOffset":0,
+            "rollOffset":1
         },
         "RightShoulder":{
             "pitch":0,
@@ -183,9 +183,9 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
-            "yawOffset":14.26415,
-            "rollOffset":-31.92453
+            "pitchOffset":10,
+            "yawOffset":0,
+            "rollOffset":-1
         },
         "LeftArm":{
             "pitch":0,
@@ -194,7 +194,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":69.96226,
+            "pitchOffset":70,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -205,7 +205,7 @@ MaleHoverToIdleRP = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":69.96226,
+            "pitchOffset":70,
             "yawOffset":0,
             "rollOffset":0
         },

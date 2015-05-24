@@ -14,7 +14,6 @@ walkTools = (function () {
 
     // gui elements visibility settings
     var _visibility = {
-
         visible: true,
         logVisible: true,
         statsVisible: true,
@@ -25,9 +24,7 @@ walkTools = (function () {
         walkJSUIVisible: true,
         scopeVisible: true
     };
-
     var _editMode = {
-
         editing: false,
         editDirection: FORWARDS,
         editingTranslation: false,
@@ -35,8 +32,9 @@ walkTools = (function () {
         opposingSymmetricalEditing: false
     }
     var _currentlySelectedJoint = "Hips";
-    var _currentlySelectedAnimation = walkAssets.getAnimation("MaleWalk"),
+    var _currentlySelectedAnimation = walkAssets.getAnimationDataFile("MaleIdle"),
     var _animationEditBuffer = null;
+    var _momentaryButtonTimer = null;
 
     // UI stuff
     var _sliderThumbOverlays = [];
@@ -55,7 +53,7 @@ walkTools = (function () {
     var _logPanelX = 0;
 
     // shorten the log panel if we're using the scope
-    if(oscilloscope) {
+    if (oscilloscope) {
         _logPanelX += 607;
     }
 
@@ -71,13 +69,6 @@ walkTools = (function () {
     var _nFrames = 0;
     var _globalPhase = 0;
 
-    // walk.js references
-    _motion = null;
-    _state = null;
-    _walkInterface = null;
-    _avatar = null;
-    _oscilloscope = null;
-
     // constants
     var MAX_PREVIEW_SPEED = 10;
     var HOME_LOCATION = {x:8192, y:3, z:8192};
@@ -85,7 +76,6 @@ walkTools = (function () {
     // debug log
     var _debugLogLines = [];
     _debugLogLines.length = 9;
-
 
     // UI elements
     var _walkToolsLogPanel = Overlays.addOverlay("text", {
@@ -103,7 +93,7 @@ walkTools = (function () {
             y: _auxControlsPanelY,
             width: 549, height: 140
         },
-        imageURL: pathToAssets + "overlay-images/lowerSliderPanel.png",
+        imageURL: pathToAssets + "walktools-overlay-images/lowerSliderPanel.png",
         alpha: 1, visible: _visibility.visible && _visibility.transportVisible
     });
     _backgroundOverlays.push(_walkToolsTransportBar);
@@ -111,7 +101,7 @@ walkTools = (function () {
     var _walkToolsMenuPanel = Overlays.addOverlay("image", {
         x: _menuPanelX, y: _menuPanelY,
         width: 60, height: 839,
-        imageURL: pathToAssets + "overlay-images/sideBar.png",
+        imageURL: pathToAssets + "walktools-overlay-images/sideBar.png",
         alpha: 1, visible: true //_visibility.visible
     });
     _backgroundOverlays.push(_walkToolsMenuPanel);
@@ -119,7 +109,7 @@ walkTools = (function () {
     var _walkToolsMenuPanelClicked = Overlays.addOverlay("image", {
         x: _menuPanelX, y: _menuPanelY,
         width: 60, height: 839,
-        imageURL: pathToAssets + "overlay-images/sideBarClicked.png",
+        imageURL: pathToAssets + "walktools-overlay-images/sideBarClicked.png",
         alpha: 1, visible: false
     });
     _backgroundOverlays.push(_walkToolsMenuPanelClicked);
@@ -131,7 +121,7 @@ walkTools = (function () {
     //    color: {red: 204, green: 204, blue: 204},
     //    topMargin: 10, leftMargin: 15,
     //    visible: _visibility.visible && _visibility.statsVisible,
-    //    imageURL: pathToAssets + "overlay-images/stats-bg.png",
+    //    imageURL: pathToAssets + "walktools-overlay-images/stats-bg.png",
         //backgroundColor: {red: 34, green: 34, blue: 34},
     //    alpha: 1.0,
     //    text: "Debug Stats\n\n\nNothing to report yet."
@@ -158,7 +148,7 @@ walkTools = (function () {
     //    color: {red: 204, green: 204, blue: 204},
     //    topMargin: 5, leftMargin: 15,
     //    visible: _visibility.visible && _visibility.pStatsVisible,
-    //    imageURL: pathToAssets + "overlay-images/periodic-stats-bg.png",
+    //    imageURL: pathToAssets + "walktools-overlay-images/periodic-stats-bg.png",
         //backgroundColor: {red: 34, green: 34, blue: 34},
     //    alpha: 1.0,
     //    text: "Debug Stats\n\n\nNothing to report yet."
@@ -172,7 +162,7 @@ walkTools = (function () {
         color: {red: 204, green: 204, blue: 204},
         topMargin: 5, leftMargin: 15,
         visible: _visibility.visible && _visibility.pStatsVisible,
-        //imageURL: pathToAssets + "overlay-images/periodic-stats-bg.png",
+        //imageURL: pathToAssets + "walktools-overlay-images/periodic-stats-bg.png",
         backgroundColor: {red: 34, green: 34, blue: 34},
         alpha: 1.0,
         text: "Debug Stats\n\n\nNothing to report yet."
@@ -251,7 +241,7 @@ walkTools = (function () {
             y: _auxControlsPanelY + 13,
             width: 25, height: 25
         },
-        imageURL: pathToAssets + "overlay-images/sliderHandle.png",
+        imageURL: pathToAssets + "walktools-overlay-images/sliderHandle.png",
         alpha: 1, visible: _visibility.visible && _visibility.transportVisible
     });
     _sliderThumbOverlays.push(_sliderOne);
@@ -262,7 +252,7 @@ walkTools = (function () {
             y: _auxControlsPanelY + 51,
             width: 25, height: 25
         },
-        imageURL: pathToAssets + "overlay-images/sliderHandle.png",
+        imageURL: pathToAssets + "walktools-overlay-images/sliderHandle.png",
         alpha: 1, visible: _visibility.visible && _visibility.transportVisible
     });
     _sliderThumbOverlays.push(_sliderTwo);
@@ -273,7 +263,7 @@ walkTools = (function () {
             y: _auxControlsPanelY + 90,
             width: 25, height: 25
         },
-        imageURL: pathToAssets + "overlay-images/sliderHandle.png",
+        imageURL: pathToAssets + "walktools-overlay-images/sliderHandle.png",
         alpha: 1, visible: _visibility.visible && _visibility.transportVisible
     });
     _sliderThumbOverlays.push(_sliderThree);
@@ -288,20 +278,16 @@ walkTools = (function () {
         var clickedOverlay = Overlays.getOverlayAtPoint({x: event.x, y: event.y});
 
         switch(clickedOverlay) {
-
             case _walkToolsMenuPanel:
-
                 var clickY = event.y - _menuPanelY;
-
                 Overlays.editOverlay(_walkToolsMenuPanelClicked, {visible: _visibility.visible});
                 Overlays.editOverlay(_walkToolsMenuPanel, {visible: false});
-                momentaryButtonTimer = Script.setInterval(function() {
+                _momentaryButtonTimer = Script.setInterval(function() {
                     Overlays.editOverlay(_walkToolsMenuPanelClicked, {visible: false});
                     Overlays.editOverlay(_walkToolsMenuPanel, {visible: _visibility.visible});
-                    Script.clearInterval(momentaryButtonTimer);
-                    momentaryButtonTimer = null;
+                    Script.clearInterval(_momentaryButtonTimer);
+                    _momentaryButtonTimer = null;
                 }, 50);
-
                 if (clickY > 60 && clickY < 84)
                     _visibility.walkJSUIVisible = !_visibility.walkJSUIVisible;
                 else if (clickY > 84 && clickY < 109)
@@ -323,59 +309,45 @@ walkTools = (function () {
                 return;
 
             case _walkToolsTransportBar:
-
                 var clickX = event.x - _auxControlsPanelX;
                 var clickY = event.y - _auxControlsPanelY;
 
                 // orientation compass
                 if (clickX > 92 && clickY > 0 && clickX < 111 && clickY < 30)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 0, 0);
-
                 else if (clickX > 110 && clickY > 36 && clickX < 130 && clickY < 60)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 45, 0);
-
                 else if (clickX > 139 && clickY > 62 && clickX < 167 && clickY < 76)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 90, 0);
-
                 else if (clickX > 110 && clickY > 75 && clickX < 134 && clickY < 90)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 135, 0);
-
                 else if (clickX > 92 && clickY > 104 && clickX < 111 && clickY < 129)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 180, 0);
-
                 else if (clickX > 75 && clickY > 75 && clickX < 98 && clickY < 90)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 225, 0);
-
                 else if (clickX > 42 && clickY > 62 && clickX < 68 && clickY < 76)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 270, 0);
-
                 else if (clickX > 75 && clickY > 41 && clickX < 100 && clickY < 62)
                     MyAvatar.orientation = Quat.fromPitchYawRollDegrees(0, 315, 0);
-
                 else if (clickX > 90 && clickY > 60 && clickX < 115 && clickY < 85)
                     MyAvatar.position = HOME_LOCATION;
-
                 return;
 
             case _sliderOne:
-
                 _movingSliderOne = true;
                 return;
 
             case _sliderTwo:
-
                 _movingSliderTwo = true;
                 return;
 
             case _sliderThree:
-
                 _movingSliderThree = true;
                 return;
 
             // could be a scope overlay click - pass the message on
             default:
-
-                if (_oscilloscope) _oscilloscope.mousePressEvent(event);
+                if (oscilloscope) oscilloscope.mousePressEvent(event);
                 return;
         }
     };
@@ -390,15 +362,11 @@ walkTools = (function () {
         var sliderX = thumbPositionNormalised * _sliderRangeX; // sets range
 
         if (_movingSliderOne) {
-
                 Overlays.editOverlay(_sliderOne, {x: sliderX + _minSliderX});
-
                 // walk speed
-                _avatar.currentAnimation.calibration.frequency = thumbPositionNormalised * MAX_PREVIEW_SPEED;
+                avatar.currentAnimation.calibration.frequency = thumbPositionNormalised * MAX_PREVIEW_SPEED;
                 return;
-
         } else if (_movingSliderTwo) {
-
                 Overlays.editOverlay(_sliderTwo, {x: sliderX + _minSliderX});
 
                 // animation phase adjust
@@ -406,9 +374,7 @@ walkTools = (function () {
                 walkTools.toLog('global phase is now '+_globalPhase.toFixed(1));
                 globalPhaseShift();
                 return;
-
         } else if (_movingSliderThree) {
-
                 Overlays.editOverlay(_sliderThree, {x: sliderX + _minSliderX});
 
                 // walk cycle position
@@ -416,22 +382,21 @@ walkTools = (function () {
 
                 var footRPos = MyAvatar.getJointPosition("RightFoot");
                 var footLPos = MyAvatar.getJointPosition("LeftFoot");
-                _avatar.calibration.strideLength = Vec3.distance(footRPos, footLPos);
+                avatar.calibration.strideLength = Vec3.distance(footRPos, footLPos);
                 // since we go heel to toe, we must include that distance too
                 //var toeRPos = Vec3.multiplyQbyV(inverseRotation, MyAvatar.getJointPosition("RightToeBase"));
                 //var heelToToe = Math.abs(toeRPos.z - footRPos.z) / 2; // div 2, as only happens once per stride
-                //_avatar.calibration.strideLength = Math.abs(footRPos.z - footLPos.z) + heelToToe;
-
+                //avatar.calibration.strideLength = Math.abs(footRPos.z - footLPos.z) + heelToToe;
                 walkTools.toLog('cycle position: '+_cyclePosition.toFixed(1) +
-                                ' walk stride is '+_avatar.calibration.strideLength.toFixed(4)+
-                                ' at '+_motion.frequencyTimeWheelPos.toFixed(1)+
+                                ' walk stride is '+avatar.calibration.strideLength.toFixed(4)+
+                                ' at '+motion.frequencyTimeWheelPos.toFixed(1)+
                                 ' degrees');// and heel to toe is '+heelToToe.toFixed(4) +
                                 //' mm');
 
                 return;
         }
-        if (_oscilloscope) {
-            _oscilloscope.mouseMoveEvent(event);
+        if (oscilloscope) {
+            oscilloscope.mouseMoveEvent(event);
         }
     };
 
@@ -449,8 +414,8 @@ walkTools = (function () {
 
             _movingSliderThree = false;
         }
-        if (_oscilloscope) {
-            _oscilloscope.mouseReleaseEvent(event);
+        if (oscilloscope) {
+            oscilloscope.mouseReleaseEvent(event);
         }
     };
 
@@ -465,8 +430,8 @@ walkTools = (function () {
         for (var i in _backgroundOverlays) {
             Overlays.deleteOverlay(_backgroundOverlays[i]);
         }
-        if (_oscilloscope) {
-            _oscilloscope.deleteScope();
+        if (oscilloscope) {
+            oscilloscope.deleteScope();
         }
 
         // remove the slider thumb overlays
@@ -509,15 +474,13 @@ walkTools = (function () {
     function stateAsString(state) {
 
         switch (state) {
-            case _state.STATIC:
+            case STATIC:
                 return 'Static';
-            case _state.SURFACE_MOTION:
+            case SURFACE_MOTION:
                 return 'Surface motion';
-            //case _state.SIDE_STEP:
-            //    return 'Side stepping';
-            case _state.AIR_MOTION:
+            case AIR_MOTION:
                 return 'Air motion';
-            case _state.EDIT:
+            case EDIT:
                 return 'Editing';
             default:
                 return 'Unknown';
@@ -556,14 +519,12 @@ walkTools = (function () {
         Overlays.editOverlay(_frequencyTimeWheelYLine, {visible: _visibility.visible && _visibility.frequencyTimeWheelVisible});
         Overlays.editOverlay(_transFTWheelYLine, {visible: _visibility.visible && _visibility.frequencyTimeWheelVisible});
         Overlays.editOverlay(_transFTWheelZLine, {visible: _visibility.visible && _visibility.frequencyTimeWheelVisible});
-        if (_oscilloscope) {
-
-            _oscilloscope.displayScope(_visibility.visible && _visibility.scopeVisible);
+        if (oscilloscope) {
+            oscilloscope.displayScope(_visibility.visible && _visibility.scopeVisible);
         }
-        _walkInterface.minimiseInterface(_visibility.walkJSUIVisible);
+        walkInterface.minimiseInterface(_visibility.walkJSUIVisible);
 
-        if (!momentaryButtonTimer) {
-
+        if (!_momentaryButtonTimer) {
             Overlays.editOverlay(_walkToolsMenuPanel, {visible: _visibility.visible});
             Overlays.editOverlay(_walkToolsMenuPanelClicked, {visible: false});
         }
@@ -574,11 +535,8 @@ walkTools = (function () {
 
         var phaseSum = phaseOne + phaseTwo;
         if (phaseSum > 180) {
-
             phaseSum -= 360;
-
         } else if (phaseSum < -180) {
-
             phaseSum += 360;
         }
         return phaseSum;
@@ -587,9 +545,7 @@ walkTools = (function () {
     function globalPhaseShift() {
 
         if (_editMode.editing) {
-
             for (i in _currentlySelectedAnimation.joints) {
-
                 // rotations
                 var pitchFrequencyMultiplier = 1;
                 var yawFrequencyMultiplier = 1;
@@ -612,7 +568,6 @@ walkTools = (function () {
                     addPhases(yawFrequencyMultiplier * _globalPhase, _currentlySelectedAnimation.joints[i].yawPhase);
                 _animationEditBuffer.joints[i].rollPhase =
                     addPhases(rollFrequencyMultiplier * _globalPhase, _currentlySelectedAnimation.joints[i].rollPhase);
-
                 if (i === "Hips") {
 
                     // Hips translations
@@ -620,15 +575,12 @@ walkTools = (function () {
                     var bobFrequencyMultiplier = 1;
                     var thrustFrequencyMultiplier = 1;
                     if (isDefined(_animationEditBuffer.joints[i].swayFrequencyMultiplier)) {
-
                         swayFrequencyMultiplier = _animationEditBuffer.joints[i].swayFrequencyMultiplier;
                     }
                     if (isDefined(_animationEditBuffer.joints[i].bobFrequencyMultiplier)) {
-
                         bobFrequencyMultiplier = _animationEditBuffer.joints[i].bobFrequencyMultiplier;
                     }
                     if (isDefined(_animationEditBuffer.joints[i].thrustFrequencyMultiplier)) {
-
                         thrustFrequencyMultiplier = _animationEditBuffer.joints[i].thrustFrequencyMultiplier;
                     }
                     _animationEditBuffer.joints[i].thrustPhase =
@@ -641,25 +593,15 @@ walkTools = (function () {
             }
         }
         // update the sliders
-        _walkInterface.update();
+        walkInterface.update();
     };
 
     // public methods
     return {
-
-        connect: function(state, motion, walkInterface, avatar, oscilloscope) {
-
-            // save references
-            _motion = motion;
-            _state = state;
-            _walkInterface = walkInterface;
-            _avatar = avatar;
-            _oscilloscope = oscilloscope;
-
-            // connect walk speed to slider one
-            var sliderXPos = _avatar.currentAnimation.calibration.frequency / MAX_PREVIEW_SPEED * _sliderRangeX;
-            Overlays.editOverlay(_sliderOne, {x: sliderXPos + _minSliderX});
-        },
+        
+        // often useful elsewhere too
+        stateAsString: stateAsString,
+        directionAsString: directionAsString,
 
         // manual cycle advance
         getCyclePosition: function() {
@@ -668,42 +610,34 @@ walkTools = (function () {
 
         // visibility toggle
         toggleVisibility: function() {
-
             _visibility.visible = !_visibility.visible;
             setVisibility();
         },
 
         // editing stuff
-        editingTranslation: (_editMode.editingTranslation),
-        symmetricalEditing: (_editMode.symmetricalEditing),
-        opposingSymmetricalEditing: (_editMode.opposingSymmetricalEditing),
+        editingTranslation: _editMode.editingTranslation,
+        symmetricalEditing: _editMode.symmetricalEditing,
+        opposingSymmetricalEditing: _editMode.opposingSymmetricalEditing,
 
         setEditMode: function (editMode) {
-
             _editMode.editing = editMode;
         },
         editMode: function () {
-
             return _editMode.editing;
         },
         selectAnimation: function(newAnimation) {
-
             _currentlySelectedAnimation = newAnimation;
         },
         selectedAnimation: function() {
-
             return _currentlySelectedAnimation;
         },
         selectJoint: function(jointName) {
-
             _currentlySelectedJoint = jointName;
         },
         selectedJoint: function() {
-
             return _currentlySelectedJoint;
         },
         startEditing: function() {
-
             _editMode.editing = true;
             _animationEditBuffer = new Buffer(_currentlySelectedAnimation.name+' buffered');
             animationOperations.deepCopy(_currentlySelectedAnimation, _animationEditBuffer);
@@ -711,10 +645,8 @@ walkTools = (function () {
             print('walkTools avatar.currentAnimation is '+avatar.currentAnimation.name);
         },
         stopEditing: function() {
-
             _editMode.editing = false;
             if (Window.confirm('Apply changes to '+_currentlySelectedAnimation.name+'?')) {
-
                 animationOperations.deepCopy(_animationEditBuffer, _currentlySelectedAnimation);
                 print('copied '+_animationEditBuffer.name + ' to '+_currentlySelectedAnimation.name);
             }
@@ -722,22 +654,17 @@ walkTools = (function () {
 
         toLog: logMessage,
 
-        oscilloscope: _oscilloscope,
-
         toOscilloscope: function(channel1, channel2, channel3) {
-
-            if(_visibility.visible && _visibility.scopeVisible && _oscilloscope)
-                _oscilloscope.updateScopeTrace(channel1, channel2, channel3);
+            if (_visibility.visible && _visibility.scopeVisible && oscilloscope)
+                oscilloscope.updateScopeTrace(channel1, channel2, channel3);
         },
 
         tweakBezier: function(percentProgress) {
-
-            if(_oscilloscope) return _oscilloscope.bezierCurve.getBezier(percentProgress);
+            if (oscilloscope) return oscilloscope.bezierCurve.getBezier(percentProgress);
             else return 0;
         },
 
         beginProfiling: function(deltaTime) {
-
             _frameStartTime = new Date().getTime();
             _cumulativeTime += deltaTime;
             _nFrames++;
@@ -745,7 +672,7 @@ walkTools = (function () {
 
         dumpState: function() {
 
-            var currentState =  'State: ' + stateAsString(state.currentState) + ' ' + directionAsString(_motion.direction) + '\n\n' +
+            var currentState =  'State: ' + stateAsString(motion.state) + ' ' + directionAsString(motion.direction) + '\n\n' +
                                 'Playing: '+ avatar.currentAnimation.name + '\n' +
                                 'Velocity: ' + Vec3.length(motion.velocity).toFixed(3) + ' m/s\n' +
                                 'Velocity.x: ' + motion.velocity.x.toFixed(3) + ' m/s\n' +
@@ -754,17 +681,17 @@ walkTools = (function () {
                                 'Acceleration mag: ' + Vec3.length(motion.acceleration).toFixed(2) + ' m/s/s\n' +
                                 'Directed acceleration: '+ motion.directedAcceleration.toFixed(2) + ' m/s/s\n' +
                                 'Direction: '+ directionAsString(motion.direction) +
-                                'Above surface: ' + avatar.distanceToSurface.toFixed(3) + ' m\n' +
-                                'Under gravity: '+avatar.isUnderGravity + '\n' +
+                                'Above surface: ' + avatar.distanceFromSurface.toFixed(3) + ' m\n' +
+                                //'Under gravity: '+avatar.isUnderGravity + '\n' +
                                 'Accelerating: '+ motion.isAccelerating + '\n' +
                                 'Decelerating: '+ motion.isDecelerating + '\n' +
                                 'Decelerating fast: '+ motion.isDeceleratingFast + '\n' +
                                 'Coming to a halt: '+motion.isComingToHalt + '\n' +
                                 'Walking speed: '+motion.isWalkingSpeed + '\n' +
-                                'Flying speed: '+motion.isFlyingSpeed + '\n' +
-                                'Coming in to land: '+avatar.isComingInToLand + '\n' +
-                                'Taking off: '+avatar.isTakingOff + '\n' +
-                                'On surface: '+avatar.isOnSurface + '\n';
+                                'Flying speed: '+motion.isFlyingSpeed + '\n';// +
+                                //'Coming in to land: '+avatar.isComingInToLand + '\n' +
+                                //'Taking off: '+avatar.isTakingOff + '\n' +
+                                //'On surface: '+avatar.isOnSurface + '\n';
             return currentState;
         },
 
@@ -773,13 +700,13 @@ walkTools = (function () {
             var cumuTimeMS = Math.floor(_cumulativeTime * 1000);
             var deltaTimeMS = motion.deltaTime * 1000;
             var frameExecutionTime = new Date().getTime() - _frameStartTime;
-            var aboveSurface = avatar.distanceToSurface;
-            if(aboveSurface < 0.0001) aboveSurface = 0;
-            else if(aboveSurface > 10000) aboveSurface = Infinity;
+            var aboveSurface = avatar.distanceFromSurface;
+            if (aboveSurface < 0.0001) aboveSurface = 0;
+            else if (aboveSurface > 10000) aboveSurface = Infinity;
             if (frameExecutionTime > _frameExecutionTimeMax) _frameExecutionTimeMax = frameExecutionTime;
 
             var debugInfo = '                   Stats\n--------------------------------------\n' +
-                'State: ' + stateAsString(state.currentState) + ' ' + directionAsString(_motion.direction) + '\n' +
+                'State: ' + stateAsString(motion.state) + ' ' + directionAsString(motion.direction) + '\n' +
                 'Playing: '+ avatar.currentAnimation.name + '\n' +
                 'Editing: ' + _currentlySelectedAnimation.name + '\n' +
                 'Editing: '+ _currentlySelectedJoint + '\n' +
@@ -799,7 +726,7 @@ walkTools = (function () {
 
             if (motion.acceleration.magnitude > _localAccelerationPeak) _localAccelerationPeak = motion.acceleration.magnitude;
 
-            if (_visibility.visible && _visibility.pStatsVisible && _nFrames % 2 === 0) {
+            if (_visibility.visible && _visibility.pStatsVisible && _nFrames % 30 === 0) {
 
                 // update these every ... mS
                 var debugInfo = '           Periodic Stats\n--------------------------------------\n' +
@@ -838,9 +765,9 @@ walkTools = (function () {
                 var distanceTravelled = speed * deltaTime;
                 var angularVelocity = speed / wheelRadius;
 
-                //if(_motion.currentTransition.progress > 0) {
-                    Overlays.editOverlay(_frequencyTimeWheelYLine, {alpha: (1-_motion.currentTransition.progress)});
-                    Overlays.editOverlay(_frequencyTimeWheelZLine, {alpha: (1-_motion.currentTransition.progress)});
+                //if (motion.currentTransition.progress > 0) {
+                    Overlays.editOverlay(_frequencyTimeWheelYLine, {alpha: (1-motion.currentTransition.progress)});
+                    Overlays.editOverlay(_frequencyTimeWheelZLine, {alpha: (1-motion.currentTransition.progress)});
                 //}
 
                 if (_visibility.frequencyTimeWheelVisible) {
@@ -850,14 +777,14 @@ walkTools = (function () {
 
                         // draw the frequency time turning around the z axis for sidestepping
                         var directionSign = 1;
-                        if (_motion.direction === RIGHT) directionSign = -1;
+                        if (motion.direction === RIGHT) directionSign = -1;
                         var yOffset = avatar.calibration.hipsToFeet - (wheelRadius / 1.2);
-                        var sinWalkWheelPosition = wheelRadius * Math.sin(filter.degToRad(directionSign * _motion.frequencyTimeWheelPos));
-                        var cosWalkWheelPosition = wheelRadius * Math.cos(filter.degToRad(directionSign * -_motion.frequencyTimeWheelPos));
+                        var sinWalkWheelPosition = wheelRadius * Math.sin(filter.degToRad(directionSign * motion.frequencyTimeWheelPos));
+                        var cosWalkWheelPosition = wheelRadius * Math.cos(filter.degToRad(directionSign * -motion.frequencyTimeWheelPos));
                         var wheelXPos = {x: cosWalkWheelPosition, y: -sinWalkWheelPosition - yOffset, z: 0};
                         var wheelXEnd = {x: -cosWalkWheelPosition, y: sinWalkWheelPosition - yOffset, z: 0};
-                        sinWalkWheelPosition = wheelRadius * Math.sin(filter.degToRad(-directionSign * _motion.frequencyTimeWheelPos + 90));
-                        cosWalkWheelPosition = wheelRadius * Math.cos(filter.degToRad(-directionSign * _motion.frequencyTimeWheelPos + 90));
+                        sinWalkWheelPosition = wheelRadius * Math.sin(filter.degToRad(-directionSign * motion.frequencyTimeWheelPos + 90));
+                        cosWalkWheelPosition = wheelRadius * Math.cos(filter.degToRad(-directionSign * motion.frequencyTimeWheelPos + 90));
                         var wheelYPos = {x: cosWalkWheelPosition, y: sinWalkWheelPosition - yOffset, z: 0};
                         var wheelYEnd = {x: -cosWalkWheelPosition, y: -sinWalkWheelPosition - yOffset, z: 0};
 
@@ -868,11 +795,11 @@ walkTools = (function () {
 
                         // draw the frequency time turning around the x axis for walking forwards or backwards
                         var forwardModifier = 1;
-                        if (_motion.direction === BACKWARDS) forwardModifier = -1;
+                        if (motion.direction === BACKWARDS) forwardModifier = -1;
                         var yOffset = 0;//- avatar.calibration.hipsToFeet - (wheelRadius / 1.2);
 
-                        sinFTWheelPosition = wheelRadius * Math.sin(filter.degToRad(forwardModifier * _motion.frequencyTimeWheelPos));
-                        cosFTWheelPosition = wheelRadius * Math.cos(filter.degToRad(forwardModifier * _motion.frequencyTimeWheelPos));
+                        sinFTWheelPosition = wheelRadius * Math.sin(filter.degToRad(forwardModifier * motion.frequencyTimeWheelPos));
+                        cosFTWheelPosition = wheelRadius * Math.cos(filter.degToRad(forwardModifier * motion.frequencyTimeWheelPos));
 
                         var wheelYPos = {x: 0, y: sinFTWheelPosition - yOffset, z: cosFTWheelPosition};
                         var wheelYEnd = {x: 0, y: -sinFTWheelPosition - yOffset, z: -cosFTWheelPosition};
@@ -883,7 +810,7 @@ walkTools = (function () {
                         //print('wheelYPos: '+wheelYPos.y.toFixed(1)+', '+wheelYPos.z.toFixed(1));
                         //print('sinFTWheelPosition: '+sinFTWheelPosition.toFixed(1)+
                         //      ' cosFTWheelPosition '+cosFTWheelPosition.toFixed(1)+
-                        //      ' Ft wheeel: '+_motion.frequencyTimeWheelPos.toFixed(1));
+                        //      ' Ft wheeel: '+motion.frequencyTimeWheelPos.toFixed(1));
 
                         Overlays.editOverlay(_frequencyTimeWheelYLine, {position: wheelYPos, end: wheelYEnd});
                         Overlays.editOverlay(_frequencyTimeWheelZLine, {position: wheelZPos, end: wheelZEnd});
@@ -900,7 +827,7 @@ walkTools = (function () {
                         'Distance covered: ' + distanceTravelled.toFixed(3) + ' m\n' +
                         'Omega: ' + angularVelocity.toFixed(3) + ' rad / s\n' +
                         'Deg to turn: ' + degreesTurnedSinceLastFrame.toFixed(2) + ' deg\n' +
-                        'Wheel position: ' + _motion.frequencyTimeWheelPos.toFixed(1) + ' deg\n' +
+                        'Wheel position: ' + motion.frequencyTimeWheelPos.toFixed(1) + ' deg\n' +
                         'Wheel radius: ' + wheelRadius.toFixed(3) + ' m\n' +
                         'Hips To Feet: ' + avatar.calibration.hipsToFeet.toFixed(3) + ' m\n' +
                         'Stride: ' + avatar.calibration.strideLength.toFixed(3) + 'm';
@@ -915,12 +842,12 @@ walkTools = (function () {
 
                 var deltaTimeMS = deltaTime * 1000;
                 var distanceTravelled = velocity * deltaTime;
-                var angularVelocity = velocity / _motion.currentTransition.lastFrequencyTimeWheelRadius;
+                var angularVelocity = velocity / motion.currentTransition.lastFrequencyTimeWheelRadius;
 
-                if(_motion.currentTransition.progress > 0) {
+                if (motion.currentTransition.progress > 0) {
 
-                    Overlays.editOverlay(_transFTWheelYLine, {alpha: _motion.currentTransition.progress, visible: true});
-                    Overlays.editOverlay(_transFTWheelZLine, {alpha: _motion.currentTransition.progress, visible: true});
+                    Overlays.editOverlay(_transFTWheelYLine, {alpha: motion.currentTransition.progress, visible: true});
+                    Overlays.editOverlay(_transFTWheelZLine, {alpha: motion.currentTransition.progress, visible: true});
 
                 } else {
                     Overlays.editOverlay(_transFTWheelYLine, {visible: false});
@@ -932,23 +859,23 @@ walkTools = (function () {
 
                     // draw the frequency time turning around the z axis for sidestepping
                     var directionSign = 1;
-                    if (_motion.direction === RIGHT) directionSign = -1;
+                    if (motion.direction === RIGHT) directionSign = -1;
                     var yOffset = avatar.calibration.hipsToFeet -
-                                 (_motion.currentTransition.lastFrequencyTimeWheelRadius / 1.2);
-                    var sinWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                                 (motion.currentTransition.lastFrequencyTimeWheelRadius / 1.2);
+                    var sinWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                                Math.sin(filter.degToRad(directionSign *
-                                               _motion.currentTransition.lastFrequencyTimeWheelPos));
-                    var cosWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                                               motion.currentTransition.lastFrequencyTimeWheelPos));
+                    var cosWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                                Math.cos(filter.degToRad(directionSign *
                                                -motion.currentTransition.lastFrequencyTimeWheelPos));
                     var wheelXPos = {x: cosWalkWheelPosition, y: -sinWalkWheelPosition - yOffset, z: 0};
                     var wheelXEnd = { x: -cosWalkWheelPosition, y: sinWalkWheelPosition - yOffset, z: 0};
-                    sinWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                    sinWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                            Math.sin(filter.degToRad(-directionSign *
-                                           _motion.currentTransition.lastFrequencyTimeWheelPos + 90));
-                    cosWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                                           motion.currentTransition.lastFrequencyTimeWheelPos + 90));
+                    cosWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                            Math.cos(filter.degToRad(-directionSign *
-                                           _motion.currentTransition.lastFrequencyTimeWheelPos + 90));
+                                           motion.currentTransition.lastFrequencyTimeWheelPos + 90));
                     var wheelYPos = {x: cosWalkWheelPosition, y: sinWalkWheelPosition - yOffset, z: 0};
                     var wheelYEnd = {x: -cosWalkWheelPosition, y: -sinWalkWheelPosition - yOffset, z: 0};
 
@@ -959,23 +886,23 @@ walkTools = (function () {
 
                     // draw the frequency time turning around the x axis for walking forwards or backwards
                     var forwardModifier = 1;
-                    if (_motion.direction === BACKWARDS) forwardModifier = -1;
+                    if (motion.direction === BACKWARDS) forwardModifier = -1;
                     var yOffset = 0;//avatar.calibration.hipsToFeet -
-                                 //(_motion.currentTransition.lastFrequencyTimeWheelRadius / 1.2);
-                    var sinWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                                 //(motion.currentTransition.lastFrequencyTimeWheelRadius / 1.2);
+                    var sinWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                                Math.sin(filter.degToRad((forwardModifier * -1) *
-                                               _motion.currentTransition.lastFrequencyTimeWheelPos));
-                    var cosWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                                               motion.currentTransition.lastFrequencyTimeWheelPos));
+                    var cosWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                                Math.cos(filter.degToRad((forwardModifier * -1) *
-                                               -_motion.currentTransition.lastFrequencyTimeWheelPos));
+                                               -motion.currentTransition.lastFrequencyTimeWheelPos));
                     var wheelZPos = {x: 0, y: -sinWalkWheelPosition - yOffset, z: cosWalkWheelPosition};
                     var wheelZEnd = {x: 0, y: sinWalkWheelPosition - yOffset, z: -cosWalkWheelPosition};
-                    sinWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                    sinWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                            Math.sin(filter.degToRad(forwardModifier *
-                                           _motion.currentTransition.lastFrequencyTimeWheelPos + 90));
-                    cosWalkWheelPosition = _motion.currentTransition.lastFrequencyTimeWheelRadius *
+                                           motion.currentTransition.lastFrequencyTimeWheelPos + 90));
+                    cosWalkWheelPosition = motion.currentTransition.lastFrequencyTimeWheelRadius *
                                            Math.cos(filter.degToRad(forwardModifier *
-                                           _motion.currentTransition.lastFrequencyTimeWheelPos + 90));
+                                           motion.currentTransition.lastFrequencyTimeWheelPos + 90));
                     var wheelYPos = {x: 0, y: sinWalkWheelPosition - yOffset, z: cosWalkWheelPosition};
                     var wheelYEnd = {x: 0, y: -sinWalkWheelPosition - yOffset, z: -cosWalkWheelPosition};
 

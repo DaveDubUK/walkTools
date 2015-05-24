@@ -3,7 +3,7 @@
 //
 //  Created by David Wooldridge, Autumn 2014
 //
-//  Procedural animation datafile - use with walk.js version 1.2
+//  Procedural animation datafile - use with walk.js version 1.2+
 //
 //  Saved animation file containing all the settings, properties and joint details to animate a High Fidelity character
 //

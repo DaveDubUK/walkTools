@@ -1,5 +1,5 @@
 //
-//  dd-male-idle-animation.js
+//  dd-male-fly-backwards-animation.js
 //
 //  Created by David Wooldridge, Autumn 2014
 //
@@ -11,13 +11,13 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-MaleIdle = function() {
+MaleFlyBackwards = function() {
 
-    this.name = "MaleIdle";
+    this.name = "MaleFlyBackwards";
 
     this.calibration = {
 
-        "frequency":1.4
+        "frequency":0.5
     };
 
     this.filters = {};
@@ -31,18 +31,18 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-45,
             "yawOffset":0,
             "rollOffset":0,
-            "sway":0,
-            "bob":0,
             "thrust":0,
-            "swayPhase":0,
-            "bobPhase":0,
+            "bob":0,
+            "sway":0,
             "thrustPhase":0,
-            "swayOffset":0,
+            "bobPhase":0,
+            "swayPhase":0,
+            "thrustOffset":0,
             "bobOffset":0,
-            "thrustOffset":0
+            "swayOffset":0
         },
         "LeftUpLeg":{
             "pitch":0,
@@ -51,9 +51,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0.22642,
-            "yawOffset":-0.5283,
-            "rollOffset":1.43396
+            "pitchOffset":64.5,
+            "yawOffset":-20,
+            "rollOffset":-9
         },
         "RightUpLeg":{
             "pitch":0,
@@ -62,9 +62,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0.22642,
-            "yawOffset":0.5283,
-            "rollOffset":-1.43396
+            "pitchOffset":64,
+            "yawOffset":20,
+            "rollOffset":9
         },
         "LeftLeg":{
             "pitch":0,
@@ -73,9 +73,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-14.26415,
             "yawOffset":0,
-            "rollOffset":-0.67925
+            "rollOffset":0.07547
         },
         "RightLeg":{
             "pitch":0,
@@ -84,9 +84,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-19.69811,
             "yawOffset":0,
-            "rollOffset":0.67925
+            "rollOffset":0.08
         },
         "LeftFoot":{
             "pitch":0,
@@ -95,9 +95,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-2.03774,
-            "yawOffset":1.69811,
-            "rollOffset":-1.69811
+            "pitchOffset":-49.58491,
+            "yawOffset":0,
+            "rollOffset":0
         },
         "RightFoot":{
             "pitch":0,
@@ -106,9 +106,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-2.03774,
-            "yawOffset":-1.69811,
-            "rollOffset":1.69811
+            "pitchOffset":-49.58491,
+            "yawOffset":0,
+            "rollOffset":0
         },
         "LeftToeBase":{
             "pitch":0,
@@ -119,7 +119,7 @@ MaleIdle = function() {
             "rollPhase":0,
             "pitchOffset":0,
             "yawOffset":0,
-            "rollOffset":0.22642
+            "rollOffset":0
         },
         "RightToeBase":{
             "pitch":0,
@@ -130,16 +130,16 @@ MaleIdle = function() {
             "rollPhase":0,
             "pitchOffset":0,
             "yawOffset":0,
-            "rollOffset":-0.22642
+            "rollOffset":0
         },
         "Spine":{
             "pitch":0,
             "yaw":0,
             "roll":0,
-            "pitchPhase":0,
+            "pitchPhase":-180,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":30.90566,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -150,18 +150,18 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":4.75472,
             "yawOffset":0,
             "rollOffset":0
         },
         "Spine2":{
-            "pitch":0,
+            "pitch":0.22642,
             "yaw":0,
             "roll":0,
-            "pitchPhase":0,
+            "pitchPhase":-0.67925,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-3.73585,
+            "pitchOffset":16.98113,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -172,9 +172,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-0.67925,
-            "yawOffset":0,
-            "rollOffset":0
+            "pitchOffset":0,
+            "yawOffset":-6.11321,
+            "rollOffset":11.54717
         },
         "RightShoulder":{
             "pitch":0,
@@ -183,53 +183,53 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-0.67925,
-            "yawOffset":0,
-            "rollOffset":18.33962
+            "pitchOffset":0,
+            "yawOffset":6.11321,
+            "rollOffset":-11.54717
         },
         "LeftArm":{
-            "pitch":0,
+            "pitch":0.67925,
             "yaw":0,
             "roll":0,
             "pitchPhase":0,
             "yawPhase":0,
-            "rollPhase":-0.67925,
-            "pitchOffset":80.83019,
-            "yawOffset":-3.39623,
-            "rollOffset":8.83019
+            "rollPhase":0,
+            "pitchOffset":-12.90566,
+            "yawOffset":-26.49057,
+            "rollOffset":57.73585
         },
         "RightArm":{
-            "pitch":0,
+            "pitch":0.67925,
             "yaw":0,
             "roll":0,
-            "pitchPhase":0,
+            "pitchPhase":133.81132,
             "yawPhase":0,
-            "rollPhase":-0.67925,
-            "pitchOffset":80.83019,
-            "yawOffset":3.39623,
-            "rollOffset":-8.83019
+            "rollPhase":0,
+            "pitchOffset":-12.90566,
+            "yawOffset":26.49057,
+            "rollOffset":-57.73585
         },
         "LeftForeArm":{
             "pitch":0,
             "yaw":0,
             "roll":0,
             "pitchPhase":0,
-            "yawPhase":0,
+            "yawPhase":90.33962,
             "rollPhase":0,
-            "pitchOffset":3.39623,
-            "yawOffset":2.03774,
-            "rollOffset":11.54717
+            "pitchOffset":0.67925,
+            "yawOffset":38.71698,
+            "rollOffset":2.03774
         },
         "RightForeArm":{
             "pitch":0,
             "yaw":0,
             "roll":0,
             "pitchPhase":0,
-            "yawPhase":0,
+            "yawPhase":90.33962,
             "rollPhase":0,
-            "pitchOffset":3.39623,
-            "yawOffset":-2.03774,
-            "rollOffset":-11.54717
+            "pitchOffset":0.67925,
+            "yawOffset":-38.71698,
+            "rollOffset":2.03774
         },
         "LeftHand":{
             "pitch":0,
@@ -238,8 +238,8 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
-            "yawOffset":10.18868,
+            "pitchOffset":-15.62264,
+            "yawOffset":-29.20755,
             "rollOffset":0
         },
         "RightHand":{
@@ -249,8 +249,8 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
-            "yawOffset":-10.18868,
+            "pitchOffset":-15.62264,
+            "yawOffset":29.20755,
             "rollOffset":0
         },
         "Neck":{

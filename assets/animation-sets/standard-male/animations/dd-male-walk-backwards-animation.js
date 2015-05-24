@@ -96,32 +96,32 @@ MaleWalkBackwards = function(filter) {
             "rollOffset":-0.07547
         },
         "LeftFoot":{
-            "pitch":24.79245,
+            "pitch":18.33962,
             "yaw":1.43396,
             "roll":3.62264,
             "pitchPhase":-180,
             "yawPhase":40.50384,
             "rollPhase":27.60384,
             "pitchOffset":6.11321,
-            "yawOffset":8.86792,
-            "rollOffset":8.11321
+            "yawOffset":8.83019,
+            "rollOffset":-2.03774
         },
         "RightFoot":{
-            "pitch":24.79245,
+            "pitch":18.33962,
             "yaw":1.43396,
             "roll":3.62264,
             "pitchPhase":0,
             "yawPhase":40.50384,
             "rollPhase":27.60384,
             "pitchOffset":6.11321,
-            "yawOffset":-8.86792,
-            "rollOffset":-8.11321
+            "yawOffset":-8.83019,
+            "rollOffset":2.03774
         },
         "LeftToeBase":{
-            "pitch":-13.92453,
+            "pitch":7.4717,
             "yaw":2,
             "roll":0,
-            "pitchPhase":166.84912,
+            "pitchPhase":-13.15088,
             "yawPhase":-23.79616,
             "rollPhase":-49.49616,
             "pitchOffset":9.84906,
@@ -129,7 +129,7 @@ MaleWalkBackwards = function(filter) {
             "rollOffset":0
         },
         "RightToeBase":{
-            "pitch":13.92453,
+            "pitch":7.4717,
             "yaw":2,
             "roll":0,
             "pitchPhase":166.84912,
@@ -185,7 +185,7 @@ MaleWalkBackwards = function(filter) {
             "rollPhase":27.60384,
             "pitchOffset":6.11321,
             "yawOffset":26.49057,
-            "rollOffset":-12
+            "rollOffset":-4.75472
         },
         "RightShoulder":{
             "pitch":1.2,
@@ -196,28 +196,28 @@ MaleWalkBackwards = function(filter) {
             "rollPhase":27.60384,
             "pitchOffset":6.11321,
             "yawOffset":-26.49057,
-            "rollOffset":12
+            "rollOffset":4.75472
         },
         "LeftArm":{
             "pitch":1.35849,
-            "yaw":18,
+            "yaw":34.64151,
             "roll":0,
             "pitchPhase":-34.79233,
             "yawPhase":27.60384,
             "rollPhase":75.83026,
-            "pitchOffset":64.5283,
+            "pitchOffset":57.73585,
             "yawOffset":-25.13208,
             "rollOffset":8.83019,
             "pitchFrequencyMultiplier":2
         },
         "RightArm":{
             "pitch":1.35849,
-            "yaw":18,
+            "yaw":34.64151,
             "roll":0,
             "pitchPhase":-34.79233,
             "yawPhase":27.60384,
             "rollPhase":75.83026,
-            "pitchOffset":64.5283,
+            "pitchOffset":57.73585,
             "yawOffset":25.13208,
             "rollOffset":-8.83019,
             "pitchFrequencyMultiplier":2

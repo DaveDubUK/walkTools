@@ -239,6 +239,7 @@ Motion = function() {
             this.isMoving = false;
             this.isWalkingSpeed = false;
             this.isFlyingSpeed = false;
+            this.isComingToHalt = false;
         } else if (Vec3.length(this.velocity) < MAX_WALK_SPEED) {
             this.isMoving = true;
             this.isWalkingSpeed = true;
@@ -315,17 +316,7 @@ Motion = function() {
                     this.nextState = AIR_MOTION;
                 }
                 break;
-        } /*print ('state "'+walkTools.stateAsString(this.nextState)+
-                '" isMoving '+this.isMoving+
-                ' surfaceMotion '+surfaceMotion+
-                ' isOnSurface '+isOnSurface+
-                ' isComingToHalt '+motion.isComingToHalt+
-                //' avatar.distanceFromGround '+avatar.distanceFromSurface.toFixed(4)+
-                ' acceleration: '+Vec3.length(this.acceleration).toFixed(2)+
-                ', '+this.acceleration.x.toFixed(2)+
-                ', '+this.acceleration.y.toFixed(2)+
-                ' '+this.acceleration.z.toFixed(2)+
-                ' direction '+walkTools.directionAsString(motion.direction));*/
+        }
     }
 
     // frequency time wheel (foot / ground speed matching)
@@ -637,17 +628,17 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     this.progress = 0; // how far are we through the transition?
     this.filteredProgress = 0;
 
-    // coming to a halt whilst walking? if so, will need to complete the current walk half-cycle for a clean stop
+    // coming to a halt whilst walking? if so, will need a clean stopping point defined
     if (motion.isComingToHalt) {
         var FULL_CYCLE = 360;
         var FULL_CYCLE_THRESHOLD = 320;
         var HALF_CYCLE = 180;
         var HALF_CYCLE_THRESHOLD = 140;
-        var degreesToTurn = 0;
+        var CYCLE_COMMIT_THRESHOLD = 5;
 
         // how many degrees do we need to turn the walk wheel to finish walking with both feet on the ground?
-        if (this.lastElapsedFTDegrees < 10) {
-            // just stop the walk cycle here and blend to idle
+        if (this.lastElapsedFTDegrees < CYCLE_COMMIT_THRESHOLD) {
+            // just stop the walk cycle right here and blend to idle
             this.degreesToTurn = 0;
         } else if (this.lastElapsedFTDegrees < HALF_CYCLE) {
             // we have not taken a complete step yet, so we advance to the second stop angle
@@ -665,6 +656,16 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
             // complete the step and the next then stop at 180
             this.degreesToTurn = FULL_CYCLE - this.lastFrequencyTimeWheelPos + HALF_CYCLE;
         }
+        
+        // transition length in this case should be directly proportional to the remaining degrees to turn
+        var MIN_FT_INCREMENT = 5.0; // degrees per frame
+        var MIN_TRANSITION_DURATION = 0.4;
+        this.lastFrequencyTimeIncrement *= 0.66; // help ease the transition
+        var lastFrequencyTimeIncrement = this.lastFrequencyTimeIncrement > MIN_FT_INCREMENT ?
+                                         this.lastFrequencyTimeIncrement : MIN_FT_INCREMENT;
+        var timeToFinish = Math.max(motion.deltaTime * this.degreesToTurn / lastFrequencyTimeIncrement, 
+                                    MIN_TRANSITION_DURATION);
+        this.parameters.duration = timeToFinish;
         this.degreesRemaining = this.degreesToTurn;
     }
 
@@ -707,8 +708,9 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                         this.lastFrequencyTimeWheelPos = 180;
                     }
                 }
+                print('finished walk cycle cleanly');
             } else {
-                wheelAdvance = 5;
+                wheelAdvance = this.lastFrequencyTimeIncrement;
                 var distanceToTravel = avatar.calibration.strideLength * wheelAdvance / 180;
                 if (this.degreesRemaining <= 0) {
                     distanceToTravel = 0;
@@ -862,9 +864,10 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     };
 
     this.die = function() {
-        if (motion.isComingToHalt) {
-            motion.isComingToHalt = false;
-        }
+        print('transition dying');
+        //if (motion.isComingToHalt) {
+        //    motion.isComingToHalt = false;
+        //}
     };
 }; // end Transition constructor
 

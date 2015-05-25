@@ -25,7 +25,7 @@ transitionParameterData = (function() {
                         duration: 1.25,
                         easingLower: {x:0.0, y:1.0},
                         easingUpper: {x:0.0, y:1.0},
-                        //reachPoseNames: ["MaleIdleToWalkRP", "MaleIdleToWalk2RP", "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
+                        reachPoseNames: ["MaleIdleToWalkRP", "MaleIdleToWalk2RP", "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
                     },
 
                     "FlyBlend": {
@@ -55,7 +55,7 @@ transitionParameterData = (function() {
             "WalkBlend": {
                 nextAnimation: {
                     "MaleIdle": {
-                        duration: 0.4,
+                        duration: 1.5,
                         easingLower: {x:0.35, y:0.0},
                         easingUpper: {x:0.0, y:1.0}
                     },

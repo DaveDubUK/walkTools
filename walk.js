@@ -51,8 +51,8 @@ var MAX_TRANSITION_RECURSION = 10; // how many nested transitions are permitted
 var TRANSITION_COMPLETE = 1000;
 
 // path to animations, reach-poses, reachPoses, transitions, overlay images and reference files
-//var pathToAssets = 'http://s3.amazonaws.com/hifi-public/procedural-animator/assets/';
-var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+var pathToAssets = 'http://s3.amazonaws.com/hifi-public/procedural-animator/assets/';
+//var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
 
 // load filters (Bezier, Butterworth, harmonics, averaging)
 Script.include("./libraries/walkFilters.js");
@@ -70,7 +70,7 @@ var avatar = new Avatar();
 var motion = new Motion();
 
 // create UI
-//Script.include("./libraries/walkInterface.js");
+Script.include("./libraries/walkInterface.js");
 
 /////////////////////////////////////////////
 //
@@ -230,11 +230,12 @@ if (!walkTools.editMode()) {
                     break;
             }
 
-            // walk transition reachPoses are currently only specified for walking forwards
+            // walk transition reach poses are currently only specified for starting to walk forwards
             playTransitionReachPoses = !(motion.direction !== FORWARDS);
             
             // always set the transition before changing the state to allow new transition to save current animation state    
-            if (avatar.currentAnimation !== avatar.selectedWalkBlend) {
+            if (avatar.currentAnimation !== avatar.selectedWalkBlend && !motion.isComingToHalt) {
+                print('Current animation is '+avatar.currentAnimation.name+' but avatar.selectedWalkBlend is '+avatar.selectedWalkBlend.name);
                 setTransition(avatar.selectedWalkBlend, playTransitionReachPoses);
             }
             if (motion.state !== SURFACE_MOTION) {

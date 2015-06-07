@@ -5,7 +5,7 @@
 //  Created by David Wooldridge, May 2015
 //
 //  Animates an avatar using procedural animation techniques
-// 
+//
 //  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
 //
 //  Distributed under the Apache License, Version 2.0.
@@ -45,7 +45,7 @@ var LANDING_THRESHOLD = 0.45; // metres from a surface below which need to prepa
 var ON_SURFACE_THRESHOLD = 0.1; // height above surface to be considered as on the surface
 var MAX_TRANSITION_RECURSION = 10; // how many nested transitions are permitted
 var TRANSITION_COMPLETE = 1000;
-var HIFI_PUBLIC_BUCKET = "http://s3.amazonaws.com/hifi-public/";
+var HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
 
 // check for existence of data file object property
 function isDefined(value) {
@@ -57,9 +57,8 @@ function isDefined(value) {
 }
 
 // path to animations, reach-poses, reachPoses, transitions, overlay images and reference files
-//var pathToAssets = 'https://hifi-public.s3.amazonaws.com/procedural-animator/assets/';
-//var pathToAssets = HIFI_PUBLIC_BUCKET +procedural-animator/assets/';
-var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+var pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/beta/assets/";
+//var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
 
 // load filters (Bezier, Butterworth, harmonics, averaging)
 Script.include("./libraries/walkFilters.js");
@@ -85,11 +84,12 @@ var motion = new Motion();
 //
 // extra vars
 var oscilloscope = null;
+var bezierCurveEditor = null;
 var EDIT = 8; // extra locomotion state
 // walkTools core
 Script.include("./libraries/walkToolsInterface.js");
 Script.include('./libraries/walkTools.js');
-//Script.include("./libraries/walkToolsPropertyDialogBox.js"); 
+//Script.include("./libraries/walkToolsPropertyDialogBox.js");
 //walkToolsPropertyDialogBox = WalkToolsPropertyDialogBox();
 //walkTools addons
 Script.include("./libraries/walkToolsGrid.js");
@@ -121,19 +121,19 @@ var flyBackwardFilter = filter.createAveragingFilter(FLY_POSE_DAMPING);
 // Main loop
 Script.update.connect(function(deltaTime) {
 
-    if (motion.isLive) { 
+    if (motion.isLive) {
         /////////////////////////////////////////////
         //
         // walkTools - REMOVE_FOR_RELEASE ...
         //
-        if (walkTools) walkTools.beginProfiling(deltaTime);           
-        
+        if (walkTools) walkTools.beginProfiling(deltaTime);
+
         // assess current locomotion state
         motion.assess(deltaTime);
 
         // decide which animation should be playing
         selectAnimation();
-        
+
         // turn the frequency time wheels and determine stride length
         determineStride();
 
@@ -145,14 +145,14 @@ Script.update.connect(function(deltaTime) {
 
         // record this frame's parameters for future reference
         motion.saveHistory();
-        
+
         // REMOVE_FOR_RELEASE
         if (oscilloscope) oscilloscope.updateScopeTrace(scopeProbe1, scopeProbe2, scopeProbe3);
         if (walkTools) walkTools.updateStats();
         //
         // ... / load walkTools - REMOVE_FOR_RELEASE
         //
-        ////////////////////////////////////////////        
+        ////////////////////////////////////////////
     }
 });
 
@@ -188,10 +188,10 @@ if (!walkTools.isInEditMode()) {
     switch (motion.nextState) {
         case STATIC: {
             // always set the transition before changing the state to allow new transition to save current animation first
-            if (avatar.distanceFromSurface < ON_SURFACE_THRESHOLD && 
-                    avatar.currentAnimation !== avatar.selectedIdle) { 
+            if (avatar.distanceFromSurface < ON_SURFACE_THRESHOLD &&
+                    avatar.currentAnimation !== avatar.selectedIdle) {
                 setTransition(avatar.selectedIdle, playTransitionReachPoses);
-            } else if (!(avatar.distanceFromSurface < ON_SURFACE_THRESHOLD) && 
+            } else if (!(avatar.distanceFromSurface < ON_SURFACE_THRESHOLD) &&
                          avatar.currentAnimation !== avatar.selectedHover) {
                 setTransition(avatar.selectedHover, playTransitionReachPoses);
             }
@@ -227,8 +227,8 @@ if (!walkTools.isInEditMode()) {
 
             // walk transition reach poses are currently only specified for starting to walk forwards
             playTransitionReachPoses = !(motion.direction !== FORWARDS);
-            
-            // always set the transition before changing the state to allow new transition to save current animation state    
+
+            // always set the transition before changing the state to allow new transition to save current animation state
             if (avatar.currentAnimation !== avatar.selectedWalkBlend && !motion.isComingToHalt) {
                 setTransition(avatar.selectedWalkBlend, playTransitionReachPoses);
             }
@@ -247,20 +247,20 @@ if (!walkTools.isInEditMode()) {
             var velocityMagnitude = Vec3.length(motion.velocity);
             var verticalProportion = motion.velocity.y / velocityMagnitude;
             var thrustProportion = motion.velocity.z / velocityMagnitude / 2;
-            
+
             // directional and hover components
             var upComponent = motion.velocity.y > 0 ? verticalProportion : 0;
             var downComponent = motion.velocity.y < 0 ? -verticalProportion : 0;
             var forwardComponent = motion.velocity.z < 0 ? -thrustProportion : 0;
             var backwardComponent = motion.velocity.z > 0 ? thrustProportion : 0;
-            var hoverComponent = velocityMagnitude < MAX_WALK_SPEED ? 
+            var hoverComponent = velocityMagnitude < MAX_WALK_SPEED ?
                                 (MAX_WALK_SPEED - velocityMagnitude) / MAX_WALK_SPEED : 0;
-                                
+
             // smooth / damp directional components to add visual 'weight''
             upComponent = flyUpFilter.process(upComponent);
             downComponent = flyDownFilter.process(downComponent);
             forwardComponent = flyForwardFilter.process(forwardComponent);
-            backwardComponent = flyBackwardFilter.process(backwardComponent);            
+            backwardComponent = flyBackwardFilter.process(backwardComponent);
 
             // normalise directional components. blend influence / strength with hover component
             var normaliser = upComponent + downComponent + forwardComponent + backwardComponent;
@@ -268,7 +268,7 @@ if (!walkTools.isInEditMode()) {
             downComponent = (1 - hoverComponent) * downComponent / normaliser;
             forwardComponent = (1 - hoverComponent) * forwardComponent / normaliser;
             backwardComponent = (1 - hoverComponent) * backwardComponent / normaliser;
-            
+
             // blend animations proportionally
             if (upComponent > 0) {
                 animationOperations.blendAnimation(avatar.selectedFlyUp,
@@ -306,7 +306,7 @@ if (!walkTools.isInEditMode()) {
             break;
         }
     } // end switch next state of motion
-} // / walkTools - REMOVE_FOR_RELEASE - not possible to edit in release version    
+} // / walkTools - REMOVE_FOR_RELEASE - not possible to edit in release version
 }
 
 // determine the length of stride. advance the frequency time wheels. advance frequency time wheels for any live transitions
@@ -325,13 +325,13 @@ function determineStride() {
 
         // calculate the degrees turned (at this angular speed) since last frame
         wheelAdvance = filter.radToDeg(motion.deltaTime * angularVelocity);
-        
+
         // walkTools - show stats and walk wheel - REMOVE_FOR_RELEASE
-        if (walkTools) walkTools.updateFrequencyTimeWheelStats(motion.deltaTime, speed, motion.frequencyTimeWheelRadius, wheelAdvance);        
+        if (walkTools) walkTools.updateFrequencyTimeWheelStats(motion.deltaTime, speed, motion.frequencyTimeWheelRadius, wheelAdvance);
     } else {
         // turn the frequency time wheel by the amount specified for this animation
         wheelAdvance = filter.radToDeg(avatar.currentAnimation.calibration.frequency * motion.deltaTime);
-        
+
         // walkTools - show stats and walk wheel - REMOVE_FOR_RELEASE
         if (walkTools) walkTools.updateFrequencyTimeWheelStats(motion.deltaTime, Vec3.length(motion.velocity), 0.5, wheelAdvance);
     }
@@ -357,14 +357,14 @@ function determineStride() {
             motion.frequencyTimeWheelPos = walkTools.cyclePosition;
         }
     } else
-        
+
     // advance the walk wheel the appropriate amount
     motion.advanceFrequencyTimeWheel(wheelAdvance);
 
     // walking? then see if it's a good time to measure the stride length (needs to be at least 97% of max walking speed)
-    if (avatar.currentAnimation === avatar.selectedWalkBlend && 
+    if (avatar.currentAnimation === avatar.selectedWalkBlend &&
        (Vec3.length(motion.velocity) / MAX_WALK_SPEED > 0.97)) {
-        
+
         var strideMaxAt = avatar.currentAnimation.calibration.strideMaxAt;
         var tolerance = 1.0;
 
@@ -415,7 +415,7 @@ function getLeanPitch() {
         motion.direction === BACKWARDS) {
         leanProgress = -motion.velocity.z / TOP_SPEED;
     }
-    
+
     // use filters to shape the walking acceleration response
     leanProgress = leanPitchSmoothingFilter.process(leanProgress);
     return motion.calibration.pitchMax * leanProgress;
@@ -500,7 +500,7 @@ function renderMotion() {
     }
     if (producingFootstepSounds) {
         var ftWheelPosition = motion.frequencyTimeWheelPos;
-        if (motion.currentTransition !== nullTransition && 
+        if (motion.currentTransition !== nullTransition &&
             motion.currentTransition.lastAnimation === avatar.selectedWalkBlend) {
             ftWheelPosition = motion.currentTransition.lastFrequencyTimeWheelPos;
         }

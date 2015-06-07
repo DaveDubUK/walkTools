@@ -29,7 +29,7 @@ walkAssets = (function () {
     Script.include(pathToAssets + _animationSetPath + "animations/dd-male-idle-animation.js");
     Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-animation.js");
     Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-backwards-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-up-animation.js");    
+    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-up-animation.js");
     Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-down-animation.js");
     Script.include(pathToAssets + _animationSetPath + "animations/dd-male-hover-animation.js");
     Script.include(pathToAssets + _animationSetPath + "animations/dd-male-sidestep-left-animation.js");
@@ -61,7 +61,7 @@ walkAssets = (function () {
     _animations.push(new MaleWalkBackwards());
     _animations.push(new MaleSideStepLeft());
     _animations.push(new MaleSideStepRight());
-    _animations.push(new MaleIdle());    
+    _animations.push(new MaleIdle());
     _animations.push(new MaleFly());
     _animations.push(new MaleFlyBackwards());
     _animations.push(new MaleFlyDown());
@@ -87,10 +87,10 @@ walkAssets = (function () {
     return {
         // expose the sounds
         footsteps: _footsteps,
-        
+
         // expose the animation reference
         animationReference: _animationReference,
-        
+
         // populates passed transitionParameters object with any situation specific params from transition-parameters.js
         getTransitionParameters: function(lastAnimation, nextAnimation, transitionParameters) {
             transitionParameterData.fetch(lastAnimation, nextAnimation, transitionParameters);
@@ -125,8 +125,8 @@ walkAssets = (function () {
             }
             return undefined;
         },
-        
-        // walkTools - REMOVE_FOR_RELEASE - return array containing names of all animations and reach poses
+
+        // for walkTools only - return array containing names of all animations and reach poses
         getAnimationNamesAsArray: function() {
             var allAnimations = [];
             for (animation in _animations) {
@@ -136,6 +136,6 @@ walkAssets = (function () {
                 allAnimations.push(_reachPoseDataFiles[pose].name);
             }
             return allAnimations;
-        }       
+        }
     }
 })();

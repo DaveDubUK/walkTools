@@ -1,6 +1,5 @@
 //
 //  walkInterface.js
-//
 //  version 2.0
 //
 //  Created by David Wooldridge, Autumn 2014
@@ -20,13 +19,9 @@ walkInterface = (function() {
     var _backgroundY = Window.innerHeight / 2 - _backgroundHeight / 2;
     var _bigButtonsY = 418;
 
-    // Load up the overlays
-    var _buttonOverlays = [];
-
     // ui minimised tab
     var _controlsMinimisedTab = Overlays.addOverlay("image", {
-        x: Window.innerWidth - 58,
-        y: Window.innerHeight - 145,
+        x: Window.innerWidth - 58, y: Window.innerHeight - 145,
         width: 50, height: 50,
         imageURL: pathToAssets + 'overlay-images/ddpa-minimised-ddpa-tab.png',
         visible: true, alpha: 0.9
@@ -34,94 +29,71 @@ walkInterface = (function() {
 
     // ui background
     var _controlsBackground = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX,
-            y: _backgroundY,
-            width: _backgroundWidth,
-            height: _backgroundHeight
-        },
+        x: _backgroundX, y: _backgroundY,
+        width: _backgroundWidth, height: _backgroundHeight,
         imageURL: pathToAssets + "overlay-images/ddpa-background.png",
         alpha: 1, visible: false
     });
 
     // button overlays
+    var _buttonOverlays = [];
     var _controlsMinimiseButton = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX + _backgroundWidth - 62,
-            y: _backgroundY + 40,
-            width: 25, height: 25
-        },
+        x: _backgroundX + _backgroundWidth - 62, y: _backgroundY + 40,
+        width: 25, height: 25,
         imageURL: pathToAssets + "overlay-images/ddpa-minimise-button.png",
         alpha: 1, visible: false
     });
     _buttonOverlays.push(_controlsMinimiseButton);
 
     var _onButton = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX + _backgroundWidth / 2 - 115,
-            y: _backgroundY + _bigButtonsY,
-            width: 230, height: 36
-        },
+        x: _backgroundX + _backgroundWidth / 2 - 115, y: _backgroundY + _bigButtonsY,
+        width: 230, height: 36,
         imageURL: pathToAssets + "overlay-images/ddpa-power-button-selected.png",
         alpha: 1, visible: false
     });
     _buttonOverlays.push(_onButton);
 
     var _offButton = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX + _backgroundWidth / 2 - 115,
-            y: _backgroundY + _bigButtonsY,
-            width: 230, height: 36
-        },
+        x: _backgroundX + _backgroundWidth / 2 - 115, y: _backgroundY + _bigButtonsY,
+        width: 230, height: 36,
         imageURL: pathToAssets + "overlay-images/ddpa-power-button.png",
         alpha: 1, visible: false
     });
     _buttonOverlays.push(_offButton);
 
     var _armsFreeButton = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX + _backgroundWidth / 2 - 115,
-            y: _backgroundY + _bigButtonsY + 75,
-            width: 230, height: 36
-        },
+        x: _backgroundX + _backgroundWidth / 2 - 115, y: _backgroundY + _bigButtonsY + 75,
+        width: 230, height: 36,
         imageURL: pathToAssets + "overlay-images/ddpa-arms-free-button.png",
         alpha: 1, visible: false
     });
     _buttonOverlays.push(_armsFreeButton);
 
     var _armsFreeButtonSelected = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX + _backgroundWidth / 2 - 115,
-            y: _backgroundY + _bigButtonsY + 75,
-            width: 230, height: 36
-        },
+        x: _backgroundX + _backgroundWidth / 2 - 115, y: _backgroundY + _bigButtonsY + 75,
+        width: 230, height: 36,
         imageURL: pathToAssets + "overlay-images/ddpa-arms-free-button-selected.png",
         alpha: 1, visible: false
     });
     _buttonOverlays.push(_armsFreeButtonSelected);
 
     var _footstepsButton = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX + _backgroundWidth / 2 - 115,
-            y: _backgroundY + _bigButtonsY + 150,
-            width: 230, height: 36
-        },
+        x: _backgroundX + _backgroundWidth / 2 - 115, y: _backgroundY + _bigButtonsY + 150,
+        width: 230, height: 36,
         imageURL: pathToAssets + "overlay-images/ddpa-footstep-sounds-button.png",
         alpha: 1, visible: false
     });
     _buttonOverlays.push(_footstepsButton);
 
     var _footstepsButtonSelected = Overlays.addOverlay("image", {
-        bounds: {
-            x: _backgroundX + _backgroundWidth / 2 - 115,
-            y: _backgroundY + _bigButtonsY + 150,
-            width: 230, height: 36
-        },
+        x: _backgroundX + _backgroundWidth / 2 - 115, y: _backgroundY + _bigButtonsY + 150,
+        width: 230, height: 36,
         imageURL: pathToAssets + "overlay-images/ddpa-footstep-sounds-button-selected.png",
         alpha: 1, visible: false
     });
     _buttonOverlays.push(_footstepsButtonSelected);
 
+    // UI handling
     function minimiseDialog(minimise) {
         Overlays.editOverlay(_controlsBackground, {visible: !minimise});
         Overlays.editOverlay(_controlsMinimisedTab, {visible: minimise});
@@ -150,10 +122,9 @@ walkInterface = (function() {
         }
     };
 
-    // mouse event handler
     function mousePressEvent(event) {
 
-        switch (Overlays.getOverlayAtPoint({x: event.x, y: event.y})) {
+        switch (Overlays.getOverlayAtPoint(event)) {
             case _controlsMinimiseButton:
                 minimiseDialog(true);
                 motion.state = STATIC;
@@ -204,22 +175,21 @@ walkInterface = (function() {
                 return;
         }
     };
-
-    //Controller.keyPressEvent.connect(keyPressEvent);
     Controller.mousePressEvent.connect(mousePressEvent);
 
     Script.update.connect(function(deltaTime) {
-        // make sure the minimise tab / button stays in place
-        Overlays.editOverlay(_controlsMinimisedTab, {x: Window.innerWidth - 58, y: Window.innerHeight - 145});
+        // if the window size has changed, we need to reposition the minimise tab
+        if (Window.innerWidth !== _backgroundX - _backgroundWidth - 58){ 
+            Overlays.editOverlay(_controlsMinimisedTab, {x: Window.innerWidth - 58, y: Window.innerHeight - 145});
+        } // REMOVE_FOR_RELEASE - if condition is untested
     });
 
     // delete overlays on script ending
     Script.scriptEnding.connect(function() {
-        // delete overlays
         Overlays.deleteOverlay(_controlsBackground);
         Overlays.deleteOverlay(_controlsMinimisedTab);
-        for (var i in _buttonOverlays) {
-            Overlays.deleteOverlay(_buttonOverlays[i]);
+        for (var buttonOverlay in _buttonOverlays) {
+            Overlays.deleteOverlay(_buttonOverlays[buttonOverlay]);
         }
     });
 })();

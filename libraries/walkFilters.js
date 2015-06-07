@@ -1,6 +1,5 @@
 //
 //  walkFilters.js
-//
 //  version 1.1
 //
 //  Created by David Wooldridge, Autumn 2014

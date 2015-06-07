@@ -1,12 +1,8 @@
 //
 //  walk.js
+//  version 1.255
 //
-//  version 1.252 May 2015
-//
-//  https://hifi-public.s3.amazonaws.com/hifi-public/procedural-animator/beta/walk.js
-//  http://s3.amazonaws.com/hifi-public/procedural-animator/beta/walk.js
-//
-//  Design and code: David Wooldridge
+//  Created by David Wooldridge, May 2015
 //
 //  Animates an avatar using procedural animation techniques
 // 
@@ -35,24 +31,35 @@ var SAWTOOTH = 1;
 var TRIANGLE = 2;
 var SQUARE = 4;
 
-// animation and locomotion constants
+// constants
 var MOVE_THRESHOLD = 0.075;
-var FLY_THRESHOLD = 0.01;
-var MAX_WALK_SPEED = 2.29;
+//var FLY_THRESHOLD = 0.01;
+var MAX_WALK_SPEED = 2.9; // peak, by observation
 var TOP_SPEED = 300;
-var ACCELERATION_THRESHOLD = 2;  // detect stop to walking
-var DECELERATION_THRESHOLD = -5; // detect walking to stop
+var ACCELERATION_THRESHOLD = 0.1;  // detect stop to walking
+var DECELERATION_THRESHOLD = -6; // detect walking to stop
 var FAST_DECELERATION_THRESHOLD = -150; // detect flying to stop
 var GRAVITY_THRESHOLD = 3.0; // height above surface where gravity is in effect
-var GRAVITY_REACTION_THRESHOLD = 0.5; // reaction sensitivity to jumping under gravity
+var OVERCOME_GRAVITY_SPEED = 0.5; // reaction sensitivity to jumping under gravity
 var LANDING_THRESHOLD = 0.45; // metres from a surface below which need to prepare for impact
 var ON_SURFACE_THRESHOLD = 0.1; // height above surface to be considered as on the surface
 var MAX_TRANSITION_RECURSION = 10; // how many nested transitions are permitted
 var TRANSITION_COMPLETE = 1000;
+var HIFI_PUBLIC_BUCKET = "http://s3.amazonaws.com/hifi-public/";
+
+// check for existence of data file object property
+function isDefined(value) {
+    try {
+        if (typeof value != 'undefined') return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 // path to animations, reach-poses, reachPoses, transitions, overlay images and reference files
-var pathToAssets = 'http://s3.amazonaws.com/hifi-public/procedural-animator/assets/';
-//var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+//var pathToAssets = 'https://hifi-public.s3.amazonaws.com/procedural-animator/assets/';
+//var pathToAssets = HIFI_PUBLIC_BUCKET +procedural-animator/assets/';
+var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
 
 // load filters (Bezier, Butterworth, harmonics, averaging)
 Script.include("./libraries/walkFilters.js");
@@ -70,22 +77,29 @@ var avatar = new Avatar();
 var motion = new Motion();
 
 // create UI
-Script.include("./libraries/walkInterface.js");
+//Script.include("./libraries/walkInterface.js");
 
 /////////////////////////////////////////////
 //
 // load walkTools - REMOVE_FOR_RELEASE ...
 //
-var oscilloscope = null; 
+// extra vars
+var oscilloscope = null;
 var EDIT = 8; // extra locomotion state
+// walkTools core
+Script.include("./libraries/walkToolsInterface.js");
 Script.include('./libraries/walkTools.js');
+//Script.include("./libraries/walkToolsPropertyDialogBox.js"); 
+//walkToolsPropertyDialogBox = WalkToolsPropertyDialogBox();
+//walkTools addons
+Script.include("./libraries/walkToolsGrid.js");
 Script.include("./libraries/walkToolsCameras.js");
-//Script.include("./libraries/walkToolsScopeBezier.js");
-Script.include("./libraries/walkToolsUI.js");
-//var scopeProbe1 = 0;
-//var scopeProbe2 = 0;
-//var scopeProbe3 = 0;
-//var scopePreAmp = 5000;
+//Script.include("./libraries/walkToolsScope.js");
+//Script.include("./libraries/walkToolsBezierEditor.js");
+var scopeProbe1 = 0;
+var scopeProbe2 = 0;
+var scopeProbe3 = 0;
+var scopePreAmp = 5000;
 //
 // ... / load walkTools - REMOVE_FOR_RELEASE
 //
@@ -104,32 +118,15 @@ var flyDownFilter = filter.createAveragingFilter(FLY_POSE_DAMPING);
 var flyForwardFilter = filter.createAveragingFilter(FLY_POSE_DAMPING);
 var flyBackwardFilter = filter.createAveragingFilter(FLY_POSE_DAMPING);
 
-// check for existence of data file object property
-function isDefined(value) {
-    try {
-        if (typeof value != 'undefined') return true;
-    } catch (e) {
-        return false;
-    }
-}
-
-// ECMAScript 6 specification ready string.contains() function
-if (!('contains' in String.prototype)) {
-    String.prototype.contains = function(str, startIndex) {
-        return ''.indexOf.call(this, str, startIndex) !== -1;
-    };
-}
-
 // Main loop
 Script.update.connect(function(deltaTime) {
 
-    if (motion.isLive) {
-        
+    if (motion.isLive) { 
         /////////////////////////////////////////////
         //
         // walkTools - REMOVE_FOR_RELEASE ...
         //
-        if (walkTools) walkTools.beginProfiling(deltaTime);              
+        if (walkTools) walkTools.beginProfiling(deltaTime);           
         
         // assess current locomotion state
         motion.assess(deltaTime);
@@ -148,14 +145,14 @@ Script.update.connect(function(deltaTime) {
 
         // record this frame's parameters for future reference
         motion.saveHistory();
-
+        
         // REMOVE_FOR_RELEASE
-        if (oscilloscope) walkTools.toOscilloscope(scopeProbe1 , scopeProbe2, scopeProbe3);
+        if (oscilloscope) oscilloscope.updateScopeTrace(scopeProbe1, scopeProbe2, scopeProbe3);
         if (walkTools) walkTools.updateStats();
         //
         // ... / load walkTools - REMOVE_FOR_RELEASE
         //
-        ////////////////////////////////////////////   
+        ////////////////////////////////////////////        
     }
 });
 
@@ -175,17 +172,15 @@ function setTransition(nextAnimation, playTransitionReachPoses) {
     }
     // handle excessive nested / overlapping transitions
     if (motion.currentTransition.recursionDepth > MAX_TRANSITION_RECURSION) {
-        motion.currentTransition.die();
         motion.currentTransition = lastTransition;
     }
 }
 
 // select / blend the appropriate animation for the current state of motion
 function selectAnimation() {
-// walkTools - REMOVE_FOR_RELEASE - not possible to edit in release version 
+// walkTools - REMOVE_FOR_RELEASE - not possible to edit in release version
 // check for editing modes first, as these require no positioning calculations
-if (!walkTools.editMode()) {
-    
+if (!walkTools.isInEditMode()) {
     // will we use the Transition's reachPoses?
     var playTransitionReachPoses = true;
 
@@ -194,7 +189,7 @@ if (!walkTools.editMode()) {
         case STATIC: {
             // always set the transition before changing the state to allow new transition to save current animation first
             if (avatar.distanceFromSurface < ON_SURFACE_THRESHOLD && 
-                       avatar.currentAnimation !== avatar.selectedIdle) {
+                    avatar.currentAnimation !== avatar.selectedIdle) { 
                 setTransition(avatar.selectedIdle, playTransitionReachPoses);
             } else if (!(avatar.distanceFromSurface < ON_SURFACE_THRESHOLD) && 
                          avatar.currentAnimation !== avatar.selectedHover) {
@@ -235,7 +230,6 @@ if (!walkTools.editMode()) {
             
             // always set the transition before changing the state to allow new transition to save current animation state    
             if (avatar.currentAnimation !== avatar.selectedWalkBlend && !motion.isComingToHalt) {
-                print('Current animation is '+avatar.currentAnimation.name+' but avatar.selectedWalkBlend is '+avatar.selectedWalkBlend.name);
                 setTransition(avatar.selectedWalkBlend, playTransitionReachPoses);
             }
             if (motion.state !== SURFACE_MOTION) {
@@ -311,7 +305,7 @@ if (!walkTools.editMode()) {
             }
             break;
         }
-    } // end switch (motion.nextState)
+    } // end switch next state of motion
 } // / walkTools - REMOVE_FOR_RELEASE - not possible to edit in release version    
 }
 
@@ -331,16 +325,15 @@ function determineStride() {
 
         // calculate the degrees turned (at this angular speed) since last frame
         wheelAdvance = filter.radToDeg(motion.deltaTime * angularVelocity);
-
-        // walkTools - show stats and walk wheel - REMOVE_FOR_RELEASE
-        if (walkTools) walkTools.updateFrequencyTimeWheelStats(motion.deltaTime, speed, motion.frequencyTimeWheelRadius, wheelAdvance); 
         
+        // walkTools - show stats and walk wheel - REMOVE_FOR_RELEASE
+        if (walkTools) walkTools.updateFrequencyTimeWheelStats(motion.deltaTime, speed, motion.frequencyTimeWheelRadius, wheelAdvance);        
     } else {
         // turn the frequency time wheel by the amount specified for this animation
         wheelAdvance = filter.radToDeg(avatar.currentAnimation.calibration.frequency * motion.deltaTime);
-
+        
         // walkTools - show stats and walk wheel - REMOVE_FOR_RELEASE
-        if (walkTools) walkTools.updateFrequencyTimeWheelStats(motion.deltaTime, Vec3.length(motion.velocity), 0.5, wheelAdvance);              
+        if (walkTools) walkTools.updateFrequencyTimeWheelStats(motion.deltaTime, Vec3.length(motion.velocity), 0.5, wheelAdvance);
     }
 
     if (motion.currentTransition !== nullTransition) {
@@ -357,13 +350,14 @@ function determineStride() {
         }
         motion.currentTransition.advancePreviousFrequencyTimeWheel(motion.deltaTime);
     }
-    
+
     // walkTools - REMOVE_FOR_RELEASE
-    if (walkTools) walkTools.updateTransitionFTWheelStats(motion.deltaTime, Vec3.length(motion.velocity));
     if (avatar.currentAnimation.calibration.frequency === 0) {
-        if (walkTools) motion.frequencyTimeWheelPos = walkTools.getCyclePosition();
-    } else        
-    
+        if (walkTools) {
+            motion.frequencyTimeWheelPos = walkTools.cyclePosition;
+        }
+    } else
+        
     // advance the walk wheel the appropriate amount
     motion.advanceFrequencyTimeWheel(wheelAdvance);
 
@@ -407,7 +401,6 @@ function updateTransitions() {
 
         // update the Transition progress
         if (motion.currentTransition.updateProgress() === TRANSITION_COMPLETE) {
-            motion.currentTransition.die();
             motion.currentTransition = nullTransition;
         }
     }
@@ -432,7 +425,7 @@ function getLeanPitch() {
 function getLeanRoll() {
 
     var leanRollProgress = 0;
-    var angularSpeed = filter.radToDeg(MyAvatar.getAngularVelocity().y);
+    var angularSpeed = 0; //filter.radToDeg(MyAvatar.getAngularVelocity().y); // MyAvatar.getAngularVelocity() currently unavailable
 
     // factor in both angular and linear speeds
     var linearContribution = 0;
@@ -544,6 +537,12 @@ function renderMotion() {
             if (jointName === "Hips") {
                 jointRotations.x += leanPitch;
                 jointRotations.z += leanRoll;
+            }
+            // REMOVE_FOR_RELEASE
+            if (jointName === walkTools.selectedJoint()) {
+                scopeProbe1 = jointRotations.x;
+                scopeProbe2 = jointRotations.y;
+                scopeProbe3 = jointRotations.z;
             }
             // apply rotations
             MyAvatar.setJointData(jointName, Quat.fromVec3Degrees(jointRotations));

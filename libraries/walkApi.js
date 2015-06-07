@@ -1,11 +1,12 @@
 //
 //  walkApi.js
-//
-//  version 1.1
+//  version 1.2
 //
 //  Created by David Wooldridge, Autumn 2014
 //
-//  Motion, state and Transition objects for use by the walk.js script v1.2+
+//  Animates an avatar using procedural animation techniques
+// 
+//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -31,7 +32,7 @@ Avatar = function() {
 
     // settings
     this.armsFree = this.hydraCheck(); // automatically sets true for Hydra support - temporary fix
-    this.makesFootStepSounds = false; // REMOVE_FOR_RELEASE - set true
+    this.makesFootStepSounds = false; // REMOVE_FOR_RELEASE - set 
     this.animationSet = undefined; // currently just one animation set
     this.setAnimationSet = function(animationSet) {
         this.animationSet = animationSet;
@@ -130,10 +131,10 @@ Avatar = function() {
                     VOLUME_ATTENUATION * Vec3.length(motion.velocity) / MAX_WALK_SPEED : MIN_VOLUME
         };
         if (this.nextStep === RIGHT) {
-            Audio.playSound(walkAssets.footsteps[0], options);//print('right: '+options.volume.toFixed(2));
+            Audio.playSound(walkAssets.footsteps[0], options);
             this.nextStep = LEFT;
         } else if (this.nextStep === LEFT) {
-            Audio.playSound(walkAssets.footsteps[1], options);//print('left: '+options.volume.toFixed(2));
+            Audio.playSound(walkAssets.footsteps[1], options);
             this.nextStep = RIGHT;
         }
     }
@@ -192,6 +193,11 @@ Motion = function() {
         this.acceleration.x = (this.velocity.x - this.lastVelocity.x) / deltaTime;
         this.acceleration.y = (this.velocity.y - this.lastVelocity.y) / deltaTime;
         this.acceleration.z = (this.velocity.z - this.lastVelocity.z) / deltaTime;
+        //walkTools.toLog('Acceleration: '+this.acceleration.x.toFixed(3)+', '+this.acceleration.y.toFixed(3)+', '+this.acceleration.z.toFixed(3)+
+        //                ' Current Velocity: '+this.velocity.x.toFixed(3)+', '+this.velocity.y.toFixed(3)+', '+this.velocity.z.toFixed(3)+
+        //                ' Last Velocity: '+this.lastVelocity.x.toFixed(3)+', '+this.lastVelocity.y.toFixed(3)+', '+this.lastVelocity.z.toFixed(3)+
+        //                ' Current speed: '+Vec3.length(this.velocity).toFixed(3)+
+        //                ' Current accn: '+Vec3.length(this.acceleration).toFixed(3));
         //this.acceleration = MyAvatar.getAcceleration();
         //this.acceleration = Vec3.multiplyQbyV(Quat.inverse(MyAvatar.orientation), MyAvatar.getAcceleration());
 
@@ -201,7 +207,7 @@ Motion = function() {
         avatar.distanceFromSurface = distanceFromSurface - avatar.calibration.hipsToFeet;
 
         // determine principle direction of locomotion
-        var FWD_BACK_BIAS = 3; // prevent false sidestep condition detection when banking hard
+        var FWD_BACK_BIAS = 5; // prevent false sidestep condition detection when banking hard
         if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y) &&
             Math.abs(this.velocity.x) > FWD_BACK_BIAS * Math.abs(this.velocity.z)) {
             if (this.velocity.x < 0) {
@@ -255,6 +261,7 @@ Motion = function() {
             this.isAccelerating = true;
             this.isDecelerating = false;
             this.isDeceleratingFast = false;
+            this.isComingToHalt = false;
         } else if (this.directedAcceleration < DECELERATION_THRESHOLD) {
             this.isAccelerating = false;
             this.isDecelerating = true;
@@ -268,22 +275,32 @@ Motion = function() {
         // use the gathered information to build up some spatial awareness for the avatar
         var isOnSurface = (avatar.distanceFromSurface < ON_SURFACE_THRESHOLD);
         var isUnderGravity = (avatar.distanceFromSurface < GRAVITY_THRESHOLD);
-        var isTakingOff = (isUnderGravity && this.velocity.y > GRAVITY_REACTION_THRESHOLD);
-        var isComingInToLand = (isUnderGravity && this.velocity.y < -GRAVITY_REACTION_THRESHOLD);
+        var isTakingOff = (isUnderGravity && this.velocity.y > OVERCOME_GRAVITY_SPEED);
+        var isComingInToLand = (isUnderGravity && this.velocity.y < -OVERCOME_GRAVITY_SPEED);
         var aboutToLand = isComingInToLand && avatar.distanceFromSurface < LANDING_THRESHOLD;
-        var surfaceMotion = isOnSurface && this.isWalkingSpeed;
+        var surfaceMotion = isOnSurface && this.isMoving;
         var acceleratingAndAirborne = this.isAccelerating && !isOnSurface;
-        var goingTooFastToWalk = !this.isDecelerating && this.isAtFlyingSpeed;
+        var goingTooFastToWalk = !this.isDecelerating && this.isFlyingSpeed;
         var movingDirectlyUpOrDown = (this.direction === UP || this.direction === DOWN) && lateralVelocity < MOVE_THRESHOLD;
-
+        
+        // use the spatial awareness to define locomotion state change trigger conditions
+        var staticToAirMotion = acceleratingAndAirborne || goingTooFastToWalk || (movingDirectlyUpOrDown && !isOnSurface);
+        var staticToSurfaceMotion = surfaceMotion && !motion.isComingToHalt && 
+                                    !this.isDecelerating && lateralVelocity > MOVE_THRESHOLD;
+        var surfaceMotionToStatic = !this.isMoving || (this.isDecelerating && motion.lastDirection !== DOWN && surfaceMotion);
+        var surfaceMotionToAirMotion = (acceleratingAndAirborne || goingTooFastToWalk || movingDirectlyUpOrDown) && 
+                                       (!surfaceMotion && isTakingOff) ||
+                                       (!surfaceMotion && this.isMoving && !isComingInToLand);
+        var airMotionToSurfaceMotion = (surfaceMotion || aboutToLand) && !movingDirectlyUpOrDown;
+        var airMotionToStatic = Vec3.length(this.velocity) < MOVE_THRESHOLD ||
+                                this.isDeceleratingFast || isOnSurface;
+        
         // we now have enough information to set the appropriate locomotion mode
         switch (this.state) {
             case STATIC:
-                if (acceleratingAndAirborne || goingTooFastToWalk ||
-                   (movingDirectlyUpOrDown && !isOnSurface)) {
+                if (staticToAirMotion) {
                     this.nextState = AIR_MOTION;
-                } else if (surfaceMotion && !motion.isComingToHalt &&
-                           !this.isDecelerating && lateralVelocity > MOVE_THRESHOLD) {
+                } else if (staticToSurfaceMotion) {
                     this.nextState = SURFACE_MOTION;
                 } else {
                     this.nextState = STATIC;
@@ -291,15 +308,13 @@ Motion = function() {
                 break;
 
             case SURFACE_MOTION:
-                if (!this.isMoving || 
-                   (this.isDecelerating && motion.lastDirection !== DOWN && surfaceMotion)) {
+                if (surfaceMotionToStatic) {
                     // working on the assumption that stopping is now inevitable
                     if (!motion.isComingToHalt && isOnSurface) {
                         motion.isComingToHalt = true;
                     }
                     this.nextState = STATIC;
-                } else if ((!surfaceMotion || acceleratingAndAirborne ||
-                    goingTooFastToWalk || movingDirectlyUpOrDown) && isTakingOff) {
+                } else if (surfaceMotionToAirMotion) {
                     this.nextState = AIR_MOTION;
                 } else {
                     this.nextState = SURFACE_MOTION;
@@ -307,16 +322,29 @@ Motion = function() {
                 break;
 
             case AIR_MOTION:
-                if ((surfaceMotion || aboutToLand) && !movingDirectlyUpOrDown){
+                if (airMotionToSurfaceMotion){
                     this.nextState = SURFACE_MOTION;
-                } else if (Vec3.length(this.velocity) < FLY_THRESHOLD ||
-                           this.isDeceleratingFast || isOnSurface) {
+                } else if (airMotionToStatic) {
                     this.nextState = STATIC;
                 } else {
                     this.nextState = AIR_MOTION;
                 }
                 break;
         }
+        /*walkTools.toLog('velocity.y: '+this.velocity.y.toFixed(3)+
+                       ' isOnSurface: '+isOnSurface+
+                       ' isUnderGravity: '+isUnderGravity+
+                       ' isTakingOff: '+isTakingOff+
+                       ' isComingInToLand: '+isComingInToLand+
+                       ' aboutToLand: '+aboutToLand+
+                       ' surfaceMotion: '+surfaceMotion+
+                       ' AAA: '+acceleratingAndAirborne+
+                       ' tooFastToWalk: '+goingTooFastToWalk+
+                       ' movingUpOrDown: '+movingDirectlyUpOrDown+
+                       ' direction: '+walkTools.directionAsString(this.direction)+
+                       ' dir-accn: '+this.directedAcceleration+
+                       ' state: '+walkTools.stateAsString(this.state)+
+                       ' next: '+walkTools.stateAsString(this.nextState));  */      
     }
 
     // frequency time wheel (foot / ground speed matching)
@@ -635,7 +663,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         var HALF_CYCLE = 180;
         var HALF_CYCLE_THRESHOLD = 140;
         var CYCLE_COMMIT_THRESHOLD = 5;
-
+        
         // how many degrees do we need to turn the walk wheel to finish walking with both feet on the ground?
         if (this.lastElapsedFTDegrees < CYCLE_COMMIT_THRESHOLD) {
             // just stop the walk cycle right here and blend to idle
@@ -680,7 +708,6 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         if (this.lastTransition !== nullTransition) {
             this.lastTransition.incrementRecursion();
             if (this.lastTransition.recursionDepth > MAX_TRANSITION_RECURSION) {
-                this.lastTransition.die();
                 this.lastTransition = nullTransition;
             }
         }
@@ -708,7 +735,6 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                         this.lastFrequencyTimeWheelPos = 180;
                     }
                 }
-                print('finished walk cycle cleanly');
             } else {
                 wheelAdvance = this.lastFrequencyTimeIncrement;
                 var distanceToTravel = avatar.calibration.strideLength * wheelAdvance / 180;
@@ -749,7 +775,6 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         if (this.lastTransition !== nullTransition) {
             if (this.lastTransition.updateProgress() === TRANSITION_COMPLETE) {
                 // the previous transition is now complete
-                this.lastTransition.die();
                 this.lastTransition = nullTransition;
             }
         }
@@ -861,13 +886,6 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
             }
         }
         return nextRotations;
-    };
-
-    this.die = function() {
-        print('transition dying');
-        //if (motion.isComingToHalt) {
-        //    motion.isComingToHalt = false;
-        //}
     };
 }; // end Transition constructor
 

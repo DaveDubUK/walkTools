@@ -48,38 +48,45 @@ MaleWalk = function() {
     this.filters = {
 
         "Hips": {
+
             "bobLPFilter": filter.createButterworthFilter(),
             "yawFilter": filter.createWaveSynth(2, 3, 2)
         },
         "LeftUpLeg": {
+
             "pitchFilter": filter.createHarmonicsFilter(
-                           this.harmonics.upperLegHarmonicMagnitudes,
-                           this.harmonics.upperLegHarmonicPhaseAngles)
+                               this.harmonics.upperLegHarmonicMagnitudes,
+                               this.harmonics.upperLegHarmonicPhaseAngles)
         },
         "RightUpLeg": {
+
             "pitchFilter": filter.createHarmonicsFilter(
-                           this.harmonics.upperLegHarmonicMagnitudes,
-                           this.harmonics.upperLegHarmonicPhaseAngles)
+                               this.harmonics.upperLegHarmonicMagnitudes,
+                               this.harmonics.upperLegHarmonicPhaseAngles)
         },
         "LeftLeg": {
+
             "pitchFilter": filter.createHarmonicsFilter(
-                           this.harmonics.lowerLegHarmonicMagnitudes,
-                           this.harmonics.lowerLegHarmonicPhaseAngles)
+                               this.harmonics.lowerLegHarmonicMagnitudes,
+                               this.harmonics.lowerLegHarmonicPhaseAngles)
         },
         "RightLeg": {
+
             "pitchFilter": filter.createHarmonicsFilter(
-                           this.harmonics.lowerLegHarmonicMagnitudes,
-                           this.harmonics.lowerLegHarmonicPhaseAngles)
+                               this.harmonics.lowerLegHarmonicMagnitudes,
+                               this.harmonics.lowerLegHarmonicPhaseAngles)
         },
         "LeftFoot": {
+
             "pitchFilter": filter.createHarmonicsFilter(
-                           this.harmonics.footHarmonicMagnitudes,
-                           this.harmonics.footHarmonicPhaseAngles)
+                               this.harmonics.footHarmonicMagnitudes,
+                               this.harmonics.footHarmonicPhaseAngles)
         },
         "RightFoot": {
+
             "pitchFilter": filter.createHarmonicsFilter(
-                           this.harmonics.footHarmonicMagnitudes,
-                           this.harmonics.footHarmonicPhaseAngles)
+                               this.harmonics.footHarmonicMagnitudes,
+                               this.harmonics.footHarmonicPhaseAngles)
         }
     };
 
@@ -92,7 +99,7 @@ MaleWalk = function() {
             "pitchPhase":-180,
             "yawPhase":0,
             "rollPhase":-141.96226,
-            "pitchOffset":0,
+            "pitchOffset":-0.84906,
             "yawOffset":0,
             "rollOffset":0,
             "thrust":0.0283,
@@ -101,7 +108,7 @@ MaleWalk = function() {
             "thrustPhase":-88.98113,
             "bobPhase":91.69811,
             "swayPhase":-42.79245,
-            "thrustOffset":0,
+            "thrustOffset":0.00094,
             "bobOffset":0,
             "swayOffset":0,
             "pitchFrequencyMultiplier":2,
@@ -115,8 +122,8 @@ MaleWalk = function() {
             "pitchPhase":345.0566,
             "yawPhase":90.33962,
             "rollPhase":94.41509,
-            "pitchOffset":-10.37736,
-            "yawOffset":0,
+            "pitchOffset":-15.77358,
+            "yawOffset":0.07547,
             "rollOffset":0
         },
         "RightUpLeg":{
@@ -126,8 +133,8 @@ MaleWalk = function() {
             "pitchPhase":165.0566,
             "yawPhase":90.33962,
             "rollPhase":94.41509,
-            "pitchOffset":-10.37736,
-            "yawOffset":0,
+            "pitchOffset":-15.77358,
+            "yawOffset":-0.07547,
             "rollOffset":0
         },
         "LeftLeg":{
@@ -139,7 +146,7 @@ MaleWalk = function() {
             "rollPhase":93.0566,
             "pitchOffset":44.15094,
             "yawOffset":-6.11321,
-            "rollOffset":0
+            "rollOffset":-0.07547
         },
         "RightLeg":{
             "pitch":1.28302,
@@ -150,7 +157,7 @@ MaleWalk = function() {
             "rollPhase":93.0566,
             "pitchOffset":44.15094,
             "yawOffset":6.11321,
-            "rollOffset":0
+            "rollOffset":-0.07547
         },
         "LeftFoot":{
             "pitch":0.98113,
@@ -181,8 +188,8 @@ MaleWalk = function() {
             "pitchPhase":285.28302,
             "yawPhase":-51.4,
             "rollPhase":-77.1,
-            "pitchOffset":14,
-            "yawOffset":0,
+            "pitchOffset":9.84906,
+            "yawOffset":-4.60377,
             "rollOffset":0
         },
         "RightToeBase":{
@@ -192,8 +199,8 @@ MaleWalk = function() {
             "pitchPhase":105.28302,
             "yawPhase":-51.4,
             "rollPhase":-77.1,
-            "pitchOffset":14,
-            "yawOffset":0,
+            "pitchOffset":9.84906,
+            "yawOffset":4.60377,
             "rollOffset":0
         },
         "Spine":{
@@ -203,7 +210,7 @@ MaleWalk = function() {
             "pitchPhase":-14.26415,
             "yawPhase":-178.64151,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-3.73585,
             "yawOffset":0,
             "rollOffset":0,
             "pitchFrequencyMultiplier":2
@@ -215,8 +222,8 @@ MaleWalk = function() {
             "pitchPhase":-26.49057,
             "yawPhase":180,
             "rollPhase":0.67925,
-            "pitchOffset":0,
-            "yawOffset":0,
+            "pitchOffset":1.01887,
+            "yawOffset":0.56604,
             "rollOffset":0,
             "pitchFrequencyMultiplier":2
         },
@@ -227,7 +234,7 @@ MaleWalk = function() {
             "pitchPhase":-22.41509,
             "yawPhase":-180,
             "rollPhase":-31.92453,
-            "pitchOffset":0,
+            "pitchOffset":1.01887,
             "yawOffset":0,
             "rollOffset":0,
             "pitchFrequencyMultiplier":2
@@ -262,8 +269,8 @@ MaleWalk = function() {
             "yawPhase":180,
             "rollPhase":48.22642,
             "pitchOffset":64.5283,
-            "yawOffset":-14.26415,
-            "rollOffset":0,
+            "yawOffset":-25.13208,
+            "rollOffset":8.83019,
             "pitchFrequencyMultiplier":2
         },
         "RightArm":{
@@ -274,8 +281,8 @@ MaleWalk = function() {
             "yawPhase":180,
             "rollPhase":48.22642,
             "pitchOffset":64.5283,
-            "yawOffset":14.26415,
-            "rollOffset":0,
+            "yawOffset":25.13208,
+            "rollOffset":-8.83019,
             "pitchFrequencyMultiplier":2
         },
         "LeftForeArm":{
@@ -286,7 +293,7 @@ MaleWalk = function() {
             "yawPhase":-19.69811,
             "rollPhase":-29.20755,
             "pitchOffset":4.75472,
-            "yawOffset":0,
+            "yawOffset":2.03774,
             "rollOffset":22.41509
         },
         "RightForeArm":{
@@ -297,7 +304,7 @@ MaleWalk = function() {
             "yawPhase":-19.69811,
             "rollPhase":-29.20755,
             "pitchOffset":4.75472,
-            "yawOffset":0,
+            "yawOffset":-2.03774,
             "rollOffset":-22.41509
         },
         "LeftHand":{

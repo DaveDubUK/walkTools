@@ -79,7 +79,7 @@ Avatar = function() {
                     MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
                 }
             }
-            this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightFoot").y;
+            this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightToeBase").y;
 
             if (this.calibration.hipsToFeet === 0 && extraAttempts < 100) {
                 attempts++;

@@ -5,7 +5,7 @@
 //  Created by David Wooldridge, Autumn 2014
 //
 //  Animates an avatar using procedural animation techniques
-// 
+//
 //  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
 //
 //  Distributed under the Apache License, Version 2.0.
@@ -27,12 +27,12 @@ Avatar = function() {
         } else {
             print('walk.js info: Razer Hydra not detected. Arms will be controlled by script.');
             return false;
-        }    
+        }
     }
 
     // settings
     this.armsFree = this.hydraCheck(); // automatically sets true for Hydra support - temporary fix
-    this.makesFootStepSounds = false; // REMOVE_FOR_RELEASE - set 
+    this.makesFootStepSounds = false; // REMOVE_FOR_RELEASE - set
     this.animationSet = undefined; // currently just one animation set
     this.setAnimationSet = function(animationSet) {
         this.animationSet = animationSet;
@@ -42,7 +42,7 @@ Avatar = function() {
                 this.selectedWalk = walkAssets.getAnimationDataFile("MaleWalk");
                 this.selectedWalkBackwards = walkAssets.getAnimationDataFile("MaleWalkBackwards");
                 this.selectedSideStepLeft = walkAssets.getAnimationDataFile("MaleSideStepLeft");
-                this.selectedSideStepRight = walkAssets.getAnimationDataFile("MaleSideStepRight");                
+                this.selectedSideStepRight = walkAssets.getAnimationDataFile("MaleSideStepRight");
                 this.selectedWalkBlend = walkAssets.getAnimationDataFile("WalkBlend");
                 this.selectedTurnLeft = walkAssets.getAnimationDataFile("MaleTurnLeft");
                 this.selectedTurnRight = walkAssets.getAnimationDataFile("MaleTurnRight");
@@ -79,7 +79,7 @@ Avatar = function() {
                     MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
                 }
             }
-            this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightToeBase").y;
+            this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightFoot").y;
 
             if (this.calibration.hipsToFeet === 0 && extraAttempts < 100) {
                 attempts++;
@@ -147,7 +147,7 @@ Motion = function() {
     this.isLive = true;
 
     // locomotion status
-    this.state = STATIC; 
+    this.state = STATIC;
     this.nextState = STATIC;
     this.isMoving = false;
     this.isWalkingSpeed = false;
@@ -282,19 +282,19 @@ Motion = function() {
         var acceleratingAndAirborne = this.isAccelerating && !isOnSurface;
         var goingTooFastToWalk = !this.isDecelerating && this.isFlyingSpeed;
         var movingDirectlyUpOrDown = (this.direction === UP || this.direction === DOWN) && lateralVelocity < MOVE_THRESHOLD;
-        
+
         // use the spatial awareness to define locomotion state change trigger conditions
         var staticToAirMotion = acceleratingAndAirborne || goingTooFastToWalk || (movingDirectlyUpOrDown && !isOnSurface);
-        var staticToSurfaceMotion = surfaceMotion && !motion.isComingToHalt && 
+        var staticToSurfaceMotion = surfaceMotion && !motion.isComingToHalt &&
                                     !this.isDecelerating && lateralVelocity > MOVE_THRESHOLD;
         var surfaceMotionToStatic = !this.isMoving || (this.isDecelerating && motion.lastDirection !== DOWN && surfaceMotion);
-        var surfaceMotionToAirMotion = (acceleratingAndAirborne || goingTooFastToWalk || movingDirectlyUpOrDown) && 
+        var surfaceMotionToAirMotion = (acceleratingAndAirborne || goingTooFastToWalk || movingDirectlyUpOrDown) &&
                                        (!surfaceMotion && isTakingOff) ||
                                        (!surfaceMotion && this.isMoving && !isComingInToLand);
         var airMotionToSurfaceMotion = (surfaceMotion || aboutToLand) && !movingDirectlyUpOrDown;
         var airMotionToStatic = Vec3.length(this.velocity) < MOVE_THRESHOLD ||
                                 this.isDeceleratingFast || isOnSurface;
-        
+
         // we now have enough information to set the appropriate locomotion mode
         switch (this.state) {
             case STATIC:
@@ -344,7 +344,7 @@ Motion = function() {
                        ' direction: '+walkTools.directionAsString(this.direction)+
                        ' dir-accn: '+this.directedAcceleration+
                        ' state: '+walkTools.stateAsString(this.state)+
-                       ' next: '+walkTools.stateAsString(this.nextState));  */      
+                       ' next: '+walkTools.stateAsString(this.nextState));  */
     }
 
     // frequency time wheel (foot / ground speed matching)
@@ -381,7 +381,7 @@ Motion = function() {
 animationOperations = (function() {
 
     return {
-        
+
         // helper function for renderMotion(). calculate joint translations based on animation file settings and frequency * time
         calculateTranslations: function(animation, ft, direction) {
             var jointName = "Hips";
@@ -554,7 +554,7 @@ ReachPose = function(reachPoseName) {
     this.reachPoseParameters = walkAssets.getReachPoseParameters(reachPoseName);
     this.reachPoseDataFile = walkAssets.getReachPoseDataFile(reachPoseName);
     this.progress = 0;
-    
+
     this.smoothingFilter = filter.createAveragingFilter(this.reachPoseParameters.smoothing);
 
     this.currentStrength = function() {
@@ -607,7 +607,7 @@ ReachPose = function(reachPoseName) {
 
 // constructor with default parameters
 TransitionParameters = function() {
-    
+
     this.duration = 0.5;
     this.easingLower = {x:0.5, y:0.5};
     this.easingUpper = {x:0.5, y:0.5};
@@ -620,7 +620,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     if (playTransitionReachPoses === undefined) {
         playTransitionReachPoses = true;
     }
- 
+
     // record the current state of animation
     this.nextAnimation = nextAnimation;
     this.lastAnimation = lastAnimation;
@@ -642,7 +642,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     this.parameters = new TransitionParameters();
     this.liveReachPoses = [];
     if (walkAssets && isDefined(lastAnimation) && isDefined(nextAnimation)) {
-        // overwrite this.parameters with any transition parameters specified for this particular transition 
+        // overwrite this.parameters with any transition parameters specified for this particular transition
         walkAssets.getTransitionParameters(lastAnimation, nextAnimation, this.parameters);
         // fire up any reach poses for this transition
         if (playTransitionReachPoses) {
@@ -651,7 +651,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
             }
         }
     }
-    
+
     this.startTime = new Date().getTime(); // Starting timestamp (seconds)
     this.progress = 0; // how far are we through the transition?
     this.filteredProgress = 0;
@@ -663,7 +663,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         var HALF_CYCLE = 180;
         var HALF_CYCLE_THRESHOLD = 140;
         var CYCLE_COMMIT_THRESHOLD = 5;
-        
+
         // how many degrees do we need to turn the walk wheel to finish walking with both feet on the ground?
         if (this.lastElapsedFTDegrees < CYCLE_COMMIT_THRESHOLD) {
             // just stop the walk cycle right here and blend to idle
@@ -684,14 +684,14 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
             // complete the step and the next then stop at 180
             this.degreesToTurn = FULL_CYCLE - this.lastFrequencyTimeWheelPos + HALF_CYCLE;
         }
-        
+
         // transition length in this case should be directly proportional to the remaining degrees to turn
         var MIN_FT_INCREMENT = 5.0; // degrees per frame
         var MIN_TRANSITION_DURATION = 0.4;
         this.lastFrequencyTimeIncrement *= 0.66; // help ease the transition
         var lastFrequencyTimeIncrement = this.lastFrequencyTimeIncrement > MIN_FT_INCREMENT ?
                                          this.lastFrequencyTimeIncrement : MIN_FT_INCREMENT;
-        var timeToFinish = Math.max(motion.deltaTime * this.degreesToTurn / lastFrequencyTimeIncrement, 
+        var timeToFinish = Math.max(motion.deltaTime * this.degreesToTurn / lastFrequencyTimeIncrement,
                                     MIN_TRANSITION_DURATION);
         this.parameters.duration = timeToFinish;
         this.degreesRemaining = this.degreesToTurn;
@@ -788,7 +788,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                 this.liveReachPoses.splice(pose, 1);
             }
         }
-        
+
         // update transition progress
         this.filteredProgress = filter.bezier(this.progress, this.parameters.easingLower, this.parameters.easingUpper);
         return this.progress >= 1 ? TRANSITION_COMPLETE : false;
@@ -871,7 +871,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                                                        this.liveReachPoses[pose].reachPoseDataFile,
                                                        frequencyTimeWheelPos,
                                                        direction);
-                                                       
+
                 // don't use Vec3 operations here, as if x,y or z is zero, the reach pose should have no influence at all
                 if (Math.abs(poseRotations.x) > 0) {
                     nextRotations.x = reachPoseStrength * poseRotations.x + (1 - reachPoseStrength) * nextRotations.x;
@@ -882,7 +882,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                 if (Math.abs(poseRotations.z) > 0) {
                     nextRotations.z = reachPoseStrength * poseRotations.z + (1 - reachPoseStrength) * nextRotations.z;
                 }
-                
+
             }
         }
         return nextRotations;

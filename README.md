@@ -1,7 +1,7 @@
 # walkTools
 walkTools - a procedural animation editor for high fidelty
 
-walkTools is work in progress - please feel free to contribute!
+walkTools is work in progress - please feel free to contribute! The UI is currently being ported to separate webWindows, which is tidying everything up nicely. Will release soon.
 
 walkTools allows the user to edit any of the procedural animation files that work with the walk.js script within HighFidelity's Interface, so is 100% WYSIWYG. In addition to being able to set joint rotation offsets (i.e like Poser or bvhacker), joint oscillations can be specified. The ability to create animations in this way presents a novel way of creating perfectly looped animation files like walking, sidestepping and turning on the spot. I have found animating procedurally (as opposed to generating / editing keyframes) presents a very different way of animating, with it's own set of challenges, advantages and disadvantages.
 

@@ -18,26 +18,27 @@ transitionParameterData = (function() {
             "MaleIdle": {
                 nextAnimation: {
                     "WalkBlend": {
-                        // MaleIdleToWalkRP  - lean forwards from upper torso
-                        // MaleIdleToWalk2RP - arm swing early starter (matches walk)
-                        // MaleIdleToWalk3RP - hips and left leg early starter (matches walk)
-                        // MaleIdleToWalk4RP - bends the leading leg to allow the first step to be cut short more cleanly
+                        // Reach Pose Descriptions:
+                        //  - MaleIdleToWalkRP  - lean forwards from upper torso
+                        //  - MaleIdleToWalk2RP - arm swing early starter (matches walk)
+                        //  - MaleIdleToWalk3RP - hips and left leg early starter (matches walk)
+                        //  - MaleIdleToWalk4RP - bends the leading leg to allow the first step to be cut short more cleanly
                         duration: 1.25,
                         easingLower: {x:0.0, y:1.0},
                         easingUpper: {x:0.0, y:1.0},
-                        reachPoseNames: ["MaleIdleToWalkRP", "MaleIdleToWalk2RP", "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
+                        reachPoses: ["MaleIdleToWalkRP", "MaleIdleToWalk2RP", "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
                     },
 
                     "FlyBlend": {
                         duration: 0.55,
-                        easingLower: {x:0.5, y:0.5},
-                        easingUpper: {x:0.5, y:0.5}
+                        easingLower: {x:0.74, y:0.10},  
+                        easingUpper: {x:0.23, y:0.92}
                     },
 
                     "MaleHover": {
                         duration: 0.5,
-                        easingLower: {x:0.5, y:0.5},
-                        easingUpper: {x:0.5, y:0.5}
+                        easingLower: {x:0.74, y:0.10},  
+                        easingUpper: {x:0.23, y:0.92}
                     }
                 }
             },
@@ -46,8 +47,8 @@ transitionParameterData = (function() {
                 nextAnimation: {
                     "MaleIdle": {
                         duration: 0.33,
-                        easingLower: {x:0.5, y:0.5},
-                        easingUpper: {x:0.5, y:0.5}
+                        easingLower: {x:0.74, y:0.10},  
+                        easingUpper: {x:0.23, y:0.92}
                     }
                 }
             },
@@ -55,15 +56,15 @@ transitionParameterData = (function() {
             "WalkBlend": {
                 nextAnimation: {
                     "MaleIdle": {
-                        duration: 1.5,
-                        easingLower: {x:0.35, y:0.0},
+                        duration: 0.35,
+                        easingLower: {x:0.25, y:0.0},
                         easingUpper: {x:0.0, y:1.0}
                     },
 
                     "FlyBlend": {
                         duration: 0.55,
-                        easingLower: {x:0.5, y:0.5},
-                        easingUpper: {x:0.5, y:0.5}
+                        easingLower: {x:0.74, y:0.10},  
+                        easingUpper: {x:0.23, y:0.92}
                     }
                 }
             },
@@ -71,22 +72,22 @@ transitionParameterData = (function() {
                 nextAnimation: {
                     "MaleHover": {
                         duration: 0.55,
-                        easingLower: {x:0.5, y:0.5},
-                        easingUpper: {x:0.5, y:0.5}
+                        easingLower: {x:0.74, y:0.10},  
+                        easingUpper: {x:0.23, y:0.92}
                     },
 
                     "WalkBlend": {
                         duration: 0.5,
                         easingLower: {x:0.5, y:0.0},
                         easingUpper: {x:0.2, y:1.0},
-                        reachPoseNames: ["MaleFlyToWalkRP"]
+                        reachPoses: ["MaleFlyToWalkRP"]
                     },
 
                     "MaleIdle": {
                         duration: 0.35,
                         easingLower: {x:0.3, y:0.0},
                         easingUpper: {x:0.0, y:1.0},
-                        reachPoseNames: ["MaleHoverToIdleRP"]
+                        reachPoses: ["MaleHoverToIdleRP"]
                     }
                 }
             }
@@ -97,30 +98,30 @@ transitionParameterData = (function() {
 
         // populate transitionParameters with specified transition parameters (where set)
         fetch: function(lastAnimation, nextAnimation, transitionParameters) {
-            if (isDefined(lastAnimation) && isDefined(nextAnimation)) {
+            if (lastAnimation && nextAnimation) {
                 for (animationLast in _transitionParameters.lastAnimation) {
                     if (animationLast === lastAnimation.name) {
                         for (animationNext in _transitionParameters.lastAnimation[animationLast].nextAnimation) {
                             if (animationNext === nextAnimation.name) {
-                                if (isDefined(_transitionParameters.lastAnimation[animationLast]
-                                              .nextAnimation[animationNext].duration)) {
+                                if (_transitionParameters.lastAnimation[animationLast]
+                                              .nextAnimation[animationNext].duration) {
                                      transitionParameters.duration =  _transitionParameters.lastAnimation[animationLast]
                                                                       .nextAnimation[animationNext].duration;
                                 }
-                                if (isDefined(_transitionParameters.lastAnimation[animationLast]
-                                              .nextAnimation[animationNext].easingLower)) {
+                                if (_transitionParameters.lastAnimation[animationLast]
+                                              .nextAnimation[animationNext].easingLower) {
                                      transitionParameters.easingLower = _transitionParameters.lastAnimation[animationLast]
                                                                         .nextAnimation[animationNext].easingLower;
                                 }
-                                if (isDefined(_transitionParameters.lastAnimation[animationLast]
-                                              .nextAnimation[animationNext].easingUpper)) {
+                                if (_transitionParameters.lastAnimation[animationLast]
+                                              .nextAnimation[animationNext].easingUpper) {
                                      transitionParameters.easingUpper = _transitionParameters.lastAnimation[animationLast]
                                                                         .nextAnimation[animationNext].easingUpper;
                                 }
-                                if (isDefined(_transitionParameters.lastAnimation[animationLast]
-                                              .nextAnimation[animationNext].reachPoseNames)) {
-                                     transitionParameters.reachPoseNames = _transitionParameters.lastAnimation[animationLast]
-                                                                    .nextAnimation[animationNext].reachPoseNames;
+                                if (_transitionParameters.lastAnimation[animationLast]
+                                              .nextAnimation[animationNext].reachPoses) {
+                                     transitionParameters.reachPoses = _transitionParameters.lastAnimation[animationLast]
+                                                                    .nextAnimation[animationNext].reachPoses;
                                 }
                             }
                         }

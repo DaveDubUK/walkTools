@@ -2,7 +2,8 @@
 //  walkAssets.js
 //  version 1.1
 //
-//  Created by David Wooldridge, Autumn 2014
+//  Created by David Wooldridge, June 2015
+//  Copyright © 2014 - 2015 High Fidelity, Inc.
 //
 //  Organises, loads up and makes available the assets for use by the walk.js script v1.2+
 //
@@ -12,48 +13,55 @@
 
 walkAssets = (function () {
 
+    //const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
+    //const _pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
+    var _pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+
     var _animationSetPath = 'animation-sets/standard-male/';
 
     // load the sound files
     var _footsteps = [];
-    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW2Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW2Right-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW3Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW3Right-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW5Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(pathToAssets + _animationSetPath + "sounds/FootstepW5Right-12db.wav"));
+    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Left-12db.wav"));
+    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Right-12db.wav"));
+    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Left-12db.wav"));
+    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Right-12db.wav"));
+    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Left-12db.wav"));
+    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Right-12db.wav"));
 
     // load the animation datafiles
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-walk-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-walk-backwards-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-idle-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-backwards-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-up-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-fly-down-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-hover-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-sidestep-left-animation.js");
-    Script.include(pathToAssets + _animationSetPath + "animations/dd-male-sidestep-right-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-walk-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-walk-backwards-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-idle-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-fly-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-fly-backwards-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-fly-up-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-fly-down-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-hover-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-sidestep-left-animation.js");
+    Script.include(_pathToAssets + _animationSetPath + "animations/dd-male-sidestep-right-animation.js");
 
     // load reach pose datafiles
-    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-reach-pose.js");
-    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-2-reach-pose.js");
-    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-3-reach-pose.js");
-    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-4-reach-pose.js");
-    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-hover-to-idle-reach-pose.js");
-    Script.include(pathToAssets + _animationSetPath + "reach-poses/dd-male-fly-to-walk-reach-pose.js");
+    Script.include(_pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-reach-pose.js");
+    Script.include(_pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-2-reach-pose.js");
+    Script.include(_pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-3-reach-pose.js");
+    Script.include(_pathToAssets + _animationSetPath + "reach-poses/dd-male-idle-to-walk-4-reach-pose.js");
+    Script.include(_pathToAssets + _animationSetPath + "reach-poses/dd-male-hover-to-idle-reach-pose.js");
+    Script.include(_pathToAssets + _animationSetPath + "reach-poses/dd-male-fly-to-walk-reach-pose.js");
 
     // load the transition parameters datafile
-    Script.include(pathToAssets +_animationSetPath +  "transition-parameters.js");
+    Script.include(_pathToAssets +_animationSetPath +  "transition-parameters.js");
 
     // load the reachPose parameters datafile
-    Script.include(pathToAssets +_animationSetPath +  "reach-pose-parameters.js");
+    Script.include(_pathToAssets +_animationSetPath +  "reach-pose-parameters.js");
 
     // blank animation buffer
-    Script.include(pathToAssets + "miscellaneous/animation-buffer.js");
+    Script.include(_pathToAssets + "miscellaneous/animation-buffer.js");
 
     // load the animation reference datafile
-    Script.include(pathToAssets + "miscellaneous/animation-reference.js");
+    Script.include(_pathToAssets + "miscellaneous/animation-reference.js");
+
+    // load the Blender pre-rotations
+    Script.include(_pathToAssets + "miscellaneous/blender-pre-rotations.js");
 
     // animations
     var _animations = [];
@@ -84,12 +92,18 @@ walkAssets = (function () {
     // animation reference (lists joints, defines IK chains)
     var _animationReference = new AnimationReference();
 
+    // Blender pre-rotations
+    var _blenderPreRotations = new BlenderPreRotations();
+
     return {
         // expose the sounds
         footsteps: _footsteps,
 
         // expose the animation reference
         animationReference: _animationReference,
+
+        // expose the Blender pre-rotations
+        blenderPreRotations: _blenderPreRotations,
 
         // populates passed transitionParameters object with any situation specific params from transition-parameters.js
         getTransitionParameters: function(lastAnimation, nextAnimation, transitionParameters) {
@@ -126,7 +140,7 @@ walkAssets = (function () {
             return undefined;
         },
 
-        // for walkTools only - return array containing names of all animations and reach poses
+        // return array containing names of all animations and reach poses
         getAnimationNamesAsArray: function() {
             var allAnimations = [];
             for (animation in _animations) {

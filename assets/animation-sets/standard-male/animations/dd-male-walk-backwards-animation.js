@@ -206,7 +206,7 @@ MaleWalkBackwards = function(filter) {
             "yawPhase":27.60384,
             "rollPhase":75.83026,
             "pitchOffset":57.73585,
-            "yawOffset":-25.13208,
+            "yawOffset":10.18868,
             "rollOffset":8.83019,
             "pitchFrequencyMultiplier":2
         },
@@ -218,7 +218,7 @@ MaleWalkBackwards = function(filter) {
             "yawPhase":27.60384,
             "rollPhase":75.83026,
             "pitchOffset":57.73585,
-            "yawOffset":25.13208,
+            "yawOffset":-10.18868,
             "rollOffset":-8.83019,
             "pitchFrequencyMultiplier":2
         },

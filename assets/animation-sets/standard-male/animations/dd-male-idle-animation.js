@@ -161,7 +161,7 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-3.73585,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -172,7 +172,7 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-0.67925,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -183,9 +183,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-0.67925,
+            "pitchOffset":0,
             "yawOffset":0,
-            "rollOffset":18.33962
+            "rollOffset":0
         },
         "LeftArm":{
             "pitch":0,
@@ -194,9 +194,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":-0.67925,
-            "pitchOffset":80.83019,
-            "yawOffset":-3.39623,
-            "rollOffset":8.83019
+            "pitchOffset":79.5,
+            "yawOffset":0,
+            "rollOffset":0
         },
         "RightArm":{
             "pitch":0,
@@ -205,9 +205,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":-0.67925,
-            "pitchOffset":80.83019,
-            "yawOffset":3.39623,
-            "rollOffset":-8.83019
+            "pitchOffset":79.5,
+            "yawOffset":0,
+            "rollOffset":0
         },
         "LeftForeArm":{
             "pitch":0,
@@ -216,9 +216,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":3.39623,
-            "yawOffset":2.03774,
-            "rollOffset":11.54717
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":0
         },
         "RightForeArm":{
             "pitch":0,
@@ -227,9 +227,9 @@ MaleIdle = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":3.39623,
-            "yawOffset":-2.03774,
-            "rollOffset":-11.54717
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":0
         },
         "LeftHand":{
             "pitch":0,
@@ -239,7 +239,7 @@ MaleIdle = function() {
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":0,
-            "yawOffset":10.18868,
+            "yawOffset":0,
             "rollOffset":0
         },
         "RightHand":{
@@ -250,7 +250,7 @@ MaleIdle = function() {
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":0,
-            "yawOffset":-10.18868,
+            "yawOffset":0,
             "rollOffset":0
         },
         "Neck":{

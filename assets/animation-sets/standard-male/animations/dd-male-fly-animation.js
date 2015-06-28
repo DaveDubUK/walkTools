@@ -195,7 +195,7 @@ MaleFly = function() {
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":68.60377,
-            "yawOffset":12.90566,
+            "yawOffset":15.62264,
             "rollOffset":-10.18868
         },
         "RightArm":{
@@ -206,7 +206,7 @@ MaleFly = function() {
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":68.60377,
-            "yawOffset":-12.90566,
+            "yawOffset":-15.62264,
             "rollOffset":10.18868
         },
         "LeftForeArm":{

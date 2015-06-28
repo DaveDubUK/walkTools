@@ -1,0 +1,59 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkToolsStyle.css">
+        <script>
+
+            function loaded() {
+
+                var _loggingEnabled = true;
+                var _logs = [];
+                _logs.length = 120;
+
+                // assign form elements to vars
+                elLogDisplay = document.getElementById("log-display");
+                elLogToggle = document.getElementById("toggle-logging");
+                elClearLog = document.getElementById("clear-log");
+
+				// script event received handler
+                if (window.EventBridge !== undefined) {
+                    EventBridge.scriptEventReceived.connect(function(data) {
+                        data = JSON.parse(data);
+                        if (data.type == "log" && _loggingEnabled) {
+                            if (data.logEntry !== undefined) {
+                                _logs.push(data.logEntry);
+                                _logs.shift();
+                                elLogDisplay.innerHTML = _logs.join("");
+                            }
+                        }
+                    });
+                }
+
+                elLogToggle.addEventListener("click", function() {
+                    if (_loggingEnabled) {
+                        _loggingEnabled = false;
+                        this.value = "Resume";
+                    } else {
+                        _loggingEnabled = true;
+                        this.value = "Pause";
+                    }
+                });
+
+                elClearLog.addEventListener("click", function() {
+                    elLogDisplay.innerHTML = "";
+                });
+
+            }
+        </script>
+    </head>
+    <body onload='loaded();'>
+        <div class="button-bar">
+            <div class="button-group">
+                <input type="button" id="toggle-logging" value="Pause"></button>
+                <input type="button" id="clear-log" value="Clear"></button>
+            </div>
+        </div>
+        <div>
+            <textarea id="log-display" autofocus="yes" cols="250" rows="500" ></textarea>
+        </div>
+    </body>
+</html>

@@ -23,20 +23,19 @@ MaleIdleToWalk3RP = function() {
     this.harmonics = {
 
         // harmonics for Fourier synthesis of selected curves
-        upperLegHarmonicMagnitudes: [17.538920734375, 23.08425475645531, 2.9714963624155475],
+        upperLegHarmonicMagnitudes: [0.7597785122, 1, 0.128723946],
         upperLegHarmonicPhaseAngles: [0, -1.978736510128823, 0.4421915515224404],
 
         lowerLegHarmonicMagnitudes: [
-        50.2832053125, 19.977486179991658, 9.8120561631209, 3.9149396023953096,
-        1.9347406401084608, 0.494011941430673, 0.320480015303252, 0.4155457558427306,],
+        1, 0.3972993777, 0.1951358531, 0.0778577972,
+        0.0384768757, 0.0098245913, 0.0063735001, 0.0082641063],
 
         lowerLegHarmonicPhaseAngles: [
         3.141592653589793, -0.8445953085228647, 1.98985581486737, -1.1917752932493388,
         2.061766274940117, -0.9115015515304669, -2.4863137678767178, 1.0514082126383006],
 
         footHarmonicMagnitudes: [
-        122.87142500000002, 8.857044328370522, 12.379329322067036, 5.525255504032192,
-        6.547518009687611, 1.8987575976733153, 1.4654272940296846, 1.3481890158271028],
+        1, 0.0720838415, 0.1007502706, 0.0449677824, 0.0532875566, 0.0154532073, 0.0119265101, 0.010972356],
 
         footHarmonicPhaseAngles: [
         0, -0.17972447389053214, 1.151574676528302, 2.9857657685902033,
@@ -97,7 +96,7 @@ MaleIdleToWalk3RP = function() {
             "pitchPhase":-180,
             "yawPhase":0,
             "rollPhase":-141.96226,
-            "pitchOffset":-0.84906,
+            "pitchOffset":0,
             "yawOffset":0,
             "rollOffset":0,
             "thrust":0.0283,
@@ -106,7 +105,7 @@ MaleIdleToWalk3RP = function() {
             "thrustPhase":-88.98113,
             "bobPhase":91.69811,
             "swayPhase":-42.79245,
-            "thrustOffset":0.00094,
+            "thrustOffset":0,
             "bobOffset":0,
             "swayOffset":0,
             "pitchFrequencyMultiplier":2,
@@ -114,29 +113,29 @@ MaleIdleToWalk3RP = function() {
             "bobFrequencyMultiplier":2
         },
         "LeftUpLeg":{
-            "pitch":1.01887,
+            "pitch":23.51985,
             "yaw":0.79245,
             "roll":0.66038,
             "pitchPhase":345.0566,
             "yawPhase":90.33962,
             "rollPhase":94.41509,
-            "pitchOffset":-15.77358,
-            "yawOffset":0.07547,
+            "pitchOffset":-10.37736,
+            "yawOffset":0,
             "rollOffset":0
         },
         "RightUpLeg":{
-            "pitch":0,
-            "yaw":0,
-            "roll":0,
-            "pitchPhase":0,
-            "yawPhase":0,
-            "rollPhase":0,
-            "pitchOffset":0,
+            "pitch":23.51985,
+            "yaw":0.79245,
+            "roll":0.66038,
+            "pitchPhase":165.0566,
+            "yawPhase":90.33962,
+            "rollPhase":94.41509,
+            "pitchOffset":-10.37736,
             "yawOffset":0,
             "rollOffset":0
         },
         "LeftLeg":{
-            "pitch":1.28302,
+            "pitch":64.51435,
             "yaw":0,
             "roll":0,
             "pitchPhase":340.98113,
@@ -144,21 +143,21 @@ MaleIdleToWalk3RP = function() {
             "rollPhase":93.0566,
             "pitchOffset":44.15094,
             "yawOffset":-6.11321,
-            "rollOffset":-0.07547
+            "rollOffset":0
         },
         "RightLeg":{
-            "pitch":0,
+            "pitch":64.51435,
             "yaw":0,
             "roll":0,
-            "pitchPhase":0,
-            "yawPhase":0,
-            "rollPhase":0,
-            "pitchOffset":0,
-            "yawOffset":0,
+            "pitchPhase":160.98113,
+            "yawPhase":4.75472,
+            "rollPhase":93.0566,
+            "pitchOffset":44.15094,
+            "yawOffset":6.11321,
             "rollOffset":0
         },
         "LeftFoot":{
-            "pitch":0.98113,
+            "pitch":120.55284,
             "yaw":1.43396,
             "roll":3.62264,
             "pitchPhase":345.73585,
@@ -169,13 +168,13 @@ MaleIdleToWalk3RP = function() {
             "rollOffset":0
         },
         "RightFoot":{
-            "pitch":0,
-            "yaw":0,
-            "roll":0,
-            "pitchPhase":0,
-            "yawPhase":0,
+            "pitch":120.55284,
+            "yaw":1.43396,
+            "roll":3.62264,
+            "pitchPhase":165.73585,
+            "yawPhase":12.9,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-125.66038,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -186,8 +185,8 @@ MaleIdleToWalk3RP = function() {
             "pitchPhase":285.28302,
             "yawPhase":-51.4,
             "rollPhase":-77.1,
-            "pitchOffset":9.84906,
-            "yawOffset":-4.60377,
+            "pitchOffset":14,
+            "yawOffset":0,
             "rollOffset":0
         },
         "RightToeBase":{

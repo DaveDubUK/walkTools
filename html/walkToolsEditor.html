@@ -1,0 +1,1212 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkToolsStyle.css">
+        <link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.min.css">
+        <script src="jquery-2.1.4.min.js"></script>
+        <script src="jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+        <script>
+       
+            // ECMAScript 6 specification ready string.contains() function
+            if (!('contains' in String.prototype)) {
+                String.prototype.contains = function(str, startIndex) {
+                    return ''.indexOf.call(this, str, startIndex) !== -1;
+                };
+            }        
+
+            // the main function
+            function loaded() {
+
+                // radio buttons
+                var _elEditingOff = document.getElementById("editing-off");
+                var _elEditingFree = document.getElementById("editing-free");
+                var _elEditingSymmetrical = document.getElementById("editing-symmetrical");
+                var _elEditingOppositeSymmetrical = document.getElementById("editing-opposite-symmetrical");
+                var _elEditingRotations = document.getElementById("editing-rotations");
+                var _elEditingTranslations = document.getElementById("editing-translations");
+                
+                // dropdown selects
+                var _elAnimationSelect = document.getElementById("animation-select");
+                var _elLeftHandSelect = document.getElementById("left-hand-select");
+                var _elRightHandSelect = document.getElementById("right-hand-select");
+                var _elSliderRangeSelect = document.getElementById("slider-range-select");
+                // arrays for dropdown selects
+                var _animations = null;
+                var _leftHandJoints = null;
+                var _rightHandJoints = null;
+                var _sliderRangeOptions = ['Animation', 'Full Range'];
+                var _sliderRanges = null;
+                
+                // slider values
+                var _animationParamsTextInputs = [];
+                var _elPitchOscillation = document.getElementById("pitch-oscillation-text");
+                _animationParamsTextInputs.push(_elPitchOscillation);
+                var _elYawOscillation = document.getElementById("yaw-oscillation-text");
+                _animationParamsTextInputs.push(_elYawOscillation);
+                var _elRollOscillation = document.getElementById("roll-oscillation-text");
+                _animationParamsTextInputs.push(_elRollOscillation);
+                var _elPitchPhase = document.getElementById("pitch-phase-text");
+                _animationParamsTextInputs.push(_elPitchPhase);
+                var _elYawPhase = document.getElementById("yaw-phase-text");
+                _animationParamsTextInputs.push(_elYawPhase);
+                var _elRollPhase = document.getElementById("roll-phase-text");
+                _animationParamsTextInputs.push(_elRollPhase);
+                var _elPitchOffset = document.getElementById("pitch-offset-text");
+                _animationParamsTextInputs.push(_elPitchOffset);
+                var _elYawOffset = document.getElementById("yaw-offset-text");
+                _animationParamsTextInputs.push(_elYawOffset);
+                var _elRollOffset = document.getElementById("roll-offset-text");
+                _animationParamsTextInputs.push(_elRollOffset);
+                
+                // animation parameter(pitch yaw roll) sliders 
+                var _sliders = [];
+                
+                // transport bar sliders
+                var _elFrequencySlider = $("#frequency-slider");
+                var _elGlobalPhaseSlider = $("#global-phase-slider");
+                var _elTransportSlider = $("#transport-slider");
+
+                // internal vars
+                var _dataReady = false; // do not send data unless ready
+                var _dataReadyLight = document.getElementById("data-ready-led");
+                function lockData(lock) {
+                    if (lock) {
+                        _dataReady = false;
+                        _dataReadyLight.style.visibility = "hidden"; 
+                    } else  {
+                        _dataReady = true;
+                        _dataReadyLight.style.visibility = "visible";
+                    }
+                }
+                lockData(true); // lock until after initial values update
+                
+                var _editMode = {
+                    editing: false,
+                    editingTranslation: false,
+                    symmetricalEditing: false,
+                    opposingSymmetricalEditing: true,
+                    editingFingersLeft: false,
+                    editingFingersRight: false
+                }
+                _animationBeingEdited = "MaleIdle";
+                _jointData = {};
+                _pairedJointData = {};
+
+                // joint selectors
+                function selector(name, element, left, top, right, bottom) {
+                    this.name = name;
+                    this.element = element;
+                    this.left = left;
+                    this.top = top;
+                    this.right = right;
+                    this.bottom = bottom;
+                }
+                var _jointSelectors = [];
+                var _joint = "Hips";
+                var _pairedJoint = "None";
+                var _IKChain = "Torso";
+
+                // map the joint selectors
+                var headJointSelector = new selector("Head", document.getElementById("head-joint-selector"), 84, 14, 115, 46);
+                _jointSelectors.push(headJointSelector);
+                var neckJointSelector = new selector("Neck", document.getElementById("neck-joint-selector"), 84, 46, 115, 62);
+                _jointSelectors.push(neckJointSelector);
+                var leftShoulderJointSelector = new selector("LeftShoulder", document.getElementById("left-shoulder-joint-selector"), 113, 56, 128, 69);
+                _jointSelectors.push(leftShoulderJointSelector);
+                var rightShoulderJointSelector = new selector("RightShoulder", document.getElementById("right-shoulder-joint-selector"), 67, 56, 86, 69);
+                _jointSelectors.push(rightShoulderJointSelector);
+                var leftArmJointSelector = new selector("LeftArm", document.getElementById("left-upper-arm-joint-selector"), 128, 56, 143, 95);
+                _jointSelectors.push(leftArmJointSelector);
+                var rightArmJointSelector = new selector("RightArm", document.getElementById("right-upper-arm-joint-selector"), 56, 56, 67, 95);
+                _jointSelectors.push(rightArmJointSelector);
+                var leftForeArmJointSelector = new selector("LeftForeArm", document.getElementById("left-lower-arm-joint-selector"), 143, 95, 166, 116);
+                _jointSelectors.push(leftForeArmJointSelector);
+                var rightForeArmJointSelector = new selector("RightForeArm", document.getElementById("right-lower-arm-joint-selector"), 34, 95, 56, 115);
+                _jointSelectors.push(rightForeArmJointSelector);
+                var leftHandJointSelector = new selector("LeftHand", document.getElementById("left-hand-joint-selector"), 166, 116, 178, 134);
+                _jointSelectors.push(leftHandJointSelector);
+                var rightHandJointSelector = new selector("RightHand", document.getElementById("right-hand-joint-selector"), 15, 115, 34, 135);
+                _jointSelectors.push(rightHandJointSelector);
+                var spine2JointSelector = new selector("Spine2", document.getElementById("spine2-joint-selector"), 77, 77, 121, 96);
+                _jointSelectors.push(spine2JointSelector);
+                var spine1JointSelector = new selector("Spine1", document.getElementById("spine1-joint-selector"), 77, 96, 121, 108);
+                _jointSelectors.push(spine1JointSelector);
+                var spineJointSelector = new selector("Spine", document.getElementById("spine-joint-selector"), 77, 108, 121, 126);
+                _jointSelectors.push(spineJointSelector);
+                var hipsJointSelector = new selector("Hips", document.getElementById("hips-joint-selector"), 73, 126, 124, 153);
+                _jointSelectors.push(hipsJointSelector);
+                var leftUpLegJointSelector = new selector("LeftUpLeg", document.getElementById("left-upper-leg-joint-selector"), 100, 153, 131, 200);
+                _jointSelectors.push(leftUpLegJointSelector);
+                var rightUpLegJointSelector = new selector("RightUpLeg", document.getElementById("right-upper-leg-joint-selector"), 66, 153, 100, 200);
+                _jointSelectors.push(rightUpLegJointSelector);
+                var leftLegJointSelector = new selector("LeftLeg", document.getElementById("left-lower-leg-joint-selector"), 113, 200, 134, 255);
+                _jointSelectors.push(leftLegJointSelector);
+                var rightLegJointSelector = new selector("RightLeg", document.getElementById("right-lower-leg-joint-selector"), 59, 200, 84, 255);
+                _jointSelectors.push(rightLegJointSelector);
+                var leftFootJointSelector = new selector("LeftFoot", document.getElementById("left-foot-joint-selector"), 121, 255, 137, 261);
+                _jointSelectors.push(leftFootJointSelector);
+                var rightFootJointSelector = new selector("RightFoot", document.getElementById("right-foot-joint-selector"), 59, 255, 77, 261);
+                _jointSelectors.push(rightFootJointSelector);
+                var leftToesJointSelector = new selector("LeftToeBase", document.getElementById("left-toes-joint-selector"), 121, 261, 137, 275);
+                _jointSelectors.push(leftToesJointSelector);
+                var rightToesJointSelector = new selector("RightToeBase", document.getElementById("right-toes-joint-selector"), 59, 261, 77, 275);
+                _jointSelectors.push(rightToesJointSelector);
+                var translationJointSelector = new selector("Translation", document.getElementById("hips-translation-joint-selector"));
+                _jointSelectors.push(translationJointSelector);
+                
+                // map the (invisible) direction buttons
+                var _directionSelectors = [];
+                var faceNorth = new selector("North", null, 70, 0, 85, 20);
+                _directionSelectors.push(faceNorth);
+                var faceSouth = new selector("South", null, 70, 100, 85, 122);
+                _directionSelectors.push(faceSouth);
+                var faceEast = new selector("East", null, 111, 50, 139, 69);
+                _directionSelectors.push(faceEast);
+                var faceWest = new selector("West", null, 14, 52, 41, 67);
+                _directionSelectors.push(faceWest);
+                var faceNorthEast = new selector("NorthEast", null, 83, 29, 104, 54);
+                _directionSelectors.push(faceNorthEast);
+                var faceSouthEast = new selector("SouthEast", null, 83, 65, 104, 86);
+                _directionSelectors.push(faceSouthEast);
+                var faceSouthWest = new selector("SouthWest", null, 48, 65, 70, 86);
+                _directionSelectors.push(faceSouthWest);
+                var faceNorthWest = new selector("NorthWest", null, 48, 29, 70, 54);
+                _directionSelectors.push(faceNorthWest);
+                var goHome = new selector("GoHome", null, 67, 51, 86, 69);
+                _directionSelectors.push(goHome);
+                
+                // animation parameter sliders
+                var pitchSlider = $("#pitch-oscillation");
+                _sliders.push(pitchSlider);
+                var yawSlider = $("#yaw-oscillation");
+                _sliders.push(yawSlider);
+                var rollSlider = $("#roll-oscillation");
+                _sliders.push(rollSlider);
+                var pitchPhaseSlider = $("#pitch-phase");
+                _sliders.push(pitchPhaseSlider);
+                var yawPhaseSlider = $("#yaw-phase");
+                _sliders.push(yawPhaseSlider);
+                var rollPhaseSlider = $("#roll-phase");
+                _sliders.push(rollPhaseSlider);
+                var pitchOffsetSlider = $("#pitch-offset");
+                _sliders.push(pitchOffsetSlider);
+                var yawOffsetSlider = $("#yaw-offset");
+                _sliders.push(yawOffsetSlider);
+                var rollOffsetSlider = $("#roll-offset");
+                _sliders.push(rollOffsetSlider);
+
+                turnOn = function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "editorEvent",
+                        action: "enableEditMode"
+                    }));
+                    _editMode.editing = true;
+                    _elAnimationSelect.disabled = false;
+                    _elLeftHandSelect.disabled = false;
+                    _elRightHandSelect.disabled = false;
+                    _elSliderRangeSelect.disabled = false;
+                    _elFrequencySlider.slider("enable");
+                    _elGlobalPhaseSlider.slider("enable");
+                    _elTransportSlider.slider("enable");
+                    for (i in _animationParamsTextInputs) {
+                        _animationParamsTextInputs[i].disabled = false;
+                    }
+                    for (i in _sliders) {
+                        _sliders[i].slider("enable");
+                    }                 
+                }
+                
+                turnOff = function() {             
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "editorEvent",
+                        action: "disableEditMode"
+                    }));                
+                    _editMode.editing = false;
+                    _elAnimationSelect.disabled = true;
+                    _elLeftHandSelect.disabled = true;
+                    _elRightHandSelect.disabled = true;
+                    _elSliderRangeSelect.disabled = true;
+                    _elFrequencySlider.slider("disable");
+                    _elGlobalPhaseSlider.slider("disable");
+                    _elTransportSlider.slider("disable");
+                    for (i in _animationParamsTextInputs) {
+                        _animationParamsTextInputs[i].disabled = true;
+                    }
+                    for (i in _sliders) {
+                        _sliders[i].slider("disable");
+                    }
+                }   
+
+                updateBuffer = function() {
+                    if (_dataReady) {
+                        EventBridge.emitWebEvent(JSON.stringify({
+                            type: "editorEvent",
+                            action: "setJointData",
+                            joint: _joint,
+                            jointData: _jointData
+                        }));
+                        if (_pairedJoint !== "None" &&
+                           (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing)) {
+                            EventBridge.emitWebEvent(JSON.stringify({
+                                type: "editorEvent",
+                                action: "setJointData",
+                                joint: _pairedJoint,
+                                jointData: _pairedJointData
+                            }));
+                        }
+                    }
+                }
+
+                updateLabels = function(editingRotations) {
+                
+                    if (editingRotations) {
+                        $("#pitchOsc").html("Pitch Osc");
+                        $("#yawOsc").html("Yaw Osc");
+                        $("#rollOsc").html("Roll Osc");
+                        $("#pitchPhase").html("Pitch Phase");
+                        $("#yawPhase").html("Yaw Phase");
+                        $("#rollPhase").html("Roll Phase");
+                        $("#pitchOffset").html("Pitch Offset");
+                        $("#yawOffset").html("Yaw Offset");
+                        $("#rollOffset").html("Roll Offset");
+                    } else {
+                        $("#pitchOsc").html("Sway Osc");
+                        $("#yawOsc").html("Bob Osc");
+                        $("#rollOsc").html("Thrust Osc");
+                        $("#pitchPhase").html("Sway Phase");
+                        $("#yawPhase").html("Bob Phase");
+                        $("#rollPhase").html("Thrust Phase");
+                        $("#pitchOffset").html("Sway Offset");
+                        $("#yawOffset").html("Bob Offset");
+                        $("#rollOffset").html("Thrust Offset");
+                    }
+                    updateJointValues();
+                }                
+
+                var SHOW_DP = 3;
+                updateSlider = function(jointDataSlider, jointData, min, max) {
+                    jointDataSlider.slider('option', 'min', min);
+                    jointDataSlider.slider('option', 'max', max);
+                    jointDataSlider.slider('option', 'value', jointData);
+                    jointDataSlider.slider('option','slide')
+                        .call(jointDataSlider, null, {
+                            handle: $('.ui-slider-handle', jointDataSlider), value: jointData
+                        });
+                }
+                updateJointValues = function() {
+                
+                    if (_editMode.editingTranslation) {                
+                        _elPitchOscillation.value = _jointData.sway.toFixed(SHOW_DP);
+                        _elYawOscillation.value = _jointData.bob.toFixed(SHOW_DP);
+                        _elRollOscillation.value = _jointData.thrust.toFixed(SHOW_DP);
+                        _elPitchPhase.value = _jointData.swayPhase.toFixed(SHOW_DP);
+                        _elYawPhase.value = _jointData.bobPhase.toFixed(SHOW_DP);
+                        _elRollPhase.value = _jointData.yawPhase.toFixed(SHOW_DP);
+                        _elPitchOffset.value = _jointData.swayOffset.toFixed(SHOW_DP);
+                        _elYawOffset.value = _jointData.bobOffset.toFixed(SHOW_DP);
+                        _elRollOffset.value = _jointData.thrustOffset.toFixed(SHOW_DP);
+                        
+                        // update slider values and positions
+                        updateSlider($('#pitch-oscillation'), _jointData.sway, 0, _sliderRanges["Hips"].swayRange);
+                        updateSlider($('#yaw-oscillation'), _jointData.bob, 0, _sliderRanges["Hips"].bobRange);
+                        updateSlider($('#roll-oscillation'), _jointData.thrust, 0, _sliderRanges["Hips"].thrustRange);
+                        updateSlider($('#pitch-phase'), _jointData.swayPhase, -180, 180);
+                        updateSlider($('#yaw-phase'), _jointData.bobPhase, -180, 180);
+                        updateSlider($('#roll-phase'), _jointData.thrustPhase, -180, 180);
+                        updateSlider($('#pitch-offset'), _jointData.swayOffset, 
+                            -_sliderRanges["Hips"].swayOffsetRange, _sliderRanges["Hips"].swayOffsetRange);
+                        updateSlider($('#yaw-offset'), _jointData.bobOffset,
+                            -_sliderRanges["Hips"].bobOffsetRange, _sliderRanges["Hips"].bobOffsetRange);
+                        updateSlider($('#roll-offset'), _jointData.thrustOffset,
+                            -_sliderRanges["Hips"].thrustOffsetRange, _sliderRanges["Hips"].thrustOffsetRange);
+                    } else {
+                        _elPitchOscillation.value = _jointData.pitch.toFixed(SHOW_DP);
+                        _elYawOscillation.value = _jointData.yaw.toFixed(SHOW_DP);
+                        _elRollOscillation.value = _jointData.roll.toFixed(SHOW_DP);
+                        _elPitchPhase.value = _jointData.pitchPhase.toFixed(SHOW_DP);
+                        _elYawPhase.value = _jointData.yawPhase.toFixed(SHOW_DP);
+                        _elRollPhase.value = _jointData.rollPhase.toFixed(SHOW_DP);
+                        _elPitchOffset.value = _jointData.pitchOffset.toFixed(SHOW_DP);
+                        _elYawOffset.value = _jointData.yawOffset.toFixed(SHOW_DP);
+                        _elRollOffset.value = _jointData.rollOffset.toFixed(SHOW_DP);
+                        
+                        // update slider values and positions
+                        if (_editMode.editingFingersLeft || _editMode.editingFingersRight) {
+                            // full ranges for the fingers, no messing around
+                            updateSlider($('#pitch-oscillation'), _jointData.pitch, 0, 180);
+                            updateSlider($('#yaw-oscillation'), _jointData.yaw, 0, 180);
+                            updateSlider($('#roll-oscillation'), _jointData.roll, 0, 180);
+                            updateSlider($('#pitch-phase'), _jointData.pitchPhase, -180, 180);
+                            updateSlider($('#yaw-phase'), _jointData.yawPhase, -180, 180);
+                            updateSlider($('#roll-phase'), _jointData.rollPhase, -180, 180);
+                            updateSlider($('#pitch-offset'), _jointData.pitchOffset, -180, 180);
+                            updateSlider($('#yaw-offset'), _jointData.yawOffset, -180, 180);
+                            updateSlider($('#roll-offset'), _jointData.rollOffset, -180, 180);
+                        } else {
+                            updateSlider($('#pitch-oscillation'), _jointData.pitch, 0, _sliderRanges[_joint].pitchRange);
+                            updateSlider($('#yaw-oscillation'), _jointData.yaw, 0, _sliderRanges[_joint].yawRange);
+                            updateSlider($('#roll-oscillation'), _jointData.roll, 0, _sliderRanges[_joint].rollRange);
+                            updateSlider($('#pitch-phase'), _jointData.pitchPhase, -180, 180);
+                            updateSlider($('#yaw-phase'), _jointData.yawPhase, -180, 180);
+                            updateSlider($('#roll-phase'), _jointData.rollPhase, -180, 180);
+                            updateSlider($('#pitch-offset'), _jointData.pitchOffset, 
+                                -_sliderRanges[_joint].pitchOffsetRange, _sliderRanges[_joint].pitchOffsetRange);
+                            updateSlider($('#yaw-offset'), _jointData.yawOffset,
+                                -_sliderRanges[_joint].yawOffsetRange, _sliderRanges[_joint].yawOffsetRange);
+                            updateSlider($('#roll-offset'), _jointData.rollOffset,
+                                -_sliderRanges[_joint].rollOffsetRange, _sliderRanges[_joint].rollOffsetRange);
+                        }
+                    }                        
+                }
+
+                updateRadios = function() {
+                    if (_editMode.editing) {
+                        _elEditingOff.checked = false;
+                        _elEditingRotations.checked = !_editMode.editingTranslation;
+                        _elEditingTranslations.checked = _editMode.editingTranslation;
+                        if (_editMode.opposingSymmetricalEditing) {
+                            _elEditingFree.checked = false;
+                            _elEditingSymmetrical.checked = false;
+                            _elEditingOppositeSymmetrical.checked = true;
+                        } else if (_editMode.symmetricalEditing) {
+                            _elEditingFree.checked = false;
+                            _elEditingSymmetrical.checked = true;
+                            _elEditingOppositeSymmetrical.checked = false;
+                        } else {
+                            _elEditingFree.checked = true;
+                            _elEditingSymmetrical.checked = false;
+                            _elEditingOppositeSymmetrical.checked = false;
+                        }
+                    } else {
+                        _elEditingRotations.checked = false;
+                        _elEditingTranslations.checked = false;
+                        _elEditingOff.checked = true;
+                        _elEditingFree.checked = false;
+                        _elEditingSymmetrical.checked = false;
+                        _elEditingOppositeSymmetrical.checked = false;
+                    }
+                }
+
+                update = function() {
+                    // keep the joint selector updated
+                    if (_editMode.editingTranslation || !_editMode.editing) {
+                        for (selector in _jointSelectors) {
+                            if (_jointSelectors[selector].name === "Translation") {
+                                _jointSelectors[selector].element.style.visibility = "visible";
+                            } else {
+                                _jointSelectors[selector].element.style.visibility = "hidden";
+                            }
+                        }
+                    } else {
+                        // currently selected joint and maybe paired joint
+                        for (selector in _jointSelectors) {
+                            if (_jointSelectors[selector].name === _joint) {
+                                _jointSelectors[selector].element.style.visibility = "visible";
+                            } else if (_jointSelectors[selector].name === _pairedJoint && 
+                                      (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing)) {
+                                _jointSelectors[selector].element.style.visibility = "visible";
+                            }
+                            else {
+                                _jointSelectors[selector].element.style.visibility = "hidden";
+                            }
+                        }
+                    }
+                    
+                    if ($( "#frequency-slider" ).slider('option', 'value') > 0) {
+                        _elTransportSlider.slider('option', 'value', _ftWheelPosition);
+                        _elTransportSlider.slider('option', 'slide')
+                            .call(_elTransportSlider, null, {
+                                handle: $('.ui-slider-handle', _elTransportSlider), value: _ftWheelPosition
+                            });
+                    }
+                    updateRadios();
+                }
+
+                initialise = function() {
+                    // populate dropdown selects
+                    for (var i = 0; i < _animations.length; i++) {
+                        var opt = _animations[i];
+                        var el = document.createElement("option");
+                        el.textContent = opt;
+                        el.value = opt;
+                        _elAnimationSelect.appendChild(el);
+                    }
+                    _elAnimationSelect.value = _animationBeingEdited;
+                    for (var i = 0; i < _leftHandJoints.length; i++) {
+                        var opt = _leftHandJoints[i].name;
+                        var el = document.createElement("option");
+                        el.textContent = opt;
+                        el.value = opt;
+                        _elLeftHandSelect.appendChild(el);
+                    }
+                    _elLeftHandSelect.value = "None";
+                    for (var i = 0; i < _rightHandJoints.length; i++) {
+                        var opt = _rightHandJoints[i].name;
+                        var el = document.createElement("option");
+                        el.textContent = opt;
+                        el.value = opt;
+                        _elRightHandSelect.appendChild(el);
+                    }
+                    _elRightHandSelect.value = "None"; 
+                    for (var i = 0; i < _sliderRangeOptions.length; i++) {
+                        var opt = _sliderRangeOptions[i];
+                        var el = document.createElement("option");
+                        el.textContent = opt;
+                        el.value = opt;
+                        _elSliderRangeSelect.appendChild(el);
+                    }                   
+                }
+
+                oscillationSliderSliding = function(id, value) {
+                    var updatePair = false;
+                    if (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing) {
+                        updatePair = true;
+                    }
+                    switch(id) {
+                        case "pitch-oscillation":
+                            if(_editMode.editingTranslation) {
+                                _jointData.sway = value;
+                            } else {
+                                _jointData.pitch = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.pitch = determinePairedValue(value, false);
+                                }
+                            }
+                            _elPitchOscillation.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        case "yaw-oscillation":
+                            if(_editMode.editingTranslation) {
+                                _jointData.bob = value;
+                            } else {                        
+                                _jointData.yaw = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.yaw = determinePairedValue(value);
+                                }
+                            }
+                            _elYawOscillation.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        case "roll-oscillation":
+                            if(_editMode.editingTranslation) {
+                                _jointData.thrust = value;
+                            } else {                         
+                                _jointData.roll = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.roll = determinePairedValue(value);
+                                }
+                            }
+                            _elRollOscillation.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        default:
+                            return;
+                    }
+                    if (_dataReady) {
+                        updateBuffer();
+                    }
+                }
+
+                phaseSliderSliding = function(id, value) {
+                    var updatePair = false;
+                    if (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing) {
+                        updatePair = true;
+                    }
+                    switch(id) {
+                        case "pitch-phase":
+                            if(_editMode.editingTranslation) {
+                                _jointData.swayPhase = value;
+                            } else {                            
+                                _jointData.pitchPhase = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.pitchPhase = determinePairedValue(value, false);
+                                }
+                            }
+                            _elPitchPhase.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        case "yaw-phase":
+                            if(_editMode.editingTranslation) {
+                                _jointData.bobPhase = value;
+                            } else {                           
+                                _jointData.yawPhase = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.yawPhase = determinePairedValue(value);
+                                }
+                            }
+                            _elYawPhase.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        case "roll-phase":
+                            if(_editMode.editingTranslation) {
+                                _jointData.thrustPhase = value;
+                            } else {                          
+                                _jointData.rollPhase = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.rollPhase = determinePairedValue(value);
+                                }
+                            }
+                            _elRollPhase.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        default:
+                            return;
+                    }
+                    if (_dataReady) {
+                        updateBuffer();
+                    }
+                }
+
+                offsetSliderSliding = function(id, value) {
+                    var updatePair = false;
+                    if (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing) {
+                        updatePair = true;
+                    }
+                    switch(id) {
+                        case "pitch-offset":
+                            if(_editMode.editingTranslation) {
+                                _jointData.swayOffset = value;
+                            } else {                           
+                                _jointData.pitchOffset = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.pitchOffset = determinePairedValue(value, false);
+                                }
+                            }
+                            _elPitchOffset.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        case "yaw-offset":
+                            if(_editMode.editingTranslation) {
+                                _jointData.bobOffset = value;
+                            } else {                           
+                                _jointData.yawOffset = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.yawOffset = determinePairedValue(value);
+                                }
+                            }
+                            _elYawOffset.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        case "roll-offset":
+                            if(_editMode.editingTranslation) {
+                                _jointData.thrustOffset = value;
+                            } else {                          
+                                _jointData.rollOffset = value;
+                                if (_pairedJoint !== "None" && updatePair) {
+                                    _pairedJointData.rollOffset = determinePairedValue(value);
+                                }
+                            }
+                            _elRollOffset.value = value.toFixed(SHOW_DP);
+                            break;
+
+                        default:
+                            return;
+                    }
+                    if (_dataReady) {
+                        updateBuffer();
+                    }
+                }
+
+                determinePairedValue = function(value, reverseArmsIK) {
+
+                    if (reverseArmsIK === undefined) {
+                        reverseArmsIK = true;
+                    }
+                    var returnValue = value;
+
+                    if (_editMode.opposingSymmetricalEditing) {
+                        returnValue *= -1;
+                    }
+                    if (reverseArmsIK && (_IKChain === "LeftArm" || _IKChain === "RightArm")) {
+                        returnValue *= -1;
+                    }
+                    return returnValue;
+                }
+
+                // radio click event handlers
+                _elEditingOff.addEventListener("click", function() {
+                    if (this.checked) {
+                        turnOff();
+                    }
+                });
+                _elEditingFree.addEventListener("click", function() {
+                    if (this.checked) {
+                        _editMode.symmetricalEditing = false;
+                        _editMode.opposingSymmetricalEditing = false;
+                        turnOn();
+                    }
+                });
+                _elEditingSymmetrical.addEventListener("click", function() {
+                    if (this.checked) {
+                        _editMode.symmetricalEditing = true;
+                        _editMode.opposingSymmetricalEditing = false;
+                        turnOn();
+                    }
+                });
+                _elEditingOppositeSymmetrical.addEventListener("click", function() {
+                    if (this.checked) {
+                        _editMode.symmetricalEditing = false;
+                        _editMode.opposingSymmetricalEditing = true;
+                        turnOn();
+                    }
+                });
+                _elEditingRotations.addEventListener("click", function() {
+                    if (this.checked) {
+                        lockData(true);
+                        _editMode.editingTranslation = false;
+                        _elLeftHandSelect.value = "None";
+                        _elRightHandSelect.value = "None";
+                        _elLeftHandSelect.disabled = false;
+                        _elRightHandSelect.disabled = false;                        
+                        updateJointValues();
+                        updateLabels(true);
+                        turnOn();
+                        lockData(false);
+                    }
+                });
+                _elEditingTranslations.addEventListener("click", function() {
+                    if (this.checked) {
+                        lockData(true);
+                        _editMode.editingTranslation = true;
+                        _elLeftHandSelect.value = "None";
+                        _elRightHandSelect.value = "None";
+                        _elLeftHandSelect.disabled = true;
+                        _elRightHandSelect.disabled = true;
+                        _joint = "Hips";
+                        lockData(true);
+                        EventBridge.emitWebEvent(JSON.stringify({
+                            type: "editorEvent",
+                            action: "getJointData",
+                            selectedJoint: _joint
+                        }));                        
+                        turnOn();
+                        lockData(false);
+                    }
+                });
+
+                // dropdown select handlers
+                _elAnimationSelect.onchange = function(){
+                    lockData(true);
+                    _animationBeingEdited = _elAnimationSelect.options[_elAnimationSelect.selectedIndex].value;
+                    //alert('_animationBeingEdited selected: '+_animationBeingEdited);
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "editorEvent",
+                        action: "selectAnimation",
+                        selectedAnimation: _animationBeingEdited
+                    }));
+                }
+                _elSliderRangeSelect.onchange = function(){
+                    lockData(true);
+                    var newSliderRange = _elSliderRangeSelect.options[_elSliderRangeSelect.selectedIndex].value;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "editorEvent",
+                        action: "selectSliderRange",
+                        selectedSliderRange: newSliderRange
+                    }));
+                }
+                _elLeftHandSelect.onchange = function(){
+                    lockData(true);
+                    _elRightHandSelect.value = "None";
+                    _editMode.editingFingersLeft = true;
+                    _editMode.editingFingersRight = false;
+                    _joint = _elLeftHandSelect.options[_elLeftHandSelect.selectedIndex].value;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "editorEvent",
+                        action: "getJointData",
+                        selectedJoint: _joint
+                    }));
+                }
+                _elRightHandSelect.onchange = function(){
+                    lockData(true);
+                    _elLeftHandSelect.value = "None";
+                    _editMode.editingFingersLeft = false;
+                    _editMode.editingFingersRight = true;
+                    _joint = _elRightHandSelect.options[_elRightHandSelect.selectedIndex].value;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "editorEvent",
+                        action: "getJointData",
+                        selectedJoint: _joint
+                    }));
+                }             
+                
+                // text input event handlers
+                for (i in _animationParamsTextInputs) {
+                    _animationParamsTextInputs[i].addEventListener("change", function() {
+                        var value = Number(this.value);
+                        switch (this.id) {
+                            case "pitch-oscillation-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.sway = value;
+                                } else {
+                                    _jointData.pitch = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.pitch = determinePairedValue(value, false);
+                                    }
+                                }                                
+                                updateJointValues();
+                                break;
+
+                            case "yaw-oscillation-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.bob = value;
+                                } else {                            
+                                    _jointData.yaw = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.yaw = determinePairedValue(value);
+                                    }                                
+                                }
+                                updateJointValues();
+                                break;                                
+                                
+                            case "roll-oscillation-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.thrust = value;
+                                } else {                                   
+                                    _jointData.roll = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.roll = determinePairedValue(value);
+                                    }
+                                }
+                                updateJointValues();
+                                break;                                
+
+                            case "pitch-phase-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.swayPhase = value;
+                                } else {                               
+                                    _jointData.pitchPhase = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.pitchPhase = determinePairedValue(value, false);
+                                    }
+                                }                                
+                                updateJointValues();
+                                break;
+
+                            case "yaw-phase-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.bobPhase = value;
+                                } else {                                
+                                    _jointData.yawPhase = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.yawPhase = determinePairedValue(value);
+                                    }      
+                                }                                
+                                updateJointValues();
+                                break;                                
+                                
+                            case "roll-phase-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.thrustPhase = value;
+                                } else {                              
+                                    _jointData.rollPhase = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.rollPhase = determinePairedValue(value);
+                                    }
+                                }                                
+                                updateJointValues();
+                                break;   
+
+                            case "pitch-offset-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.swayOffset = value;
+                                } else {                                 
+                                    _jointData.pitchOffset = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.pitchOffset = determinePairedValue(value, false);
+                                    }
+                                }                                
+                                updateJointValues();
+                                break;
+
+                            case "yaw-offset-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.bobOffset = value;
+                                } else {                               
+                                    _jointData.yawOffset = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.yawOffset = determinePairedValue(value);
+                                    }
+                                }                                
+                                updateJointValues();
+                                break;                                
+                                
+                            case "roll-offset-text":
+                                if (_editMode.editingTranslation) {
+                                    _jointData.thrustOffset = value;
+                                } else {                               
+                                    _jointData.rollOffset = value;
+                                    if (_pairedJoint !== "None") {
+                                        _pairedJointData.rollOffset = determinePairedValue(value);
+                                    }
+                                }                                
+                                updateJointValues();
+                                break;   
+                                
+                            default:
+                                break;
+                        }
+                    });
+                }
+
+                // jQueryUI initialisation
+                const MIN_SLIDER_STEP = 0.001;
+                const SLIDER_STEP = 0.01;
+                $(function() {
+                    $( ".oscillation-slider" ).slider({
+                        min: 0,
+                        max: 180,
+                        value: 0,
+                        step: MIN_SLIDER_STEP,
+                        orientation: "horizontal",
+                        slide: function(event, ui) {
+                            if (_dataReady) {
+                                var id = $(this).attr("id");
+                                var value = ui.value;
+                                oscillationSliderSliding(id, value);
+                            }
+                        }
+                    }),
+
+                    $( ".phase-slider" ).slider({
+                        min: -180,
+                        max: 180,
+                        value: 0,
+                        step: MIN_SLIDER_STEP,
+                        orientation: "horizontal",
+                        slide: function(event, ui) {
+                            if (_dataReady) {
+                                var id = $(this).attr("id");
+                                var value = ui.value;
+                                phaseSliderSliding(id, value);
+                            }
+                        }
+                    }),
+
+                    $( ".offset-slider" ).slider({
+                        min: -180,
+                        max: 180,
+                        value: 0,
+                        step: MIN_SLIDER_STEP,
+                        orientation: "horizontal",
+                        slide: function(event, ui) {
+                            if (_dataReady) {
+                                var id = $(this).attr("id");
+                                var value = ui.value;
+                                offsetSliderSliding(id, value);
+                            }
+                        }
+                    })
+
+                    $( "#frequency-slider" ).slider({
+                        min: 0,
+                        max: 15,
+                        value: 5,
+                        step: SLIDER_STEP,
+                        orientation: "horizontal",
+                        slide: function(event, ui) {
+                            EventBridge.emitWebEvent(JSON.stringify({
+                                type: "editorEvent",
+                                action: "frequencyUpdate",
+                                frequency: ui.value
+                            }));
+                        }
+                    })
+
+                    $( "#global-phase-slider" ).slider({
+                        min: -180,
+                        max: 180,
+                        value: 0,
+                        step: MIN_SLIDER_STEP,
+                        orientation: "horizontal",
+                        slide: function(event, ui) {
+                            lockData(true);
+                            EventBridge.emitWebEvent(JSON.stringify({
+                                type: "editorEvent",
+                                action: "globalPhaseUpdate",
+                                globalPhase: ui.value
+                            }));
+                        }
+                    })
+
+                    $( "#transport-slider" ).slider({
+                        min: 0,
+                        max: 359,
+                        value: 0,
+                        step: MIN_SLIDER_STEP,
+                        orientation: "horizontal",
+                        slide: function(event, ui) {
+                            if ($( "#frequency-slider" ).slider('option', 'value') === 0) {
+                                EventBridge.emitWebEvent(JSON.stringify({
+                                    type: "editorEvent",
+                                    action: "ftWheelUpdate",
+                                    ftWheelPosition: ui.value
+                                }));
+                            }
+                        }
+                    })
+
+                    // joint selector
+                    $("#editor-joint-selector", "#editor-right", ".joint-selector").click(function(event) {
+                        var posX = event.pageX - $(this).offset().left,
+                            posY = event.pageY - $(this).offset().top;
+                        for (selector in _jointSelectors) {
+                            if (posX > _jointSelectors[selector].left &&
+                                posX < _jointSelectors[selector].right &&
+                                posY > _jointSelectors[selector].top &&
+                                posY < _jointSelectors[selector].bottom) {
+                                _editMode.editingFingersLeft = false;
+                                _editMode.editingFingersRight = false;
+                                _elLeftHandSelect.value = "None";
+                                _elRightHandSelect.value = "None";
+                                _joint = _jointSelectors[selector].name;
+                                lockData(true);
+                                EventBridge.emitWebEvent(JSON.stringify({
+                                    type: "editorEvent",
+                                    action: "getJointData",
+                                    selectedJoint: _joint
+                                }));
+                            }
+                        }
+                        return false;
+                    })
+                    
+                    // direction / home control     
+                    $("#editor-direction-selector").click(function(event) {
+                        var posX = event.pageX - $(this).offset().left,
+                            posY = event.pageY - $(this).offset().top;
+                            
+                        for (selector in _directionSelectors) {
+                            if (posX > _directionSelectors[selector].left &&
+                                posX < _directionSelectors[selector].right &&
+                                posY > _directionSelectors[selector].top &&
+                                posY < _directionSelectors[selector].bottom) {
+                                EventBridge.emitWebEvent(JSON.stringify({
+                                    type: "editorEvent",
+                                    action: "setDirection",
+                                    direction: _directionSelectors[selector].name
+                                }));
+                            }
+                        }
+                        return false;
+                    })                    
+                });
+
+				// script event received handler
+                if (window.EventBridge !== undefined) {
+                    EventBridge.scriptEventReceived.connect(function(data) {
+                        data = JSON.parse(data);
+
+                        if (data.type == "editorEvent") {
+                            switch (data.action) {
+                                case "initialParams":
+                                    _animations = data.animations;
+                                    _leftHandJoints = data.leftHandJoints;
+                                    _rightHandJoints = data.rightHandJoints;
+                                    _animationBeingEdited = data.currentAnimation;
+                                    _joint = data.joint;
+                                    _jointData = data.jointData;
+                                    _pairedJoint = data.pairedJoint;
+                                    _pairedJointData = data.pairdJointData;
+                                    _IKChain = data.IKChain;
+                                    _sliderRanges = data.sliderRanges;
+                                    initialise();
+                                    updateJointValues();
+                                    lockData(false);
+                                    return;
+
+                                case "jointData":
+                                    _joint = data.joint;
+                                    _jointData = data.jointData;
+                                    _pairedJoint = data.pairedJoint;
+                                    _pairedJointData = data.pairedJointData;
+                                    _IKChain = data.IKChain;
+                                    _elFrequencySlider.slider('option', 'value', data.frequency);
+                                    _elFrequencySlider.slider('option','slide')
+                                        .call(_elFrequencySlider, null, {
+                                            handle: $('.ui-slider-handle', _elFrequencySlider), value: data.frequency
+                                        });
+                                    updateJointValues();
+                                    updateLabels(!_editMode.editingTranslation);
+                                    lockData(false);
+                                    return;
+
+                                case "update":
+                                    //lockData(true);
+                                    _ftWheelPosition = data.ftWheelPosition;
+                                    update();
+                                    //lockData(false);
+                                    return;
+                                    
+                                case "sliderRanges":
+                                    _sliderRanges = data.sliderRanges;
+                                    updateJointValues();
+                                    lockData(false);
+                                    return;
+
+                                default:
+                                    return;
+                            }
+                        }
+                    });
+                }
+
+                // initialise
+                turnOff();
+                updateRadios();
+                // request initialisation parameters
+                EventBridge.emitWebEvent(
+                    JSON.stringify({
+                        type: "editorEvent",
+                        action: "initialise"
+                    })
+                );
+            }
+        </script>
+    </head>
+    <body onload='loaded();'>
+        <div id="editor-content">
+            <div class="editor-top" id="editor-top">
+                <label>Editing Mode</label><br />
+                <input type="radio" id="editing-off" value="enabled" class="edit-mode-selector"> Off
+                <input type="radio" id="editing-free" value="disabled" class="edit-mode-selector" > Single Joint
+                <input type="radio" id="editing-symmetrical" value="disabled" class="edit-mode-selector" > Joint Match
+                <input type="radio" id="editing-opposite-symmetrical" value="enabled" class="edit-mode-selector" > Joint Oppose
+            </div>
+
+            <div class="editor-left" id="editor-left">
+                <div id="rotation-translation-selector">
+                    <input type="radio" id="editing-rotations" value="enabled" class="rotations-translations-radio" > Rotation
+                    <br />
+                    <input type="radio" id="editing-translations" value="disabled" class="rotations-translations-radio" > Translation
+                </div>
+
+                <label>Animation</label>
+                <select class="editor-select-input" id="animation-select"></select>
+
+                <label>Left Hand Joints</label>
+                <select class="editor-select-input" id="left-hand-select"></select>
+
+                <label>Right Hand Joints</label>
+                <select class="editor-select-input" id="right-hand-select"></select>
+
+                <label>Slider Ranges</label>
+                <select class="editor-select-input" id="slider-range-select"></select>
+
+                <div id="editor-joint-values">
+                    <div class="editor-property">
+                        <label id="pitchOsc">Pitch Osc</label>
+                        <input type='text' class="editor-value" id="pitch-oscillation-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="yawOsc">Yaw Osc</label>
+                        <input type='text' class="editor-value" id="yaw-oscillation-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="rollOsc">Roll Osc</label>
+                        <input type='text' class="editor-value" id="roll-oscillation-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="pitchPhase">Pitch Phase</label>
+                        <input type='text' class="editor-value" id="pitch-phase-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="yawPhase">Yaw Phase</label>
+                        <input type='text' class="editor-value" id="yaw-phase-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="rollPhase">Roll Phase</label>
+                        <input type='text' class="editor-value" id="roll-phase-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="pitchOffset">Pitch Offset</label>
+                        <input type='text' class="editor-value" id="pitch-offset-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="yawOffset">Yaw Offset</label>
+                        <input type='text' class="editor-value" id="yaw-offset-text"></input>
+                    </div>
+                    <div class="editor-property">
+                        <label id="rollOffset">Roll Offset</label>
+                        <input type='text' class="editor-value" id="roll-offset-text"></input>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="editor-right">
+                <div id="editor-joint-selector">
+                    <div class="joint-selector" id="head-joint-selector"></div>
+                    <div class="joint-selector" id="neck-joint-selector"></div>
+                    <div class="joint-selector" id="left-shoulder-joint-selector"></div>
+                    <div class="joint-selector" id="right-shoulder-joint-selector"></div>
+                    <div class="joint-selector" id="left-upper-arm-joint-selector"></div>
+                    <div class="joint-selector" id="right-upper-arm-joint-selector"></div>
+                    <div class="joint-selector" id="left-lower-arm-joint-selector"></div>
+                    <div class="joint-selector" id="right-lower-arm-joint-selector"></div>
+                    <div class="joint-selector" id="left-hand-joint-selector"></div>
+                    <div class="joint-selector" id="right-hand-joint-selector"></div>
+                    <div class="joint-selector" id="spine2-joint-selector"></div>
+                    <div class="joint-selector" id="spine1-joint-selector"></div>
+                    <div class="joint-selector" id="spine-joint-selector"></div>
+                    <div class="joint-selector" id="hips-joint-selector"></div>
+                    <div class="joint-selector" id="left-upper-leg-joint-selector"></div>
+                    <div class="joint-selector" id="right-upper-leg-joint-selector"></div>
+                    <div class="joint-selector" id="left-lower-leg-joint-selector"></div>
+                    <div class="joint-selector" id="right-lower-leg-joint-selector"></div>
+                    <div class="joint-selector" id="left-foot-joint-selector"></div>
+                    <div class="joint-selector" id="right-foot-joint-selector"></div>
+                    <div class="joint-selector" id="left-toes-joint-selector"></div>
+                    <div class="joint-selector" id="right-toes-joint-selector"></div>
+                    <div class="joint-selector" id="hips-translation-joint-selector"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="pitch-oscillation" class="oscillation-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="yaw-oscillation" class="oscillation-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="roll-oscillation" class="oscillation-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="pitch-phase" class="phase-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="yaw-phase" class="phase-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="roll-phase" class="phase-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="pitch-offset" class="offset-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="yaw-offset" class="offset-slider"></div>
+                </div>
+                <div class="editor-slider-container">
+                    <div id="roll-offset" class="offset-slider"></div>
+                </div>
+            </div>
+
+            <div class="editor-bottom" id="editor-transport-bar">
+            
+                <div id="editor-direction-selector"></div>
+            
+                <div class="editor-transport-slider-container">
+                    <label>frequency</label>
+                    <div name="frequency-slider" id="frequency-slider" class="transport-slider"></div>
+                </div>
+                <div class="editor-transport-slider-container">
+                    <label>global phase</label>
+                    <div name="global-phase-slider" id="global-phase-slider" class="transport-slider"></div>
+                </div>
+                <div class="editor-transport-slider-container">
+                    <label>transport</label>
+                    <div name="transport-slider" id="transport-slider" class="transport-slider"></div>
+                </div>
+                
+                <div id="data-ready-led"></div>
+                
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,235 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkToolsStyle.css">
+        <link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.min.css">
+        <script src="jquery-2.1.4.min.js"></script>
+        <script src="jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+        <script>
+
+            function loaded() {
+
+                var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/';
+                // ^^ path to local copy of assets folder - REMOVE_FOR_RELEASE ^^
+
+                elScopeDisplayCanvas = document.getElementById("scope-display-canvas");
+                elPauseButton = document.getElementById("pause-button");
+
+                // scope stuff
+                var _paused = false;
+                var SCOPE_RESOLUTION = 595;
+                var _timeBase = 1;
+                var _channelOneGain = 1;
+                var _channelTwoGain = 1;
+                var _channelThreeGain = 1;
+                var _channelOneOffset = 0;
+                var _channelTwoOffset = 0;
+                var _channelThreeOffset = 0;
+                var _heightOverTwo = elScopeDisplayCanvas.height / 2;
+
+                var _channelOneData = [];
+                var _channelTwoData = [];
+                var _channelThreeData = [];
+
+                for (var i = 0; i < SCOPE_RESOLUTION; i++) {
+                    _channelOneData.push(0);
+                    _channelTwoData.push(0);
+                    _channelThreeData.push(0);
+                };
+
+                function gainSliderSliding(ui, id) {
+                    switch (id) {
+
+                        case 'channel-one-gain':
+                            _channelOneGain = ui.value;
+                            break;
+
+                        case 'channel-two-gain':
+                            _channelTwoGain = ui.value;
+                            break;
+
+                        case 'channel-three-gain':
+                            _channelThreeGain = ui.value;
+                            break;
+                    }
+                }
+
+                function offsetSliderSliding(ui, id) {
+                    switch (id) {
+
+                        case 'channel-one-offset':
+                            _channelOneOffset = -ui.value;
+                            break;
+
+                        case 'channel-two-offset':
+                            _channelTwoOffset = -ui.value;
+                            break;
+
+                        case 'channel-three-offset':
+                            _channelThreeOffset = -ui.value;
+                            break;
+                    }
+                }
+
+                function timeBaseSliderSliding(ui) {
+                    _timeBase = ui.value;
+                }
+
+                elPauseButton.addEventListener("click", function() {
+                    if (_paused) {
+                        _paused = false;
+                        this.value = "Pause";
+                    } else {
+                        _paused = true;
+                        this.value = "Resume";
+                    }
+                });
+
+                // HTML 5 canvas stuff
+                var _displayMargin = 3;
+                var _context = elScopeDisplayCanvas.getContext('2d');
+                var _scopeBackgroundImage = new Image();
+
+                _scopeBackgroundImage.onload = function() {
+                    _context.drawImage(_scopeBackgroundImage, 0, 0);
+                };
+                _scopeBackgroundImage.src = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-oscilloscope-panel.png';
+
+
+                // jQueryUI stuff
+                $(function() {
+                    $( ".scope-offset-slider" ).slider({
+                        min: -600,
+                        max: 600,
+                        value: 0,
+                        step: 1,
+                        orientation: "vertical",
+                        slide: function(event, ui) {
+                            var id = $(this).attr("id");
+                            offsetSliderSliding(ui, id);
+                        }
+                    }),
+
+                    $( ".scope-gain-slider" ).slider({
+                        min: 0.1,
+                        max: 10,
+                        value: 1,
+                        step: 0.1,
+                        orientation: "vertical",
+                        slide: function(event, ui) {
+                            var id = $(this).attr("id");
+                            gainSliderSliding(ui, id);
+                        }
+                    }),
+
+                    $( "#scope-timebase-slider" ).slider({
+                        min: 1,
+                        max: 10,
+                        value: 1,
+                        step: 0.1,
+                        orientation: "horizontal",
+                        slide: function(event, ui) {
+                            var id = $(this).attr("id");
+                            timeBaseSliderSliding(ui, id);
+                        }
+                    })
+                });
+
+
+                if (window.EventBridge !== undefined) {
+                    EventBridge.scriptEventReceived.connect(function(data) {
+                        data = JSON.parse(data);
+
+                        if (data.type === "scopeData") {
+
+                            if (!_paused) {
+                                _channelOneData.push(data.ch1);
+                                _channelOneData.shift();
+                                _channelTwoData.push(data.ch2);
+                                _channelTwoData.shift();
+                                _channelThreeData.push(data.ch3);
+                                _channelThreeData.shift();
+                            }
+
+                            _context.clearRect(0, 0, elScopeDisplayCanvas.width, elScopeDisplayCanvas.height);
+                            _context.drawImage(_scopeBackgroundImage, 0, 0);
+                            _context.beginPath();
+                            _context.moveTo(_displayMargin,
+                                            _heightOverTwo + _channelOneOffset + _channelOneGain * _channelOneData[0]);
+                            for (var i = 0 ; i < SCOPE_RESOLUTION ; i++) {
+                                _context.lineTo(i * _timeBase + _displayMargin,
+                                                _heightOverTwo + _channelOneOffset +
+                                                _channelOneGain * _channelOneData[i]);
+                            }
+                            _context.lineJoin = 'round';
+                            _context.lineWidth = 1;
+                            _context.strokeStyle = 'red';
+                            _context.stroke();
+                            _context.beginPath();
+                            _context.moveTo(_displayMargin,
+                                            _heightOverTwo + _channelTwoOffset + _channelTwoGain * _channelTwoData[0]);
+                            for (var i = 0 ; i < SCOPE_RESOLUTION ; i++) {
+                                _context.lineTo(i * _timeBase + _displayMargin,
+                                                _heightOverTwo + _channelTwoOffset +
+                                                _channelTwoGain * _channelTwoData[i]);
+                            }
+                            _context.strokeStyle = 'green';
+                            _context.stroke();
+                            _context.beginPath();
+                            _context.moveTo(_displayMargin,
+                                            _heightOverTwo + _channelThreeOffset + _channelThreeGain * _channelThreeData[0]);
+                            for (var i = 0 ; i < SCOPE_RESOLUTION ; i++) {
+                                _context.lineTo(i * _timeBase + _displayMargin,
+                                                _heightOverTwo + _channelThreeOffset +
+                                                _channelThreeGain * _channelThreeData[i]);
+                            }
+                            _context.strokeStyle = 'blue';
+                            _context.stroke();
+                        }
+                    });
+                }
+            }
+        </script>
+    </head>
+    <body onload='loaded();'>
+
+        <div id="scope-controls">
+            <div class="scope-slider-container">
+                <label>Channel 1 Offset</label>
+                <div name="channel-one-offset" id="channel-one-offset" class="scope-offset-slider"></div>
+            </div>
+            <div class="scope-slider-container">
+                <label>Channel 1 Gain</label>
+                <div name="channel-one-gain" id="channel-one-gain" class="scope-gain-slider"></div>
+            </div>
+            <div class="scope-slider-container">
+                <label>Channel 2 Offset</label>
+                <div name="channel-two-offset" id="channel-two-offset" class="scope-offset-slider"></div>
+            </div>
+            <div class="scope-slider-container">
+                <label>Channel 2 Gain</label>
+                <div name="channel-two-gain" id="channel-two-gain" class="scope-gain-slider"></div>
+            </div>
+            <div class="scope-slider-container">
+                <label>Channel 3 Offset</label>
+                <div name="channel-three-offset" id="channel-three-offset" class="scope-offset-slider"></div>
+            </div>
+            <div class="scope-slider-container">
+                <label>Channel 3 Gain</label>
+                <div name="channel-three-gain" id="channel-three-gain" class="scope-gain-slider"></div>
+            </div>
+        </div>
+
+        <canvas id="scope-display-canvas" width="600" height="600"></canvas>
+
+        <div id="scope-bottom-panel">
+            <div name="timebase-slider-container" id="scope-timebase-slider-container">
+                <label>Timebase</label>
+                <div name="timebase-slider" id="scope-timebase-slider"></div>
+            </div>
+            <div class="button-group">
+                <input type="button" id="pause-button" class="scope-button" value="Pause"></button>
+            </div>
+        </div>
+
+    </body>
+</html>

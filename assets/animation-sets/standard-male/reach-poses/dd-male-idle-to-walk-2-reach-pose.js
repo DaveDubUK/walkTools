@@ -195,8 +195,8 @@ MaleIdleToWalk2RP = function() {
             "yawPhase":180,
             "rollPhase":48.22642,
             "pitchOffset":64.5283,
-            "yawOffset":-25.13208,
-            "rollOffset":8.83019,
+            "yawOffset":-14.26415,
+            "rollOffset":0,
             "pitchFrequencyMultiplier":2
         },
         "RightArm":{
@@ -207,8 +207,8 @@ MaleIdleToWalk2RP = function() {
             "yawPhase":180,
             "rollPhase":48.22642,
             "pitchOffset":64.5283,
-            "yawOffset":25.13208,
-            "rollOffset":-8.83019,
+            "yawOffset":14.26415,
+            "rollOffset":0,
             "pitchFrequencyMultiplier":2
         },
         "LeftForeArm":{
@@ -219,7 +219,7 @@ MaleIdleToWalk2RP = function() {
             "yawPhase":-19.69811,
             "rollPhase":-29.20755,
             "pitchOffset":4.75472,
-            "yawOffset":2.03774,
+            "yawOffset":0,
             "rollOffset":22.41509
         },
         "RightForeArm":{
@@ -230,7 +230,7 @@ MaleIdleToWalk2RP = function() {
             "yawPhase":-19.69811,
             "rollPhase":-29.20755,
             "pitchOffset":4.75472,
-            "yawOffset":-2.03774,
+            "yawOffset":0,
             "rollOffset":-22.41509
         },
         "LeftHand":{

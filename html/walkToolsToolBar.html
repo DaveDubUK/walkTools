@@ -1,0 +1,177 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkToolsStyle.css">
+        <script>
+
+            function loaded() {
+
+                var _animationOn = true;
+                var _editingFeaturesOn = true;
+
+                // assign form elements to vars
+                elToggleAnimation = document.getElementById("toggle-animation");
+                elToggleEditingFeatures = document.getElementById("toggle-editing-features");
+                elShowEditor = document.getElementById("show-editor");
+                //elShowScope = document.getElementById("show-scope");
+                //elShowBezier = document.getElementById("show-bezier");
+                elShowLog = document.getElementById("show-log");
+                elShowStats = document.getElementById("show-stats");
+                //elShowFTWheel = document.getElementById("show-ftwheel");
+                //elShowGrid = document.getElementById("show-grid");
+                elShowSettings = document.getElementById("show-settings");
+                elCamera1 = document.getElementById("camera-1");
+                elCamera2 = document.getElementById("camera-2");
+                elCamera3 = document.getElementById("camera-3");
+                elCamera4 = document.getElementById("camera-4");
+                elCamera5 = document.getElementById("camera-5");
+                elCamera6 = document.getElementById("camera-6");
+
+                // toggle animation / editing features
+                elToggleAnimation.addEventListener("click", function() {
+                    if (_animationOn) {
+                        _animationOn = false;
+                        this.value = "Animation On";
+                    } else {
+                        _animationOn = true;
+                        this.value = "Animation Off";
+                    }
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "animationPower",
+                        animationPower: _animationOn
+                    }));
+                });
+                elToggleEditingFeatures.addEventListener("click", function() {
+                    if (_editingFeaturesOn) {
+                        _editingFeaturesOn = false;
+                        this.value = "Enable walkTools";
+                    } else {
+                        _editingFeaturesOn = true;
+                        this.value = "Disable walkTools";
+                    }
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "walkToolsPower",
+                        walkToolsPower: _editingFeaturesOn
+                    }));
+                });
+
+                // show / hide buttons
+                elShowEditor.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "editorToggle"
+                    }));
+                });
+                /*elShowScope.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "scopeToggle"
+                    }));
+                });
+                elShowBezier.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "bezierToggle"
+                    }));
+                });*/
+                elShowLog.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "logToggle"
+                    }));
+                });
+                elShowStats.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "statsToggle"
+                    }));
+                });
+                /*elShowFTWheel.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "ftWheelToggle"
+                    }));
+                });
+                elShowGrid.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "gridToggle"
+                    }));
+                });*/
+                elShowSettings.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "action",
+                        action: "settingsToggle"
+                    }));
+                });
+                
+                
+                // camera selection
+                elCamera1.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "changeCamera",
+                        selectedCamera: 1
+                    }));
+                });
+                elCamera2.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "changeCamera",
+                        selectedCamera: 2
+                    }));
+                });
+                elCamera3.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "changeCamera",
+                        selectedCamera: 3
+                    }));
+                });
+                elCamera4.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "changeCamera",
+                        selectedCamera: 4
+                    }));
+                });
+                elCamera5.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "changeCamera",
+                        selectedCamera: 5
+                    }));
+                });
+                elCamera6.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "changeCamera",
+                        selectedCamera: 6
+                    }));
+                });
+            }
+        </script>
+    </head>
+    <body onload='loaded();'>
+        <div class="button-bar">
+            <div class="button-group">
+                <input type="button" id="toggle-animation" value="Animation Off"></button>
+                <input type="button" id="toggle-editing-features" value="Disable walkTools"></button>
+            </div>
+            <div class="button-group">
+                <input type="button" id="show-editor" value="Editor"></button>
+                <input type="button" id="show-stats" value="Stats"></button>
+                <input type="button" id="show-log" value="Log"></button>
+                <!--input type="button" id="show-scope" value="Scope"></button-->
+                <!--input type="button" id="show-bezier" value="Bezier"></button-->
+                <!--input type="button" id="show-ftwheel" value="FT Wheel"></button-->
+                <!--input type="button" id="show-grid" value="Grid"></button-->
+                <input type="button" id="show-settings" value="Settings"></button>
+            </div>
+            Camera: 
+            <div class="button-group">
+                <input type="button" id="camera-1" value="1"></button>
+                <input type="button" id="camera-2" value="2"></button>
+                <input type="button" id="camera-3" value="3"></button>
+                <input type="button" id="camera-4" value="4"></button>
+                <input type="button" id="camera-5" value="5"></button>
+                <input type="button" id="camera-6" value="6"></button>
+            </div>
+        </div>
+    </body>
+</html>

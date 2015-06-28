@@ -1,0 +1,204 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkToolsStyle.css">
+        <script>
+
+            function loaded() {
+
+                // assign form elements to vars
+                elState = document.getElementById("state-stat");
+                elDirection = document.getElementById("direction-stat");
+                elNextState = document.getElementById("next-state-stat");
+                elCurrentAnimation = document.getElementById("current-animation-stat");
+                elFrameNumber = document.getElementById("frame-number-stat");
+                elFrameTime = document.getElementById("frame-time-stat");
+                elFramerate = document.getElementById("framerate-stat");
+                elSpeed = document.getElementById("speed-stat");
+                elAcceleration = document.getElementById("acceleration-stat");
+                elDirection = document.getElementById("direction-stat");
+                elDirectedAcceleration = document.getElementById("directed-acceleration-stat");
+                elYaw = document.getElementById("yaw-stat");
+                elYawDelta = document.getElementById("yaw-delta-stat");
+                elYawDeltaAcceleration = document.getElementById("yaw-delta-acceleration-stat");
+                elAboveSurface = document.getElementById("above-surface-stat");
+                elMoving = document.getElementById("moving-stat");
+                elWalkingSpeed = document.getElementById("walking-speed-stat");
+                elFlyingSpeed = document.getElementById("flying-speed-stat");
+                elAccelerating = document.getElementById("accelerating-stat");
+                elDecelerating = document.getElementById("decelerating-stat");
+                elDeceleratingFast = document.getElementById("decelerating-fast-stat");
+                elComingToAHalt = document.getElementById("coming-to-a-halt-stat");
+                elFrameExecutionTimePeak = document.getElementById("render-time-ph-stat");
+                elPeakSpeed = document.getElementById("speed-ph-stat");
+                elAccelerationPeak = document.getElementById("acceleration-ph-stat");
+                elYawDeltaPeak = document.getElementById("yaw-delta-ph-stat");
+                elYawDeltaAccelerationPeak = document.getElementById("yaw-delta-acceleration-ph-stat");
+                elWheelPosition = document.getElementById("wheel-position-stat");
+                elHipsToFeet = document.getElementById("hips-to-feet-stat");
+                elStride = document.getElementById("stride-stat");
+                elWheelRadius = document.getElementById("wheel-radius-stat");
+                elWheelAngularVelocity = document.getElementById("wheel-angular-velocity-stat");
+                elDegreesToTurn = document.getElementById("degrees-to-turn-stat");
+                elDistanceTravelled = document.getElementById("distance-travelled-stat");
+
+				// script event received handler
+                if (window.EventBridge !== undefined) {
+                    EventBridge.scriptEventReceived.connect(function(data) {
+                        data = JSON.parse(data);
+
+                        if (data.type == "updateStats") {
+                            if (data.stats.state !== undefined) {
+                                elState.innerHTML = data.stats.state;
+                            }
+                            if (data.stats.nextState !== undefined) {
+                                elNextState.innerHTML = data.stats.nextState;
+                            }
+                            if (data.stats.direction !== undefined) {
+                                elDirection.innerHTML = data.stats.direction;
+                            }
+                            if (data.stats.currentAnimation !== undefined) {
+                                elCurrentAnimation.innerHTML = data.stats.currentAnimation;
+                            }
+                            if (data.stats.frameNumber !== undefined) {
+                                elFrameNumber.innerHTML = data.stats.frameNumber;
+                            }
+                            if (data.stats.frameTime !== undefined) {
+                                elFrameTime.innerHTML = data.stats.frameTime.toFixed(1);
+                                elFramerate.innerHTML = (1000 / data.stats.frameTime).toFixed(1);
+                            }
+                            if (data.stats.speed !== undefined) {
+                                elSpeed.innerHTML = data.stats.speed.toFixed(3);
+                            }
+                            if (data.stats.acceleration !== undefined) {
+                                elAcceleration.innerHTML = data.stats.acceleration.toFixed(3);
+                            }
+                            if (data.stats.directedAcceleration !== undefined) {
+                                elDirectedAcceleration.innerHTML = data.stats.acceleration.toFixed(3);
+                            }
+                            if (data.stats.yaw !== undefined) {
+                                elYaw.innerHTML = data.stats.yaw.toFixed(1);
+                            }
+                            if (data.stats.yawDelta !== undefined) {
+                                elYawDelta.innerHTML = data.stats.yawDelta.toFixed(2);
+                            }
+                            if (data.stats.yawDeltaAcceleration !== undefined) {
+                                elYawDeltaAcceleration.innerHTML = data.stats.yawDeltaAcceleration.toFixed(3);
+                            }
+                            if (data.stats.acceleration !== undefined) {
+                                elAcceleration.innerHTML = data.stats.acceleration.toFixed(3);
+                            }
+                            if (data.stats.aboveSurface !== undefined) {
+                                elAboveSurface.innerHTML = data.stats.aboveSurface.toFixed(3);
+                            }
+                            if (data.stats.moving !== undefined) {
+                                elMoving.innerHTML = data.stats.moving;
+                            }
+                            if (data.stats.walkingSpeed !== undefined) {
+                                elWalkingSpeed.innerHTML = data.stats.walkingSpeed;
+                            }
+                            if (data.stats.flyingSpeed !== undefined) {
+                                elFlyingSpeed.innerHTML = data.stats.flyingSpeed;
+                            }
+                            if (data.stats.accelerating !== undefined) {
+                                elAccelerating.innerHTML = data.stats.accelerating;
+                            }
+                            if (data.stats.decelerating !== undefined) {
+                                elDecelerating.innerHTML = data.stats.decelerating;
+                            }
+                            if (data.stats.deceleratingFast !== undefined) {
+                                elDeceleratingFast.innerHTML = data.stats.deceleratingFast;
+                            }
+                            if (data.stats.comingToAHalt !== undefined) {
+                                elComingToAHalt.innerHTML = data.stats.comingToAHalt;
+                            }
+                            if (data.stats.frameExecutionTimePeak !== undefined) {
+                                elFrameExecutionTimePeak.innerHTML = data.stats.frameExecutionTimePeak;
+                            }
+                            if (data.stats.speedPeak !== undefined) {
+                                elPeakSpeed.innerHTML = data.stats.speedPeak.toFixed(3);
+                            }
+                            if (data.stats.accelerationPeak !== undefined) {
+                                elAccelerationPeak.innerHTML = data.stats.accelerationPeak.toFixed(3);
+                            }
+                            if (data.stats.yawDeltaPeak !== undefined) {
+                                elYawDeltaPeak.innerHTML = data.stats.yawDeltaPeak.toFixed(3);
+                            }
+                            if (data.stats.yawDeltaPeak !== undefined) {
+                                elYawDeltaAccelerationPeak.innerHTML = data.stats.yawDeltaAccelerationPeak.toFixed(3);
+                            }
+                            if (data.stats.wheelPositon !== undefined) {
+                                elWheelPosition.innerHTML = data.stats.wheelPositon.toFixed(1);
+                            }
+                            if (data.stats.hipsToFeet !== undefined) {
+                                elHipsToFeet.innerHTML = data.stats.hipsToFeet.toFixed(3);
+                            }
+                            if (data.stats.stride !== undefined) {
+                                elStride.innerHTML = data.stats.stride.toFixed(3);
+                            }
+                            if (data.stats.wheelRadius !== undefined) {
+                                elWheelRadius.innerHTML = data.stats.wheelRadius.toFixed(3);
+                            }
+                            if (data.stats.ftWheelAngularVelocity !== undefined) {
+                                elWheelAngularVelocity.innerHTML = data.stats.ftWheelAngularVelocity.toFixed(3);
+                            }
+                            if (data.stats.degreesToTurn !== undefined) {
+                                elDegreesToTurn.innerHTML = data.stats.degreesToTurn.toFixed(3);
+                            }
+                            if (data.stats.distanceTravelled !== undefined) {
+                                elDistanceTravelled.innerHTML = data.stats.distanceTravelled.toFixed(3);
+                            }
+                        }
+                    });
+                }
+            }
+        </script>
+    </head>
+    <body onload='loaded();'>
+        <div class="stats-panel">
+            <h2>Periodic stats (peak hold)</h2>
+            <table>
+                <tr><td class="stats-column-1">Walk script execution time</td><td id="render-time-ph-stat" class="stats-column-2">not set</td><td>mS</td></tr>
+                <tr><td class="stats-column-1">Speed</td><td id="speed-ph-stat" class="stats-column-2">not set</td><td>m/s</td></tr>
+                <tr><td class="stats-column-1">Acceleration</td><td id="acceleration-ph-stat" class="stats-column-2">not set</td><td>m/s/s</td></tr>
+                <tr><td class="stats-column-1">Yaw delta</td><td id="yaw-delta-ph-stat" class="stats-column-2">not set</td><td>rad/s</td></tr>
+                <tr><td class="stats-column-1">Yaw delta acceleration</td><td id="yaw-delta-acceleration-ph-stat" class="stats-column-2">not set</td><td>rad/s/s</td></tr>
+            </table>
+
+            <h2>Frame by frame stats</h2>
+            <table>
+                <tr><td class="stats-column-1">Time between frames</td><td id="frame-time-stat" class="stats-column-2">not set</td><td>mS</td></tr>
+                <tr><td class="stats-column-1">Framerate</td><td id="framerate-stat" class="stats-column-2">not set</td><td>fps</td></tr>
+                <tr><td class="stats-column-1">Frame number</td><td id="frame-number-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Current animation</td><td id="current-animation-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">State</td><td id="state-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Next State</td><td id="next-state-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Direction</td><td id="direction-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Directed acceleration</td><td id="directed-acceleration-stat" class="stats-column-2">not set</td><td>m/s/s</td></tr>
+                <tr><td class="stats-column-1">Speed</td><td id="speed-stat" class="stats-column-2">not set</td><td>m/s</td></tr>
+                <tr><td class="stats-column-1">Acceleration</td><td id="acceleration-stat" class="stats-column-2">not set</td><td>m/s/s</td></tr>
+                <tr><td class="stats-column-1">Yaw</td><td id="yaw-stat" class="stats-column-2">not set</td><td>deg</td></tr>
+                <tr><td class="stats-column-1">Yaw delta</td><td id="yaw-delta-stat" class="stats-column-2">not set</td><td>rad/s</td></tr>
+                <tr><td class="stats-column-1">Yaw delta acceleration</td><td id="yaw-delta-acceleration-stat" class="stats-column-2">not set</td><td>rad/s/s</td></tr>
+                <tr><td class="stats-column-1">Above surface</td><td id="above-surface-stat" class="stats-column-2">not set</td><td>m</td></tr>
+                <tr><td class="stats-column-1">Moving</td><td id="moving-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Walking speed</td><td id="walking-speed-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Flying speed</td><td id="flying-speed-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Accelerating</td><td id="accelerating-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Decelerating</td><td id="decelerating-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Decelerating fast</td><td id="decelerating-fast-stat" class="stats-column-2">not set</td></tr>
+                <tr><td class="stats-column-1">Coming to a halt</td><td id="coming-to-a-halt-stat" class="stats-column-2">not set</td></tr>
+            </table>
+
+            <h2>Frequency time wheel stats</h2>
+            <table>
+                <tr><td class="stats-column-1">Wheel position</td><td id="wheel-position-stat" class="stats-column-2">not set</td><td>degrees</td></tr>
+                <tr><td class="stats-column-1">Hips to feet</td><td id="hips-to-feet-stat" class="stats-column-2">not set</td><td>m</td></tr>
+                <tr><td class="stats-column-1">Stride</td><td id="stride-stat" class="stats-column-2">not set</td><td>m</td></tr>
+                <tr><td class="stats-column-1">Wheel radius</td><td id="wheel-radius-stat" class="stats-column-2">not set</td><td>m</td></tr>
+                <tr><td class="stats-column-1">Wheel angular velocity</td><td id="wheel-angular-velocity-stat" class="stats-column-2">not set</td><td>rad/s</td></tr>
+                <tr><td class="stats-column-1">Degrees to turn</td><td id="degrees-to-turn-stat" class="stats-column-2">not set</td><td>degrees</td></tr>
+                <tr><td class="stats-column-1">Distance per step</td><td id="distance-travelled-stat" class="stats-column-2">not set</td><td>m</td></tr>
+            </table>
+    </div>
+    </body>
+</html>

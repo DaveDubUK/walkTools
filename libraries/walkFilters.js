@@ -2,7 +2,8 @@
 //  walkFilters.js
 //  version 1.1
 //
-//  Created by David Wooldridge, Autumn 2014
+//  Created by David Wooldridge, June 2015
+//  Copyright © 2014 - 2015 High Fidelity, Inc.
 //
 //  Provides a variety of filters for use by the walk.js script v1.2+
 //
@@ -12,13 +13,11 @@
 
 // simple averaging (LP) filter for damping / smoothing
 AveragingFilter = function(length) {
-
     // initialise the array of past values
     this.pastValues = [];
     for (var i = 0; i < length; i++) {
         this.pastValues.push(0);
     }
-
     // single arg is the nextInputValue
     this.process = function() {
         if (this.pastValues.length === 0 && arguments[0]) {
@@ -37,8 +36,7 @@ AveragingFilter = function(length) {
 
 // 2nd order 2Hz Butterworth LP filter
 ButterworthFilter = function() {
-
-    // coefficients calculated using: http://www-users.cs.york.ac.uk/~fisher/mkfilter/trad.html
+    // coefficients calculated at: http://www-users.cs.york.ac.uk/~fisher/mkfilter/trad.html
     this.gain = 104.9784742;
     this.coeffOne = -0.7436551950;
     this.coeffTwo = 1.7055521455;
@@ -69,7 +67,6 @@ ButterworthFilter = function() {
 // Add harmonics to a given sine wave to form square, sawtooth or triangle waves
 // Geometric wave synthesis fundamentals taken from: http://hyperphysics.phy-astr.gsu.edu/hbase/audio/geowv.html
 WaveSynth = function(waveShape, numHarmonics, smoothing) {
-
     this.numHarmonics = numHarmonics;
     this.waveShape = waveShape;
     this.smoothingFilter = new AveragingFilter(smoothing);
@@ -119,7 +116,6 @@ WaveSynth = function(waveShape, numHarmonics, smoothing) {
 
 // Create a motion wave by summing pre-calculated harmonics (Fourier synthesis)
 HarmonicsFilter = function(magnitudes, phaseAngles) {
-
     this.magnitudes = magnitudes;
     this.phaseAngles = phaseAngles;
 
@@ -136,6 +132,8 @@ HarmonicsFilter = function(magnitudes, phaseAngles) {
 // the main filter object literal
 filter = (function() {
 
+    const HALF_CYCLE = 180;
+
     // Bezier private variables
     var _C1 = {x:0, y:0};
     var _C4 = {x:1, y:1};
@@ -150,17 +148,17 @@ filter = (function() {
 
         // helper methods
         degToRad: function(degrees) {
-            var convertedValue = degrees * Math.PI / 180;
+            var convertedValue = degrees * Math.PI / HALF_CYCLE;
             return convertedValue;
         },
 
         radToDeg: function(radians) {
-            var convertedValue = radians * 180 / Math.PI;
+            var convertedValue = radians * HALF_CYCLE / Math.PI;
             return convertedValue;
         },
 
         // these filters need instantiating, as they hold arrays of previous values
-        
+
         // simple averaging (LP) filter for damping / smoothing
         createAveragingFilter: function(length) {
             var newAveragingFilter = new AveragingFilter(length);
@@ -186,7 +184,7 @@ filter = (function() {
         },
 
         // the following filters do not need separate instances, as they hold no previous values
-        
+
         // Bezier response curve shaping for more natural transitions
         bezier: function(input, C2, C3) {
             // based on script by Dan Pupius (www.pupius.net) http://13thparallel.com/archive/bezier-curves/

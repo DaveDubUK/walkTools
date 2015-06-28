@@ -1,0 +1,628 @@
+* {
+}
+
+body {
+    margin: 0;
+    padding: 0;
+
+    background-color: rgb(34, 34, 34);
+    color: rgb(204, 204, 204);
+    font-family: Arial;
+    font-size: 9pt;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* thin out the jQueryUI sliders */
+.ui-widget-content {
+    border:none !important;
+}
+.ui-slider-horizontal {
+    height: 0.63em !important;
+}
+
+
+
+/* menu shortcuts panel */
+.button-bar {
+    margin: 10px;
+    padding: 0;
+}
+
+.button-group {
+    display: inline-block; 
+    margin: 10px;
+    padding: 0;
+}
+
+input[type=button] {
+    cursor: pointer;
+    background-color: #608e96;
+    border-color: #608e96;
+    border-radius: 3.75pt;
+    padding: 4pt 10pt;
+    margin: 2px 2px 0;
+    border: 0;
+    color: #fff;
+    font-size: 10pt;
+}
+
+
+/* statistics panel */
+.stats-panel {
+    margin:10px;
+}
+.stats-column-1 {
+    min-width: 165px;
+}
+.stats-column-2 {
+    text-align: right;
+    min-width: 110px;
+}
+
+/* log display 
+.log-display {
+    font-size: 12px;
+    width:100%;
+    height:100%;
+    background-color:rgb(204, 204, 204);
+}*/
+
+textarea {
+    margin: 1%;
+    padding: 1%;
+    font-size: 15px;
+    width:98%;
+    height:85%;
+    background-color:rgb(0, 0, 0);
+    resize: vertical;
+    color: rgb(204, 204, 204);
+    border: none;
+}
+
+
+/* oscilloscope */
+#scope-display-canvas {
+    margin:0 10px
+}
+.scope-gain-slider {
+    margin:18px 18px 0;
+    height: 150px !important;
+}
+
+.scope-offset-slider {
+    margin:18px 18px 0;
+    height: 150px !important;
+}
+
+#scope-timebase-slider {
+    width: 260px !important;
+    margin: 8px 15px 30px;
+}
+
+#scope-timebase-slider-container {
+    float:right;
+    text-align: center;
+}
+
+#scope-controls {
+    width: 600px;
+    padding-left: 10px;
+}
+.scope-button {
+    margin-left:5px !important;
+    margin-right:5px !important;
+}
+
+.scope-slider-container {
+    width: 50px;
+    display: inline-block;
+    text-align: center;
+    margin: 25px 23px;
+}
+/* scope bottom panel */
+#scope-bottom-panel {
+    width:600px;
+    padding: 20px 10px 40px;
+}
+
+
+/* walkTools editor */
+#editor-content {
+    width: 493px;
+    height: 880px;
+    margin: 15px 0 0;
+    padding: 0px;
+}
+#editor-top {
+    font-size: 13px;
+    padding: 0 0 0 10px;
+}
+#editor-top label{
+    font-size: 16px;
+    padding-left: 7px;
+}
+.edit-mode-selector {
+    margin: 12px 0 0 24px;
+}
+
+/* editor left hand side panel */
+.editor-left {
+    width: 140px;
+    height:700px;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+}
+.editor-left label{
+    font-size: 16px;
+    padding-left: 13px;
+}
+
+
+
+/* editor right panel (joint selections) */
+#editor-right {
+    width: 350px;
+    height: 700px;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-editing-background.png);
+}
+#editor-joint-selector  {
+    margin: 50px 75px 0;
+    position: relative;
+    width: 200px;
+    height: 300px;    
+}
+.editor-transport-bar {
+    background-color: rgb(76, 0, 0);
+    width:100%;
+    margin: 0;
+    padding: 0;
+}
+.editor-select-input {
+    padding: 4px;
+    margin: 8px 0px 12px 20px;
+    width: 120px;
+}
+#rotation-translation-selector {
+    margin: 10px 0px 4px 29px;
+    font-size: 14px;   
+}
+.oscillation-slider, .phase-slider, .offset-slider  {
+    width: 250px;
+    margin: 10px 0px 16.5px;
+}
+.editor-slider-container {
+    display: inline-block;
+    text-align: center;
+    margin: 0px 0px 1px 50px;
+    padding: 0;
+}
+
+#editor-joint-values {
+    position: absolute;
+    width: 163px;
+    height: 350px;
+    left: 0;
+    top: 416px;
+}
+.editor-value {
+    width: 50px;
+    margin: 0px 12px;
+    float: right;
+}
+.editor-property {
+    height: 35.1px;
+}
+.editor-property label {
+    font-size: 13px;
+    padding: 0px 0px 0px 11px;
+    line-height: 155%;
+}
+#slider-range-selector {
+    margin: 4px 0px 0px 28px;
+}
+#slider-range-selector label{
+    padding: 0px 0px 12px;
+}
+.editor-bottom {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-transport-panel-v2.png);
+    height: 133px;
+    text-align: right;
+    margin-top: 0;
+    position:relative;
+}
+.editor-transport-slider-container {
+    margin: 0 24px 0 0;
+    float: right;
+}
+.transport-slider {
+    width: 303px;
+    margin: 5px 0px 7px;
+}
+.rotations-translations-radio {
+    margin: 7px 0 12px 4px;
+}
+.editing-slider-range {
+    margin: 3px 0px 0px 9px;
+}
+
+/* joint selector */
+.joint-selector {
+    width: 200px;
+    height:300px;
+    position:absolute;
+    top:-6px;
+    left:0px;
+    visibility:hidden;
+}
+#head-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-head.png);
+}
+#neck-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-neck.png);
+}
+#left-shoulder-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-shoulder.png);
+}
+#right-shoulder-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-shoulder.png);
+}
+#left-upper-arm-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-upper-arm.png);
+}
+#right-upper-arm-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-upper-arm.png);
+}
+#left-lower-arm-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-forearm.png);
+}
+#right-lower-arm-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-forearm.png);
+}
+#left-hand-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-hand.png);
+}
+#right-hand-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-hand.png);
+}
+#spine2-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-spine2.png);
+}
+#spine1-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-spine1.png);
+}
+#spine-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-spine.png);
+}
+#hips-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-hips.png);
+}
+#left-upper-leg-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-upper-leg.png);
+}
+#right-upper-leg-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-upper-leg.png);
+}
+#left-lower-leg-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-lower-leg.png);
+}
+#right-lower-leg-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-lower-leg.png);
+}
+#left-foot-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-foot.png);
+}
+#right-foot-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-foot.png);
+}
+#left-toes-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-toes.png);
+}
+#right-toes-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-toes.png);
+}
+#hips-translation-joint-selector {
+    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-hips-translation.png);
+}
+
+#editor-direction-selector {
+    position:absolute;
+    top:0;
+    left:0;
+    width: 152px;
+    height: 133px;
+}
+
+#data-ready-led {
+    width: 14px;
+    height:14px;
+    background-color:rgb(250,0,0);
+    position:absolute;
+    bottom: 6px;
+    right: 23px;
+    border-radius: 7px;
+}
+
+
+
+
+
+/* taken from edit.js */
+.selectable {
+    -webkit-touch-callout: text;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+
+    cursor: text;
+}
+
+.color-box {
+    display: inline-block;
+    width: 15pt;
+    height: 15pt;
+    border: 0.75pt solid black;
+    margin: 1.5pt;
+    cursor: pointer;
+}
+
+.color-box.highlight {
+    width: 13.5pt;
+    height: 13.5pt;
+    border: 1.5pt solid black;
+}
+
+.section-header {
+    background: #AAA;
+    border-bottom: 0.75pt solid #CCC;
+    background-color: #333333;
+    color: #999;
+    padding: 3pt;
+}
+
+.section-header label {
+    font-weight: bold;
+}
+
+.multi-property-section {
+}
+.property-section {
+    display: block;
+    margin: 10 10;
+    height: 22.5pt;
+}
+
+.property-section label {
+    font-weight: bold;
+}
+
+.property-section span {
+    float: right;
+}
+
+.grid-section {
+}
+
+#header {
+    padding: 0.5em;
+    margin: 10px;
+}
+
+#search-area {
+    width: 100%;
+    padding: 0.5em;
+    box-sizing: border-box;
+}
+
+#search-area input {
+    width: 100%;
+}
+
+input.url {
+    width: 100%;
+}
+
+input.coord {
+    width: 7em;
+    display: block;
+}
+
+input.no-spin::-webkit-outer-spin-button,
+input.no-spin::-webkit-inner-spin-button {
+    display: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+table#entity-table {
+    border-collapse: collapse;
+    font-family: Sans-Serif;
+    font-size: 7.5pt;
+    width: 100%;
+}
+
+#entity-table tr {
+    cursor: pointer;
+    border-bottom: 0.75pt solid rgb(63, 63, 63)
+}
+
+#entity-table tr.selected {
+    color: rgb(43, 43, 43);
+    background-color: #AAA;
+}
+
+#entity-table th {
+    background-color: #333;
+    color: #fff;
+    border: 0pt black solid;
+    text-align: left;
+    word-wrap: nowrap;
+    white-space: nowrap;
+}
+
+#entity-table td {
+    font-size: 8.25pt;
+    border: 0pt black solid;
+    word-wrap: nowrap;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+#entity-table td.url {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+th#entity-type {
+    width: 33.75pt;
+}
+
+
+
+div.input-area {
+    display: inline-block;
+    font-size: 7.5pt;
+}
+
+input {
+}
+
+#type {
+    font-size: 10.5pt;
+}
+
+#type label {
+    color: rgb(150, 150, 150);
+}
+
+
+#properties-list input[type=checkbox] {
+    vertical-align: bottom;
+}
+
+#properties-list input[type=button] {
+    cursor: pointer;
+    background-color: rgb(51, 102, 102);
+    border-color: #608e96;
+    border-radius: 3.75pt;
+    padding: 3.75pt 7.5pt;
+    border: 0;
+    color: rgb(204, 204, 204);
+}
+
+#properties-list input[type=button]:disabled {
+    background-color: rgb(41, 82, 82);
+    color: rgb(160, 160, 160);
+}
+
+#properties-list .property {
+    padding: 4pt;
+    border-bottom: 0.75pt solid rgb(63, 63, 63);
+    min-height: 1em;
+}
+
+
+table#properties-list {
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #efefef;
+    font-family: Arial;
+    table-layout: fixed;
+}
+
+#properties-list {
+    border-bottom: 0.75pt solid #e5e5e5;
+}
+
+#properties-list .label {
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    vertical-align: middle;
+    height: 1.2em;
+}
+
+#properties-list .value > div{
+    padding: 3pt 0;
+}
+
+col#col-label {
+    width: 97.5pt;
+}
+
+div.outer {
+    position: relative;
+}
+div.inner {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    position: absolute;
+    width: 100%;
+}
+
+td {
+
+
+        vertical-align: top;
+}
+
+#no-entities {
+    display: none;
+    font-size: 120%;
+    padding: 10pt;
+    font-weight: bold;
+    font-style: italic;
+}
+
+input[type="number"] {
+    position: relative;
+}
+
+/* Spin Buttons modified  - credit for original implementation goes to http://jsfiddle.net/Volker_E/WwfW9/ */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    background: #FFF url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAKUlEQVQYlWNgwAT/sYhhKPiPT+F/LJgEsHv37v+EMGkmkuImoh2NoQAANlcun/q4OoYAAAAASUVORK5CYII=) no-repeat center center;
+    width: 0.9em;
+    height: 4px;
+    opacity: 0.5; /* shows Spin Buttons per default (Chrome >= 39) */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+input[type="number"]::-webkit-inner-spin-button:hover,
+input[type="number"]::-webkit-inner-spin-button:active{
+    opacity: .8;
+}
+
+input#property-name {
+    width: 100%;
+}
+
+.color-picker {
+    width: 50px;
+    height: 10px;
+    margin: 5px;
+    border: 1px solid white;
+}

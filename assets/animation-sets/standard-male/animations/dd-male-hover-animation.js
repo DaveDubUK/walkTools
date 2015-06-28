@@ -194,8 +194,8 @@ MaleHover = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":93.0566,
-            "pitchOffset":69.96226,
-            "yawOffset":3.39623,
+            "pitchOffset":64.5283,
+            "yawOffset":18.33962,
             "rollOffset":-7.4717
         },
         "RightArm":{
@@ -205,8 +205,8 @@ MaleHover = function() {
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":-27.84906,
-            "pitchOffset":69.96226,
-            "yawOffset":-3.39623,
+            "pitchOffset":64.5283,
+            "yawOffset":-18.33962,
             "rollOffset":7.4717
         },
         "LeftForeArm":{

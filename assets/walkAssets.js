@@ -13,9 +13,9 @@
 
 walkAssets = (function () {
 
-    //const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
-    //const _pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
-    var _pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+    const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
+    const _pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
+    //var _pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
 
     var _animationSetPath = 'animation-sets/standard-male/';
 

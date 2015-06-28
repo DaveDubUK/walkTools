@@ -17,6 +17,6 @@ I made another short movie to show how to do this for anyone who wants to save t
 
 https://www.youtube.com/watch?v=mdXFzjsCoEc
 
-Once the animation files have been edited, you will need to change the path at the top of walk.js to point to your copy of the assets folder (var pathToAssets).
+Once the animation files have been edited, you will need to change the path at the top of walk.js and assets/walkAssets.js to point to your copy of the assets folder.
 
  - davedub June 2015

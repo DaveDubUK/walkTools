@@ -174,7 +174,7 @@ textarea {
     margin: 0;
     padding: 0;
     display: inline-block;
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-editing-background.png);
+    background: url(../assets/walktools-overlay-images/walkTools-editing-background.png);
 }
 #editor-joint-selector  {
     margin: 50px 75px 0;
@@ -235,7 +235,7 @@ textarea {
     padding: 0px 0px 12px;
 }
 .editor-bottom {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-transport-panel-v2.png);
+    background: url(../assets/walktools-overlay-images/walkTools-transport-panel-v2.png);
     height: 133px;
     text-align: right;
     margin-top: 0;
@@ -266,73 +266,73 @@ textarea {
     visibility:hidden;
 }
 #head-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-head.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-head.png);
 }
 #neck-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-neck.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-neck.png);
 }
 #left-shoulder-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-shoulder.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-shoulder.png);
 }
 #right-shoulder-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-shoulder.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-shoulder.png);
 }
 #left-upper-arm-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-upper-arm.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-upper-arm.png);
 }
 #right-upper-arm-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-upper-arm.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-upper-arm.png);
 }
 #left-lower-arm-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-forearm.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-forearm.png);
 }
 #right-lower-arm-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-forearm.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-forearm.png);
 }
 #left-hand-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-hand.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-hand.png);
 }
 #right-hand-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-hand.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-hand.png);
 }
 #spine2-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-spine2.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-spine2.png);
 }
 #spine1-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-spine1.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-spine1.png);
 }
 #spine-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-spine.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-spine.png);
 }
 #hips-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-hips.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-hips.png);
 }
 #left-upper-leg-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-upper-leg.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-upper-leg.png);
 }
 #right-upper-leg-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-upper-leg.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-upper-leg.png);
 }
 #left-lower-leg-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-lower-leg.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-lower-leg.png);
 }
 #right-lower-leg-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-lower-leg.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-lower-leg.png);
 }
 #left-foot-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-foot.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-foot.png);
 }
 #right-foot-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-foot.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-foot.png);
 }
 #left-toes-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-left-toes.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-left-toes.png);
 }
 #right-toes-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-right-toes.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-right-toes.png);
 }
 #hips-translation-joint-selector {
-    background: url(http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-joint-select-hips-translation.png);
+    background: url(../assets/walktools-overlay-images/walkTools-joint-select-hips-translation.png);
 }
 
 #editor-direction-selector {

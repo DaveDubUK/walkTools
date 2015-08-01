@@ -7,7 +7,8 @@
 
                 var _loggingEnabled = true;
                 var _logs = [];
-                _logs.length = 120;
+                const MAX_LINES = 120;
+                //_logs.length = 120;
 
                 // assign form elements to vars
                 elLogDisplay = document.getElementById("log-display");
@@ -21,7 +22,9 @@
                         if (data.type == "log" && _loggingEnabled) {
                             if (data.logEntry !== undefined) {
                                 _logs.push(data.logEntry);
-                                _logs.shift();
+                                if (_logs.length > MAX_LINES) {
+                                    _logs.shift();
+                                }
                                 elLogDisplay.innerHTML = _logs.join("");
                             }
                         }
@@ -39,6 +42,7 @@
                 });
 
                 elClearLog.addEventListener("click", function() {
+                    _logs = [];
                     elLogDisplay.innerHTML = "";
                 });
 

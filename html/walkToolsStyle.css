@@ -1,6 +1,11 @@
 * {
 }
 
+/* enable / disable walkToolsToolBar buttons #show-scope, */
+#show-bezier, #show-ftwheel, #show-grid , #toolbarCameraButtons, #show-settings{
+    display:none;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -134,7 +139,7 @@ textarea {
 
 /* walkTools editor */
 #editor-content {
-    width: 493px;
+    width: 618px;
     height: 880px;
     margin: 15px 0 0;
     padding: 0px;
@@ -216,8 +221,8 @@ textarea {
     top: 416px;
 }
 .editor-value {
-    width: 50px;
-    margin: 0px 12px;
+    width: 47px;
+    margin: 0 14px;
     float: right;
 }
 .editor-property {
@@ -235,7 +240,8 @@ textarea {
     padding: 0px 0px 12px;
 }
 .editor-bottom {
-    background: url(../assets/walktools-overlay-images/walkTools-transport-panel-v2.png);
+    background: transparent url("../assets/walktools-overlay-images/walkTools-transport-panel-v2.png") no-repeat;
+    width: 493px;
     height: 133px;
     text-align: right;
     margin-top: 0;
@@ -352,6 +358,75 @@ textarea {
     right: 23px;
     border-radius: 7px;
 }
+
+/* harmonics section */
+.editor-harmonics {
+    width: 144px;
+    /*height: 900px;
+    background-color: #F00;*/
+    position: absolute;
+    top: 0;
+    left: 485px;
+    text-align: center;
+    padding-top: 380px;
+    font-size: 1.45em;        
+}
+/*
+.harmonics-checkboxes label {
+    font-size: 13px;
+    display: inline-block;
+    width: 39px;
+    margin-right: 8px;
+}*/
+
+#harmonics-checkboxes {
+    margin-top: 17px;
+    font-size: 13px;
+}
+
+.harmonics-selector {
+    margin: 0px 0px 17px;
+}
+
+.harmonics-selector label{
+    margin-left: 8px;
+}
+
+.num-harmonics {
+    display: inline-block;
+    width: 50px;
+    margin: 0px 14px;
+    float: right;
+}
+
+/* bvh player */
+.bvh-player-content {
+    width: 600px;
+    height: 90px;
+    margin: 0px;
+    padding: 8px;
+    position: relative;
+}
+
+#bvh-loader-info {
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.bvh-player-text {
+    width: 100%;
+}
+
+.bvh-player-button {
+    margin: 8px !important;
+}
+
+.bvh-button-group {
+    margin: 0 auto;
+    float: none;
+    width: 375px;
+}
+
 
 
 

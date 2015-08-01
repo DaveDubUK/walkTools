@@ -8,17 +8,18 @@
                     type: "update",
                     armsFree: elArmsFree.checked,
                     makesFootStepSounds: elFootstepSounds.checked,
-                    blenderPreRotations: elBlenderPreRotations.checked
+                    mixamoPreRotations: elMixamoPreRotations.checked
                 }));
             }
 
             function loaded() {
                 // assign form elements to vars
                 var powerOn = true;
-                elPower = document.getElementById("power");
+                //elPower = document.getElementById("power");
                 elArmsFree = document.getElementById("arms-free");
                 elFootstepSounds = document.getElementById("footstep-sounds");
-                elBlenderPreRotations = document.getElementById("bender-pre-rotations");
+                elMixamoPreRotations = document.getElementById("mixamo-pre-rotations");
+                elAnimationCharacterSelect = document.getElementById("animation-character-select");
 
                 if (window.EventBridge !== undefined) {
                     EventBridge.scriptEventReceived.connect(function(data) {
@@ -31,16 +32,16 @@
                             if (data.makesFootStepSounds !== undefined) {
                                 elFootstepSounds.checked = data.makesFootStepSounds;
                             }
-                            if (data.blenderPreRotations !== undefined) {
-                                elBlenderPreRotations.checked = data.blenderPreRotations;
+                            if (data.mixamoPreRotations !== undefined) {
+                                elMixamoPreRotations.checked = data.mixamoPreRotations;
                             }
                         }
                     });
                 }
                 elArmsFree.addEventListener("change", emitUpdate);
                 elFootstepSounds.addEventListener("change", emitUpdate);
-                elBlenderPreRotations.addEventListener("change", emitUpdate);
-                elPower.addEventListener("click", function() {
+                elMixamoPreRotations.addEventListener("change", emitUpdate);
+                /*elPower.addEventListener("click", function() {
                     EventBridge.emitWebEvent(JSON.stringify({
                         type: "powerToggle"
                     }));
@@ -50,7 +51,7 @@
                     } else {
                         elPower.value = "Turn Animation On";
                     }
-                });
+                });*/
                 // request initial values
                 EventBridge.emitWebEvent(JSON.stringify({ type: 'init' }));
             }
@@ -58,10 +59,15 @@
     </head>
     <body onload='loaded();'>
         <div>
-
-            <div id="walk-settings-header">
-                <input type="button" id="power" value="Turn Animation Off" style="margin-left:30px; margin-top:10px"></button>
-            </div>
+        
+            <div id="walk-settings-header">        
+            </div>        
+            
+            <div class="settings-section">
+                <!--input type="button" id="power" value="Turn Animation Off" style="margin-left:30px; margin-top:10px; display:none;"></button-->
+                <label>Character</label>
+                <select class="editor-select-input" id="animation-character-select"></select>
+            </div>            
 
             <div class="settings-section">
                 <label>Arms free</label>
@@ -78,9 +84,9 @@
             </div>
 
             <div class="settings-section">
-                <label>Blender pre-rotations</label>
+                <label>Mixamo pre-rotations</label>
                 <span>
-                    <input type='checkbox' id="bender-pre-rotations">
+                    <input type='checkbox' id="mixamo-pre-rotations">
                 </span>
             </div>
 

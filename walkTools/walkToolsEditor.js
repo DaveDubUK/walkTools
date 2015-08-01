@@ -30,7 +30,7 @@ WalkToolsEditor = function() {
 
     // web window
     var url = Script.resolvePath('html/walkToolsEditor.html');
-    var webView = new WebWindow('walkTools Editor', url, 493, 900, false);
+    var webView = new WebWindow('walkTools Editor', url, 637, 900, false);
     webView.setVisible(_visible);
 
     // events from webWindow arrive here
@@ -60,9 +60,11 @@ WalkToolsEditor = function() {
                         currentAnimation: _currentlySelectedAnimation.name,
                         joint: _currentlySelectedJoint,
                         jointData: _animationEditBuffer.joints[_currentlySelectedJoint],
+                        harmonicData: {}, //_animationEditBuffer.harmonics ? _animationEditBuffer.harmonics[_currentlySelectedJoint] : {},
                         IKChain: walkAssets.animationReference.joints[_currentlySelectedJoint].IKChain,
                         pairedJoint: "None",
                         pairedJointData: {},
+                        pairedJointHarmonicData: {},
                         sliderRanges: editingScaleRanges
                     }));
                     break;
@@ -108,8 +110,10 @@ WalkToolsEditor = function() {
                         frequency: _animationEditBuffer.calibration.frequency,
                         joint: _currentlySelectedJoint,
                         jointData: _animationEditBuffer.joints[_currentlySelectedJoint],
+                        harmonicData: _animationEditBuffer.harmonics ? _animationEditBuffer.harmonics[_currentlySelectedJoint] : {},
                         pairedJoint: "None",
                         pairedJointData: {},
+                        pairedJointHarmonicData: {},
                         IKChain: IKChain
                     }));
                     break;
@@ -131,8 +135,10 @@ WalkToolsEditor = function() {
                         };
                     }
                     var jointData = _animationEditBuffer.joints[data.selectedJoint];
+                    var harmonicData = _animationEditBuffer.harmonics[data.selectedJoint] ? _animationEditBuffer.harmonics[data.selectedJoint] : {};
                     var pairedJoint = jointPaired(data.selectedJoint);
                     var pairedJointData = {};
+                    var pairedHarmonicData = {};
                     if (pairedJoint) {
                         if (!_animationEditBuffer.joints[pairedJoint]) {
                             _animationEditBuffer.joints[pairedJoint] = {
@@ -146,8 +152,11 @@ WalkToolsEditor = function() {
                                 "yawOffset":0,
                                 "rollOffset":0                        
                             };
+                            _animationEditBuffer.harmonics[pairedJoint] = {};
                         }
                         pairedJointData = _animationEditBuffer.joints[pairedJoint];
+                        pairedHarmonicData = _animationEditBuffer.harmonics[pairedJoint] ?
+                                             _animationEditBuffer.harmonics[pairedJoint] : {};
                     } else {
                         pairedJoint = "None";
                     }   
@@ -164,8 +173,10 @@ WalkToolsEditor = function() {
                         action: "jointData",
                         joint: data.selectedJoint,
                         jointData: jointData,
+                        harmonicData: harmonicData,
                         pairedJoint: pairedJoint,
                         pairedJointData: pairedJointData,
+                        pairedHarmonicData: pairedHarmonicData,
                         IKChain: IKChain,
                         frequency: _animationEditBuffer.calibration.frequency
                     }));
@@ -174,6 +185,27 @@ WalkToolsEditor = function() {
                 case "setJointData":
                     _dataHasBeenChanged = true;
                     _animationEditBuffer.joints[data.joint] = data.jointData;
+                    // can't just copy entire harmonics data, as HarmonicsFilter object is not instantiated
+                    if (data.harmonicData.pitchHarmonics) {
+                        _animationEditBuffer.harmonics[data.joint].pitchHarmonics.numHarmonics = data.harmonicData.pitchHarmonics.numHarmonics;
+                    }
+                    if (data.harmonicData.yawHarmonics) {
+                        _animationEditBuffer.harmonics[data.joint].yawHarmonics.numHarmonics = data.harmonicData.yawHarmonics.numHarmonics;
+                    }
+                    if (data.harmonicData.rollHarmonics) {
+                        _animationEditBuffer.harmonics[data.joint].rollHarmonics.numHarmonics = data.harmonicData.rollHarmonics.numHarmonics;
+                    }
+                    if (data.joint === "Hips") {
+                        if (data.harmonicData.swayHarmonics) {
+                            _animationEditBuffer.harmonics[data.joint].swayHarmonics.numHarmonics = data.harmonicData.swayHarmonics.numHarmonics;
+                        }
+                        if (data.harmonicData.bobHarmonics) {
+                            _animationEditBuffer.harmonics[data.joint].bobHarmonics.numHarmonics = data.harmonicData.bobHarmonics.numHarmonics;
+                        }
+                        if (data.harmonicData.thrustHarmonics) {
+                            _animationEditBuffer.harmonics[data.joint].thrustHarmonics.numHarmonics = data.harmonicData.thrustHarmonics.numHarmonics;
+                        }
+                    }
                     break;
 
                 case "frequencyUpdate":
@@ -217,19 +249,21 @@ WalkToolsEditor = function() {
                     globalPhaseShift(data.globalPhase);
                     var pairedJoint = jointPaired(_currentlySelectedJoint);
                     var pairedJointData = {};
+                    var pairedHarmonicData = {};
                     var IKChain = walkAssets.animationReference.joints[_currentlySelectedJoint].IKChain;
                     if (pairedJoint) {
                         pairedJointData = _animationEditBuffer.joints[pairedJoint];
-                    } else {
-                        pairedJoint = "None";
+                        pairedHarmonicData = _animationEditBuffer.harmonics[pairedJoint];
                     }
                     webView.eventBridge.emitScriptEvent(JSON.stringify({
                         type: "editorEvent",
                         action: "jointData",
                         joint: _currentlySelectedJoint,
                         jointData: _animationEditBuffer.joints[_currentlySelectedJoint],
+                        harmonicData: _currentlySelectedJoint.harmonics ? _currentlySelectedJoint.harmonics[_currentlySelectedJoint] : {},
                         pairedJoint: pairedJoint,
                         pairedJointData: pairedJointData,
+                        pairedHarmonicData: pairedJoint.harmonics ? pairedJoint.harmonics[pairedJoint] : {},
                         IKChain: IKChain,
                         frequency: _animationEditBuffer.calibration.frequency
                     }));
@@ -369,14 +403,17 @@ WalkToolsEditor = function() {
         _currentlySelectedJoint = "Hips";
         var pairedJoint = "None";
         var pairedJointData = {};
+        var pairedHarmonicData = {};
         var IKChain = walkAssets.animationReference.joints[_currentlySelectedJoint].IKChain;
         webView.eventBridge.emitScriptEvent(JSON.stringify({
             type: "editorEvent",
             action: "jointData",
             joint: _currentlySelectedJoint,
             jointData: _animationEditBuffer.joints[_currentlySelectedJoint],
+            harmonicData: _animationEditBuffer.harmonics[_currentlySelectedJoint],
             pairedJoint: pairedJoint,
             pairedJointData: pairedJointData,
+            pairedHarmonicData: pairedHarmonicData,
             IKChain: IKChain,
             frequency: _animationEditBuffer.calibration.frequency
         }));

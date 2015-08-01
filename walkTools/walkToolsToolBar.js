@@ -3,7 +3,7 @@
 //  version 0.1
 //
 //  Created by David Wooldridge, Summer 2015
-//  Copyright © 2015 High Fidelity, Inc.
+//  Copyright © 2015 David Wooldridge.
 //
 //  Presents options as a button menu for walkTools
 //
@@ -18,7 +18,7 @@ WalkToolsToolBar = function() {
 
     // web window
     var url = Script.resolvePath('html/WalkToolsToolBar.html');
-    var webView = new WebWindow('walkToolsToolBar', url, 890, 70, false);
+    var webView = new WebWindow('walkToolsToolBar', url, 665, 70, false); // 965 for full range
     webView.setVisible(true);
 
     webView.eventBridge.webEventReceived.connect(function(data) {
@@ -33,39 +33,42 @@ WalkToolsToolBar = function() {
                 case "walkToolsPower":
                     walkTools.enableWalkTools(data.walkToolsPower);
                     return;                    
-                case "editorToggle":
-                    walkTools.visibility.editorVisible = !walkTools.visibility.editorVisible;
+                case "editorOn":
+                    walkTools.visibility.editorVisible = true; //!walkTools.visibility.editorVisible;
                     walkToolsEditor.setVisible(walkTools.visibility.editorVisible);
-                    break;
-                case "scopeToggle":
-                    walkTools.visibility.scopeVisible = !walkTools.visibility.scopeVisible;
+                    return;
+                case "scopeOn":
+                    walkTools.visibility.scopeVisible = true; //!walkTools.visibility.scopeVisible;
                     walkToolsOscilloscope.setVisible(walkTools.visibility.scopeVisible);
-                    break;
-                case "bezierToggle":
-                    walkTools.visibility.bezierVisible = !walkTools.visibility.bezierVisible;
+                    return;
+                case "bezierOn":
+                    walkTools.visibility.bezierVisible = true; //!walkTools.visibility.bezierVisible;
                     bezierCurveEditor.setVisible(walkTools.visibility.bezierVisible);
-                    break;
-                case "logToggle":
-                    walkTools.visibility.logVisible = !walkTools.visibility.logVisible;
+                    return;
+                case "logWindowOn":
+                    walkTools.visibility.logVisible = true; //!walkTools.visibility.logVisible;
                     walkToolsLog.setVisible(walkTools.visibility.logVisible);
-                    break;
-                case "statsToggle":
-                    walkTools.visibility.statsVisible = !walkTools.visibility.statsVisible;
+                    return;
+                case "bvhPlayerOn":
+                    walkTools.visibility.bvhPlayerVisible = true; //!walkTools.visibility.bvhPlayerVisible;
+                    walkToolsBVHPlayer.setVisible(walkTools.visibility.bvhPlayerVisible);
+                    return;                    
+                case "statsOn":
+                    walkTools.visibility.statsVisible = true; //!walkTools.visibility.statsVisible;
                     walkToolsStats.setVisible(walkTools.visibility.statsVisible);
-                    break;
-                case "ftWheelToggle":
-                    walkTools.visibility.ftWheelVisible = !walkTools.visibility.ftWheelVisible;
+                    return;
+                case "ftWheelOn":
+                    walkTools.visibility.ftWheelVisible = true; //!walkTools.visibility.ftWheelVisible;
                     // waiting for 3D overlays to get fixed...
-                    break;   
-                case "gridToggle":
-                    walkTools.visibility.ftWheelVisible = !walkTools.visibility.ftWheelVisible;
+                    return;   
+                case "gridOn":
+                    walkTools.visibility.ftWheelVisible = true; //!walkTools.visibility.ftWheelVisible;
                     // waiting for 3D overlays to get fixed...
-                    break;
-                case "settingsToggle":
-                    walkTools.visibility.settingsVisible = !walkTools.visibility.settingsVisible;
+                    return;
+                case "showSettings":
+                    walkTools.visibility.settingsVisible = true; //!walkTools.visibility.settingsVisible;
                     walkSettings.setVisible(walkTools.visibility.settingsVisible);
-                    break;
-                   
+                    return;
             }
             
         } else if (data.type==="changeCamera") {

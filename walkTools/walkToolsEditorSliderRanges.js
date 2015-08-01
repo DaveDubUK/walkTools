@@ -211,9 +211,9 @@ editingScaleRanges = {
         "pitchOffsetRange": 90,
         "yawOffsetRange": 90,
         "rollOffsetRange": 90,
-        "swayRange": 0.3,
-        "bobRange": 0.05,
-        "thrustRange": 0.05,
+        "swayRange": 0.5,
+        "bobRange": 0.5,
+        "thrustRange": 0.5,
         "swayOffsetRange": 0.25,
         "bobOffsetRange": 0.25,
         "thrustOffsetRange": 0.25

@@ -1,0 +1,88 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkToolsStyle.css">
+        <script>
+
+            function loaded() {
+                // assign form elements to vars
+                var _loadBVHButton = document.getElementById("load-bvh");
+                var _playBVHFasterButton = document.getElementById("play-bvh-faster");
+                var _playBVHSlowerButton = document.getElementById("play-bvh-slower");
+                var _stopButton = document.getElementById("stop-bvh");
+                var _bvhFileURL = document.getElementById("bvh-url");
+                var _bvhLoaderInfo = document.getElementById("bvh-loader-info");
+                
+                _playBVHFasterButton.disabled = true;
+                _playBVHSlowerButton.disabled = true;
+
+                _loadBVHButton.addEventListener("click", function() {
+                    _playBVHFasterButton.disabled = true;
+                    _playBVHSlowerButton.disabled = true;                
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "openBVHFile",
+                        url: _bvhFileURL.value
+                    }));
+                    _bvhLoaderInfo.innerHTML = "Loading...";
+                });
+                
+                _playBVHFasterButton.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "playBVHFaster"
+                    }));
+                });
+
+                _playBVHSlowerButton.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "playBVHSlower"
+                    }));
+                });
+    
+                _stopButton.addEventListener("click", function() {
+                    _playBVHFasterButton.disabled = true;
+                    _playBVHSlowerButton.disabled = true;                
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "stop"
+                    }));
+                    _bvhLoaderInfo.innerHTML = "BVH file stopped";
+                });
+
+                if (window.EventBridge !== undefined) {
+                    EventBridge.scriptEventReceived.connect(function(data) {
+                        data = JSON.parse(data);
+
+                        if (data.type === "bvhPlayerEvent") {
+                        
+                            if (data.action === "bvhFileLoaded") {
+                                _playBVHFasterButton.disabled = false;
+                                _playBVHSlowerButton.disabled = false;    
+                                _bvhLoaderInfo.innerHTML = "BVH file loaded";                                
+                            }
+                        }
+                    });
+                }              
+            }
+            
+            // "Bangkok-Arm_Experiment.bvh" AnimationsFromOzanJuly2015_walk_forwards.bvh"; //"AnimationsFromOzanJuly2015_run.bvh"; //"AnimationsFromOzanJuly2015_walk_backwards.bvh"; //
+            
+        </script>
+    </head>
+    <body onload='loaded();'>
+
+        <div class="bvh-player-content">
+            <input class="bvh-player-text" type="text" id="bvh-url" value="https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/bvh/AnimationsFromOzanJuly2015_walk_forwards.bvh">
+            <div class="bvh-button-group">
+                <input type="button" class="bvh-player-button" id="load-bvh" value="Load BVH"></button>
+                <input type="button" class="bvh-player-button" id="play-bvh-faster" value="Faster"></button>
+                <input type="button" class="bvh-player-button" id="play-bvh-slower" value="Slower"></button>
+                <input type="button" class="bvh-player-button" id="stop-bvh" value="Stop"></button>
+            </div>
+            <div id="bvh-loader-info">Ready to load...</div>
+        </div>
+
+        </div>
+    </body>
+</html>

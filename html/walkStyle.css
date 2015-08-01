@@ -36,6 +36,11 @@ body {
     float: right;
 }
 
+#animation-character-select {
+    width:85px;
+    float: right;    
+}
+
 input[type=button] {
     cursor: pointer;
     background-color: #608e96;

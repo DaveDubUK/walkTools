@@ -19,46 +19,6 @@ AnimationReference = function(filter) {
             "name":"Hips",
             "IKChain":"Torso"
         },
-        "LeftUpLeg":{
-            "name":"LeftUpLeg",
-            "IKChain":"LeftLeg",
-            "pairing": "RightUpLeg"
-        },
-        "LeftLeg":{
-            "name":"LeftLeg",
-            "IKChain":"LeftLeg",
-            "pairing": "RightLeg"
-        },
-        "LeftFoot":{
-            "name":"LeftFoot",
-            "IKChain":"LeftLeg",
-            "pairing": "RightFoot"
-        },
-        "LeftToeBase":{
-            "name":"LeftToeBase",
-            "IKChain":"LeftLeg",
-            "pairing": "RightToeBase"
-        },
-        "RightUpLeg":{
-            "name":"RightUpLeg",
-            "IKChain":"RightLeg",
-            "pairing": "LeftUpLeg"
-        },
-        "RightLeg":{
-            "name":"RightLeg",
-            "IKChain":"RightLeg",
-            "pairing": "LeftLeg"
-        },
-        "RightFoot":{
-            "name":"RightFoot",
-            "IKChain":"RightLeg",
-            "pairing": "LeftFoot"
-        },
-        "RightToeBase":{
-            "name":"RightToeBase",
-            "IKChain":"RightLeg",
-            "pairing": "LeftToeBase"
-        },
         "Spine":{
             "name":"Spine",
             "IKChain":"Torso"
@@ -71,6 +31,14 @@ AnimationReference = function(filter) {
             "name":"Spine2",
             "IKChain":"Torso"
         },
+        "Neck":{
+            "name":"Neck",
+            "IKChain":"Head"
+        },
+        "Head":{
+            "name":"Head",
+            "IKChain":"Head"
+        },        
         "LeftShoulder":{
             "name":"LeftShoulder",
             "IKChain":"LeftArm",
@@ -111,14 +79,46 @@ AnimationReference = function(filter) {
             "IKChain":"RightArm",
             "pairing": "LeftHand"
         },
-        "Neck":{
-            "name":"Neck",
-            "IKChain":"Head"
+        "LeftUpLeg":{
+            "name":"LeftUpLeg",
+            "IKChain":"LeftLeg",
+            "pairing": "RightUpLeg"
         },
-        "Head":{
-            "name":"Head",
-            "IKChain":"Head"
-        }
+        "LeftLeg":{
+            "name":"LeftLeg",
+            "IKChain":"LeftLeg",
+            "pairing": "RightLeg"
+        },
+        "LeftFoot":{
+            "name":"LeftFoot",
+            "IKChain":"LeftLeg",
+            "pairing": "RightFoot"
+        },
+        "LeftToeBase":{
+            "name":"LeftToeBase",
+            "IKChain":"LeftLeg",
+            "pairing": "RightToeBase"
+        },
+        "RightUpLeg":{
+            "name":"RightUpLeg",
+            "IKChain":"RightLeg",
+            "pairing": "LeftUpLeg"
+        },
+        "RightLeg":{
+            "name":"RightLeg",
+            "IKChain":"RightLeg",
+            "pairing": "LeftLeg"
+        },
+        "RightFoot":{
+            "name":"RightFoot",
+            "IKChain":"RightLeg",
+            "pairing": "LeftFoot"
+        },
+        "RightToeBase":{
+            "name":"RightToeBase",
+            "IKChain":"RightLeg",
+            "pairing": "LeftToeBase"
+        }        
     };
 
     this.leftHand = {

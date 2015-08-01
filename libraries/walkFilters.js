@@ -5,7 +5,7 @@
 //  Created by David Wooldridge, June 2015
 //  Copyright © 2014 - 2015 High Fidelity, Inc.
 //
-//  Provides a variety of filters for use by the walk.js script v1.2+
+//  Provides a variety of filters for use by the walk.js script v1.4+
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -64,6 +64,7 @@ ButterworthFilter = function() {
     };
 }; // end Butterworth filter constructor
 
+/*
 // Add harmonics to a given sine wave to form square, sawtooth or triangle waves
 // Geometric wave synthesis fundamentals taken from: http://hyperphysics.phy-astr.gsu.edu/hbase/audio/geowv.html
 WaveSynth = function(waveShape, numHarmonics, smoothing) {
@@ -95,7 +96,7 @@ WaveSynth = function(waveShape, numHarmonics, smoothing) {
                         if (n === 3 || n === 7 || n === 11 || n === 15) {
                             mulitplier *= -1;
                         }
-                        harmonics += mulitplier * Math.sin(n * frequency);
+                        harmonics += mulitplier * Math.sin(n * frequency); 
                     }
                     break;
                 }
@@ -113,25 +114,34 @@ WaveSynth = function(waveShape, numHarmonics, smoothing) {
         return this.smoothingFilter.process(harmonics);
     };
 };
+*/
 
 // Create a motion wave by summing pre-calculated harmonics (Fourier synthesis)
-HarmonicsFilter = function(magnitudes, phaseAngles) {
+HarmonicsFilter = function(numHarmonics, magnitudes, phaseAngles) {
     this.magnitudes = magnitudes;
     this.phaseAngles = phaseAngles;
+    this.numHarmonics = numHarmonics;
 
     this.calculate = function(twoPiFT) {
         var harmonics = 0;
-        var numHarmonics = magnitudes.length;
-        for (var n = 0; n < numHarmonics; n++) {
-            harmonics += this.magnitudes[n] * Math.cos(n * twoPiFT - this.phaseAngles[n]);
-        }
+        
+        /*if (this.numHarmonics === 2 ) {
+            harmonics = Math.cos(2 * twoPiFT - this.phaseAngles[0]);
+        } else {*/
+            for (var n = 1; n < this.numHarmonics; n++) {
+                if (n < 3 && this.numHarmonics < 3) {
+                    harmonics += Math.cos(n * twoPiFT - this.phaseAngles[n]);
+                } else {
+                    harmonics += this.magnitudes[n] * Math.cos(n * twoPiFT - this.phaseAngles[n]);
+                }
+            }
+//}
         return harmonics;
     };
 };
 
 // the main filter object literal
 filter = (function() {
-
     const HALF_CYCLE = 180;
 
     // Bezier private variables
@@ -172,33 +182,22 @@ filter = (function() {
         },
 
         // generates sawtooth, triangle or square waves using harmonics
-        createWaveSynth: function(waveShape, numHarmonics, smoothing) {
+        /*createWaveSynth: function(waveShape, numHarmonics, smoothing) {
             var newWaveSynth = new WaveSynth(waveShape, numHarmonics, smoothing);
             return newWaveSynth;
-        },
+        },*/
 
         // generates arbitrary waveforms using pre-calculated harmonics
-        createHarmonicsFilter: function(magnitudes, phaseAngles) {
-            var newHarmonicsFilter = new HarmonicsFilter(magnitudes, phaseAngles);
+        createHarmonicsFilter: function(numHarmonics, magnitudes, phaseAngles) {
+            var newHarmonicsFilter = new HarmonicsFilter(numHarmonics, magnitudes, phaseAngles);
             return newHarmonicsFilter;
         },
-
-        // the following filters do not need separate instances, as they hold no previous values
 
         // Bezier response curve shaping for more natural transitions
         bezier: function(input, C2, C3) {
             // based on script by Dan Pupius (www.pupius.net) http://13thparallel.com/archive/bezier-curves/
             input = 1 - input;
             return _C1.y * _B1(input) + C2.y * _B2(input) + C3.y * _B3(input) + _C4.y * _B4(input);
-        },
-
-        // simple clipping filter (special case for hips y-axis skeleton offset for walk animation)
-        clipTrough: function(inputValue, peak, strength) {
-            var outputValue = inputValue * strength;
-            if (outputValue < -peak) {
-                outputValue = -peak;
-            }
-            return outputValue;
         }
     }
 })();

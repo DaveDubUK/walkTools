@@ -3,7 +3,7 @@
 //
 //  Created by David Wooldridge, Winter 2014
 //
-//  Procedural animation datafile - use with walk.js version 1.2
+//  Procedural animation datafile - use with walk.js version 1.4
 //
 //  Saved animation file containing all the settings, properties and joint details to animate a High Fidelity character
 //
@@ -12,15 +12,12 @@
 //
 
 Buffer = function(name) {
-
     this.name = name;
     this.calibration = {
-
-        "frequency":5
+        "frequency": 2 * Math.PI
     };
-    this.filters = {};
+    this.harmonics = {};
     this.joints = {
-
         "Hips":{
             "pitch":0,
             "yaw":0,

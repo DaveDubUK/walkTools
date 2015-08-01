@@ -40,7 +40,7 @@ ON_SURFACE_THRESHOLD = 0.1; // height above surface to be considered as on the s
 TRANSITION_COMPLETE = 1000;
 PITCH_MAX = 60; // maximum speed induced pitch
 ROLL_MAX = 80;  // maximum speed induced leaning / banking
-DELTA_YAW_MAX = 1.7; // maximum change in yaw in rad/s
+DELTA_YAW_MAX = 1.85; //6.2; //1.7; // maximum change in yaw in rad/s
 
 // used by walkApi.js only
 MOVE_THRESHOLD = 0.075; // movement dead zone

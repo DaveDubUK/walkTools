@@ -8,8 +8,7 @@
 
             function loaded() {
 
-                var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/';
-                // ^^ path to local copy of assets folder - REMOVE_FOR_RELEASE ^^
+                var pathToAssets = '../assets/';
 
                 elScopeDisplayCanvas = document.getElementById("scope-display-canvas");
                 elPauseButton = document.getElementById("pause-button");
@@ -92,14 +91,14 @@
                 _scopeBackgroundImage.onload = function() {
                     _context.drawImage(_scopeBackgroundImage, 0, 0);
                 };
-                _scopeBackgroundImage.src = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/walktools-overlay-images/walkTools-oscilloscope-panel.png';
+                _scopeBackgroundImage.src = '../assets/walktools-overlay-images/walkTools-oscilloscope-panel.png';
 
 
                 // jQueryUI stuff
                 $(function() {
                     $( ".scope-offset-slider" ).slider({
-                        min: -600,
-                        max: 600,
+                        min: -1000,
+                        max: 1000,
                         value: 0,
                         step: 1,
                         orientation: "vertical",
@@ -110,10 +109,10 @@
                     }),
 
                     $( ".scope-gain-slider" ).slider({
-                        min: 0.1,
-                        max: 10,
+                        min: 0.001,
+                        max: 100,
                         value: 1,
-                        step: 0.1,
+                        step: 0.001,
                         orientation: "vertical",
                         slide: function(event, ui) {
                             var id = $(this).attr("id");
@@ -142,11 +141,11 @@
                         if (data.type === "scopeData") {
 
                             if (!_paused) {
-                                _channelOneData.push(data.ch1);
+                                _channelOneData.push(-data.ch1);
                                 _channelOneData.shift();
-                                _channelTwoData.push(data.ch2);
+                                _channelTwoData.push(-data.ch2);
                                 _channelTwoData.shift();
-                                _channelThreeData.push(data.ch3);
+                                _channelThreeData.push(-data.ch3);
                                 _channelThreeData.shift();
                             }
 

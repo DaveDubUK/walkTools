@@ -16,10 +16,11 @@ Script.include("./walkTools/walkToolsToolBar.js");
 Script.include("./walkTools/walkToolsStats.js");
 Script.include("./walkTools/walkToolsEditor.js");
 Script.include("./walkTools/walkToolsLog.js");
-//Script.include("./walkTools/walkToolsOscilloscope.js");
+Script.include("./walkTools/walkToolsOscilloscope.js");
 //Script.include("./walkTools/walkToolsBezierEditor.js");
 Script.include("./walkTools/walkToolsCameras.js");
 //Script.include("./walkTools/walkToolsGrid.js");
+Script.include("./walkTools/walkToolsBVHPlayer.js");
 
 walkTools = (function () {
 
@@ -31,6 +32,7 @@ walkTools = (function () {
         logVisible: false,
         scopeVisible: false,
         bezierVisible: false,
+        bvhPlayerVisible: false,
         ftWheelVisible: false,
         gridVisible: false,
         settingsVisible: false
@@ -86,45 +88,121 @@ walkTools = (function () {
     };
     
     var _shift = false;
+    var _control = false;
     function keyPressEvent(event) {
         if (event.text === "SHIFT") {
             _shift = true;
         }
+        if (event.text === "CONTROL") {
+            _control = true;
+        }        
         if (_shift && (event.text === 'r' || event.text === 'R')) {
             animationOperations.zeroAnimation(avatar.currentAnimation);
             print('joints zeroed for '+avatar.currentAnimation.name);
             walkToolsEditor.update();
         }
         if (_shift && (event.text === 'q' || event.text === 'Q')) {
-            // export avatar.currentAnimation as json string when q key is pressed.
-            // reformat result at http://www.freeformatter.com/json-formatter.html
-            print('___________________________________\n');
-            print('walk.js dumping animation: ' + avatar.currentAnimation.name + '\n');
-            print('___________________________________\n');
-            print(JSON.stringify(avatar.currentAnimation, function(key, val) {
-                return val.toFixed ? Number(val.toFixed(5)) : val;
-            }));
-            print('\n');
-            print('___________________________________\n');
-            print(avatar.currentAnimation.name + ' animation dumped\n');
-            print('___________________________________\n');
             
-            walkToolsLog.logMessage('___________________________________\n');
-            walkToolsLog.logMessage('walk.js dumping animation: ' + avatar.currentAnimation.name + '\n');
-            walkToolsLog.logMessage('___________________________________\n');
-            walkToolsLog.logMessage(JSON.stringify(avatar.currentAnimation, function(key, val) {
-                return val.toFixed ? Number(val.toFixed(5)) : val;
-            }));
-            walkToolsLog.logMessage('\n');
-            walkToolsLog.logMessage('___________________________________\n');
-            walkToolsLog.logMessage(avatar.currentAnimation.name + ' animation dumped\n');
-            walkToolsLog.logMessage('___________________________________\n');
+            // can either produce smaller, optimised animation file (rounded parameters, no un-used harmonics, Ctrl-Shift-Q)
+            // or a larger 'raw' animation file (no rounding, keep all un-used harmonics for later editing, Shift-Q)
+            var OPTIMISE = _control;
+            const JOINTS_DP = 5; // TODO: experiment reducing this once animations get to polished standard
+            const HARMONICS_DP = 16; // TODO: experiment reducing this once animations get to polished standard            
+            
+            try {
+                
+                if (OPTIMISE) {
+                    // clear out any un-used harmonics in the actual animation file
+                    for (joint in avatar.currentAnimation.harmonics) {
+                        for (harmonicData in avatar.currentAnimation.harmonics[joint]) {
+                            var numHarmonics = avatar.currentAnimation.harmonics[joint][harmonicData].numHarmonics;
+                            var magnitudes = [];
+                            var phaseAngles = [];
+                            for (i = 0 ; i < numHarmonics ; i++) {
+                                var magnitude = avatar.currentAnimation.harmonics[joint][harmonicData].magnitudes[i];
+                                var phaseAngle = avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles[i];                           
+                                magnitudes.push(magnitude);
+                                phaseAngles.push(phaseAngle);
+                            }
+                            if (avatar.currentAnimation.harmonics[joint][harmonicData].numHarmonics === 0) {
+                                delete avatar.currentAnimation.harmonics[joint][harmonicData];
+                                print('Setting null for '+joint+' '+harmonicData);
+                            } else {
+                                avatar.currentAnimation.harmonics[joint][harmonicData].magnitudes = magnitudes;
+                                avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles = phaseAngles;
+                            }
+                        }
+                        if (Object.keys(avatar.currentAnimation.harmonics[joint]).length === 0) {
+                            delete avatar.currentAnimation.harmonics[joint];
+                        }
+                    }
+                }
+                
+                // export avatar.currentAnimation as json string when q key is pressed.
+                // reformat result at http://jsonformatter.curiousconcept.com/
+                print('___________________________________\n');
+                if (OPTIMISE) {
+                    print('walk.js dumping optimised animation: ' + avatar.currentAnimation.name + '\n');
+                } else {
+                    print('walk.js dumping animation: ' + avatar.currentAnimation.name + '\n');
+                }
+                print('___________________________________\n');
+                print(JSON.stringify(avatar.currentAnimation, function(key, val) {
+                    
+                    if (OPTIMISE) {
+                        
+                        if (isNaN(Number(key))) {
+                            // shorten joint parameters
+                            if (!isNaN(val)) {
+                                val = Number(val).toFixed(JOINTS_DP); 
+                            }
+                        } else {
+                            // shorten harmonics parameters
+                            if (!isNaN(val)) {
+                                val = Number(val).toFixed(HARMONICS_DP);              
+                            }
+                        }
+                    }
+                    return val;
+                }));
+                print('\n');
+                print('___________________________________\n');
+                print(avatar.currentAnimation.name + ' animation dumped\n');
+                print('___________________________________\n');
+            
+                // dump to walkTools log also
+                walkToolsLog.logMessage(JSON.stringify(avatar.currentAnimation, function(key, val) {
+                    
+                    if (OPTIMISE) {
+                        
+                        if (isNaN(Number(key))) {
+                            // shorten joint parameters
+                            if (!isNaN(val)) {
+                                val = Number(val).toFixed(JOINTS_DP); 
+                            }
+                        } else {
+                            // shorten harmonics parameters
+                            if (!isNaN(val)) {
+                                val = Number(val).toFixed(HARMONICS_DP);              
+                            }
+                        }
+                    }
+                    return val;
+                }));
+            } catch (error) {
+                print('Error dumping animation file: ' + error.toString() + '\n');
+                walkToolsLog.logMessage('Error dumping animation file: ' + error.toString() + '\n');
+                return;
+            }            
         }        
     }
     function keyReleaseEvent(event) {
         if (event.text === "SHIFT") {
             _shift = false;
         }
+        if (event.text === "CONTROL") {
+            _control = false;
+        }        
     }
     Controller.keyPressEvent.connect(keyPressEvent);
     Controller.keyReleaseEvent.connect(keyReleaseEvent);    
@@ -160,6 +238,9 @@ walkTools = (function () {
         // stats
         beginProfiling: function(deltaTime) {
             if (_walkToolsEnabled) {
+                //if (deltaTime > 0.02) {
+                //    print('Warning: (walkTools) deltaTime excessive: '+(deltaTime*1000).toFixed(1)+'mS');
+                //}                    
                 _frameStartTime = new Date().getTime();
                 _cumulativeTime += deltaTime;
                 _nFrames = _nFrames++ >= Number.MAX_SAFE_INTEGER ? 0 : _nFrames++;
@@ -326,3 +407,5 @@ walkTools = (function () {
         }
     }
 })();
+
+//Script.include("./walkTools/WalkToolsBVHLoader.js");

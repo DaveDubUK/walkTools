@@ -14,9 +14,10 @@
 //
 
 // animations, reach poses, reach pose parameters, transitions, transition parameters, sounds, image/s and reference files
-const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
-var pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
-//var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.25-RC-1.0/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+//const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
+//var pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
+var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+// https://hifi-public.s3.amazonaws.com/procedural-animator/assets/miscellaneous/mixamo-pre-rotations.js
 
 Script.include([
     "./libraries/walkConstants.js",
@@ -39,6 +40,7 @@ Script.include("./libraries/walkSettings.js");
 // load walkTools - REMOVE_FOR_RELEASE ...
 //
 // extra vars
+var walkTools = null;
 var walkToolsOscilloscope = null;
 var bezierCurveEditor = null;
 var EDIT = 8; // extra locomotion state
@@ -48,7 +50,7 @@ Script.include('./walkTools/walkTools.js');
 var scopeProbe1 = 0;
 var scopeProbe2 = 0;
 var scopeProbe3 = 0;
-var scopePreAmp = 10;/**/
+var scopePreAmp = 1;/**/
 //
 // ... / load walkTools - REMOVE_FOR_RELEASE
 //
@@ -89,12 +91,13 @@ if (walkTools) walkTools.beginProfiling(deltaTime);
                 walkToolsOscilloscope.updateScopeTrace(scopeProbe1, scopeProbe2, scopeProbe3);
             //}
         }
-        if (walkTools) walkTools.updateStats();
+        
         //
         // ... / load walkTools - REMOVE_FOR_RELEASE
         //
         ////////////////////////////////////////////
     }
+    if (walkTools) walkTools.updateStats();
 });
 
 // helper function for selectAnimation()
@@ -393,7 +396,7 @@ function getLeanRoll() {
     if (Vec3.length(motion.velocity) > 0) {
         linearContribution = (Math.log(Vec3.length(motion.velocity) / TOP_SPEED) + LOG_SCALER) / LOG_SCALER;
     }
-    var angularContribution = Math.abs(motion.yawDelta) / DELTA_YAW_MAX;
+    var angularContribution = Math.min(Math.abs(motion.yawDelta) / DELTA_YAW_MAX, 1);
     leanRollProgress = linearContribution;
     leanRollProgress *= angularContribution;
     // shape the response curve
@@ -454,6 +457,7 @@ function renderMotion() {
                 producingFootstepSounds = true;
         }
     }
+    
     if (producingFootstepSounds) {
         const QUARTER_CYCLE = 90;
         const THREE_QUARTER_CYCLE = 270;
@@ -480,13 +484,11 @@ function renderMotion() {
         } else if (walkAssets.animationReference.rightHand[jointName]){
             joint = walkAssets.animationReference.rightHand[jointName];
         }
-        var jointRotations = undefined;
+        var jointRotations = {x:0, y:0, z:0};
 
         // ignore arms / head rotations if options are selected in the settings
-        if (avatar.armsFree && (joint.IKChain === "LeftArm" || joint.IKChain === "RightArm")) {
-            continue;
-        }
-        if (avatar.headFree && joint.IKChain === "Head") {
+        if (avatar.armsFree && (joint.IKChain === "LeftArm" || joint.IKChain === "RightArm") ||
+            avatar.headFree && joint.IKChain === "Head") {
             continue;
         }
 
@@ -508,13 +510,30 @@ function renderMotion() {
             jointRotations.z += leanRoll;
         }
 
+        // REMOVE_FOR_RELEASE - walkTools scope probes
         if (jointName === walkTools.currentlySelectedJoint()) {
-            scopeProbe1 = jointRotations.x * scopePreAmp;
-            scopeProbe2 = jointRotations.y * scopePreAmp;
-            scopeProbe3 = jointRotations.z * scopePreAmp;
+            
+            if (jointName === "Hips or not") {
+                scopeProbe1 = hipsTranslations.x * 100;
+                scopeProbe2 = hipsTranslations.y * 100;
+                scopeProbe3 = hipsTranslations.z * 100;  
+            } else {
+                scopeProbe1 = jointRotations.x * scopePreAmp;
+                scopeProbe2 = jointRotations.y * scopePreAmp;
+                scopeProbe3 = jointRotations.z * scopePreAmp;          
+            }
         }
 
         // apply rotations
         MyAvatar.setJointData(jointName, Quat.fromVec3Degrees(jointRotations));
     }
+    
+    // send foot calibration data to log 
+    /*if (walkTools) {
+        var footRPos = MyAvatar.getJointPosition("RightFoot");
+        var footLPos = MyAvatar.getJointPosition("LeftFoot");        
+        var debugStrideLength = Vec3.distance(footRPos, footLPos);       
+        walkToolsLog.logMessage('Stride is '+debugStrideLength.toFixed(4)+
+                                ' at '+motion.frequencyTimeWheelPos.toFixed(3)+' degrees\n');
+    }*/        
 }

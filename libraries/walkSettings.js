@@ -70,8 +70,8 @@ WalkSettings = function() {
     Controller.keyReleaseEvent.connect(keyReleaseEvent);
 
     // web window
-    const PANEL_WIDTH = 200;
-    const PANEL_HEIGHT = 180;
+    const PANEL_WIDTH = 180;
+    const PANEL_HEIGHT = 200;
     var _url = Script.resolvePath('html/walkSettings.html');
     var _webWindow = new WebWindow('Walk Settings', _url, PANEL_WIDTH, PANEL_HEIGHT, false);
     _webWindow.setVisible(false);
@@ -84,7 +84,7 @@ WalkSettings = function() {
                 type: "update",
                 armsFree: avatar.armsFree,
                 makesFootStepSounds: avatar.makesFootStepSounds,
-                blenderPreRotations: avatar.blenderPreRotations
+                mixamoPreRotations: avatar.mixamoPreRotations
             }));
         } else if (data.type == "powerToggle") {
             motion.isLive = !motion.isLive;
@@ -92,7 +92,7 @@ WalkSettings = function() {
             // receive settings from the window
             avatar.armsFree = data.armsFree;
             avatar.makesFootStepSounds = data.makesFootStepSounds;
-            avatar.blenderPreRotations = data.blenderPreRotations;
+            avatar.mixamoPreRotations = data.mixamoPreRotations;
         }
     });
     

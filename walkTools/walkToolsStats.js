@@ -3,9 +3,9 @@
 //  version 0.1
 //
 //  Created by David Wooldridge, Summer 2015
-//  Copyright © 2015 High Fidelity, Inc.
+//  Copyright © 2015 David Wooldridge.
 //
-//  Presents options as a button menu for walkTools
+//  Presents animation statistics for walkTools
 //
 //  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
 //

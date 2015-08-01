@@ -38,26 +38,26 @@ Avatar = function() {
         }
     }
     // settings
-    this.headFree = true;
+    this.headFree = false; //REMOVE_FOR_RELEASE - headFree must be true to enable Oculus head movement
     this.armsFree = this.hydraCheck(); // automatically sets true to enable Hydra support - temporary fix
     this.makesFootStepSounds = true;
-    this.blenderPreRotations = false; // temporary fix
+    this.mixamoPreRotations = false; // temporary fix
     this.animationSet = undefined; // currently just one animation set
     this.setAnimationSet = function(animationSet) {
         this.animationSet = animationSet;
         switch (animationSet) {
             case 'standardMale':
-                this.selectedIdle = walkAssets.getAnimationDataFile("MaleIdle");
-                this.selectedWalk = walkAssets.getAnimationDataFile("MaleWalk");
-                this.selectedWalkBackwards = walkAssets.getAnimationDataFile("MaleWalkBackwards");
-                this.selectedSideStepLeft = walkAssets.getAnimationDataFile("MaleSideStepLeft");
-                this.selectedSideStepRight = walkAssets.getAnimationDataFile("MaleSideStepRight");
+                this.selectedIdle = walkAssets.getAnimationDataFile("Idle");
+                this.selectedWalk = walkAssets.getAnimationDataFile("Walk");
+                this.selectedWalkBackwards = walkAssets.getAnimationDataFile("WalkBackwards");
+                this.selectedSideStepLeft = walkAssets.getAnimationDataFile("SideStepLeft");
+                this.selectedSideStepRight = walkAssets.getAnimationDataFile("SideStepRight");
                 this.selectedWalkBlend = walkAssets.getAnimationDataFile("WalkBlend");
-                this.selectedHover = walkAssets.getAnimationDataFile("MaleHover");
-                this.selectedFly = walkAssets.getAnimationDataFile("MaleFly");
-                this.selectedFlyBackwards = walkAssets.getAnimationDataFile("MaleFlyBackwards");
-                this.selectedFlyDown = walkAssets.getAnimationDataFile("MaleFlyDown");
-                this.selectedFlyUp = walkAssets.getAnimationDataFile("MaleFlyUp");
+                this.selectedHover = walkAssets.getAnimationDataFile("Hover");
+                this.selectedFly = walkAssets.getAnimationDataFile("Fly");
+                this.selectedFlyBackwards = walkAssets.getAnimationDataFile("FlyBackwards");
+                this.selectedFlyDown = walkAssets.getAnimationDataFile("FlyDown");
+                this.selectedFlyUp = walkAssets.getAnimationDataFile("FlyUp");
                 this.selectedFlyBlend = walkAssets.getAnimationDataFile("FlyBlend");
                 this.currentAnimation = this.selectedIdle;
                 return;
@@ -88,7 +88,7 @@ Avatar = function() {
             this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightToeBase").y;
 
             // maybe measuring before Blender pre-rotations have been applied?
-            if (this.calibration.hipsToFeet < 0 && this.blenderPreRotations) {
+            if (this.calibration.hipsToFeet < 0 && this.mixamoPreRotations) {
                 this.calibration.hipsToFeet *= -1;
             }
 
@@ -415,33 +415,26 @@ animationOperations = (function() {
 
             // gather modifiers and multipliers
             modifiers = new FrequencyMultipliers(joint, direction);
-
-            // calculate translations. Use synthesis filters where specified by the animation data file.
-
+            
             // sway (oscillation on the x-axis)
-            if (animation.filters.hasOwnProperty(jointName) && 'swayFilter' in animation.filters[jointName]) {
-                jointTranslations.x = joint.sway * animation.filters[jointName].swayFilter.calculate
+            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].swayHarmonics) {
+                jointTranslations.x = joint.sway * animation.harmonics[jointName].swayHarmonics.calculate
                     (filter.degToRad(modifiers.swayFrequencyMultiplier * ft + joint.swayPhase)) + joint.swayOffset;
             } else {
                 jointTranslations.x = joint.sway * Math.sin
                     (filter.degToRad(modifiers.swayFrequencyMultiplier * ft + joint.swayPhase)) + joint.swayOffset;
             }
             // bob (oscillation on the y-axis)
-            if (animation.filters.hasOwnProperty(jointName) && 'bobFilter' in animation.filters[jointName]) {
-                jointTranslations.y = joint.bob * animation.filters[jointName].bobFilter.calculate
+            if (animation.harmonics.hasOwnProperty(jointName) &&  animation.harmonics[jointName].bobHarmonics) {
+                jointTranslations.y = joint.bob * animation.harmonics[jointName].bobHarmonics.calculate
                     (filter.degToRad(modifiers.bobFrequencyMultiplier * ft + joint.bobPhase)) + joint.bobOffset;
             } else {
                 jointTranslations.y = joint.bob * Math.sin
                     (filter.degToRad(modifiers.bobFrequencyMultiplier * ft + joint.bobPhase)) + joint.bobOffset;
-
-                if (animation.filters.hasOwnProperty(jointName) && 'bobLPFilter' in animation.filters[jointName]) {
-                    jointTranslations.y = filter.clipTrough(jointTranslations.y, joint, 2);
-                    jointTranslations.y = animation.filters[jointName].bobLPFilter.process(jointTranslations.y);
-                }
             }
             // thrust (oscillation on the z-axis)
-            if (animation.filters.hasOwnProperty(jointName) && 'thrustFilter' in animation.filters[jointName]) {
-                jointTranslations.z = joint.thrust * animation.filters[jointName].thrustFilter.calculate
+            if (animation.harmonics.hasOwnProperty(jointName) &&  animation.harmonics[jointName].thrustHarmonics) {
+                jointTranslations.z = joint.thrust * animation.harmonics[jointName].thrustHarmonics.calculate
                     (filter.degToRad(modifiers.thrustFrequencyMultiplier * ft + joint.thrustPhase)) + joint.thrustOffset;
             } else {
                 jointTranslations.z = joint.thrust * Math.sin
@@ -455,37 +448,32 @@ animationOperations = (function() {
             var joint = animation.joints[jointName];
             var jointRotations = {x:0, y:0, z:0};
 
-            if (avatar.blenderPreRotations) {
-                jointRotations = Vec3.sum(jointRotations, walkAssets.blenderPreRotations.joints[jointName]);
+            if (avatar.mixamoPreRotations) {
+                jointRotations = Vec3.sum(jointRotations, walkAssets.mixamoPreRotations.joints[jointName]);
             }
 
-            // gather frequency multipliers for this joint
+            // gather frequency multipliers for this joint - TODO: phase these out, no need if using harmonics 
             modifiers = new FrequencyMultipliers(joint, direction);
 
-            // calculate rotations. Use synthesis filters where specified by the animation data file.
-
             // calculate pitch
-            if (animation.filters.hasOwnProperty(jointName) &&
-               'pitchFilter' in animation.filters[jointName]) {
-                jointRotations.x += joint.pitch * animation.filters[jointName].pitchFilter.calculate
+            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].pitchHarmonics) {
+                jointRotations.x += joint.pitch * animation.harmonics[jointName].pitchHarmonics.calculate
                     (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
             } else {
                 jointRotations.x += joint.pitch * Math.sin
                     (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
             }
             // calculate yaw
-            if (animation.filters.hasOwnProperty(jointName) &&
-               'yawFilter' in animation.filters[jointName]) {
-                jointRotations.y += joint.yaw * animation.filters[jointName].yawFilter.calculate
+            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].yawHarmonics) {
+                jointRotations.y += joint.yaw * animation.harmonics[jointName].yawHarmonics.calculate
                     (filter.degToRad(ft * modifiers.yawFrequencyMultiplier + joint.yawPhase)) + joint.yawOffset;
             } else {
                 jointRotations.y += joint.yaw * Math.sin
                     (filter.degToRad(ft * modifiers.yawFrequencyMultiplier + joint.yawPhase)) + joint.yawOffset;
             }
             // calculate roll
-            if (animation.filters.hasOwnProperty(jointName) &&
-               'rollFilter' in animation.filters[jointName]) {
-                jointRotations.z += joint.roll * animation.filters[jointName].rollFilter.calculate
+            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].rollHarmonics) {
+                jointRotations.z += joint.roll * animation.harmonics[jointName].rollHarmonics.calculate
                     (filter.degToRad(ft * modifiers.rollFrequencyMultiplier + joint.rollPhase)) + joint.rollOffset;
             } else {
                 jointRotations.z += joint.roll * Math.sin
@@ -529,43 +517,13 @@ animationOperations = (function() {
         },
 
         deepCopy: function(sourceAnimation, targetAnimation) {
+            
             // calibration
             targetAnimation.calibration = JSON.parse(JSON.stringify(sourceAnimation.calibration));
 
-            // harmonics
-            targetAnimation.harmonics = {};
-            if (sourceAnimation.harmonics) {
-                targetAnimation.harmonics = JSON.parse(JSON.stringify(sourceAnimation.harmonics));
-            }
+            // harmonics filter references
+            targetAnimation.harmonics = sourceAnimation.harmonics;
 
-            // filters
-            targetAnimation.filters = {};
-            for (i in sourceAnimation.filters) {
-                // are any filters specified for this joint?
-                if (sourceAnimation.filters[i]) {
-                    targetAnimation.filters[i] = sourceAnimation.filters[i];
-                    // wave shapers
-                    if (sourceAnimation.filters[i].pitchFilter) {
-                        targetAnimation.filters[i].pitchFilter = sourceAnimation.filters[i].pitchFilter;
-                    }
-                    if (sourceAnimation.filters[i].yawFilter) {
-                        targetAnimation.filters[i].yawFilter = sourceAnimation.filters[i].yawFilter;
-                    }
-                    if (sourceAnimation.filters[i].rollFilter) {
-                        targetAnimation.filters[i].rollFilter = sourceAnimation.filters[i].rollFilter;
-                    }
-                    // LP filters
-                    if (sourceAnimation.filters[i].swayLPFilter) {
-                        targetAnimation.filters[i].swayLPFilter = sourceAnimation.filters[i].swayLPFilter;
-                    }
-                    if (sourceAnimation.filters[i].bobLPFilter) {
-                        targetAnimation.filters[i].bobLPFilter = sourceAnimation.filters[i].bobLPFilter;
-                    }
-                    if (sourceAnimation.filters[i].thrustLPFilter) {
-                        targetAnimation.filters[i].thrustLPFilter = sourceAnimation.filters[i].thrustLPFilter;
-                    }
-                }
-            }
             // joints
             targetAnimation.joints = JSON.parse(JSON.stringify(sourceAnimation.joints));
         }

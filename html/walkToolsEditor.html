@@ -4,14 +4,7 @@
         <link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.min.css">
         <script src="jquery-2.1.4.min.js"></script>
         <script src="jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
-        <script>
-       
-            // ECMAScript 6 specification ready string.contains() function
-            if (!('contains' in String.prototype)) {
-                String.prototype.contains = function(str, startIndex) {
-                    return ''.indexOf.call(this, str, startIndex) !== -1;
-                };
-            }        
+        <script>      
 
             // the main function
             function loaded() {
@@ -64,6 +57,14 @@
                 var _elFrequencySlider = $("#frequency-slider");
                 var _elGlobalPhaseSlider = $("#global-phase-slider");
                 var _elTransportSlider = $("#transport-slider");
+                
+                // harmonics controls
+                var _elPitchHarmonicsCheck = document.getElementById("pitch-harmonics-enabled");
+                var _elYawHarmonicsCheck = document.getElementById("yaw-harmonics-enabled");
+                var _elRollHarmonicsCheck = document.getElementById("roll-harmonics-enabled");
+                var _elNumPitchHarmonics = document.getElementById("num-pitch-harmonics");
+                var _elNumYawHarmonics = document.getElementById("num-yaw-harmonics");
+                var _elNumRollHarmonics = document.getElementById("num-roll-harmonics");
 
                 // internal vars
                 var _dataReady = false; // do not send data unless ready
@@ -83,13 +84,15 @@
                     editing: false,
                     editingTranslation: false,
                     symmetricalEditing: false,
-                    opposingSymmetricalEditing: true,
+                    opposingSymmetricalEditing: false,
                     editingFingersLeft: false,
                     editingFingersRight: false
                 }
                 _animationBeingEdited = "MaleIdle";
                 _jointData = {};
+                _harmonicData = {};
                 _pairedJointData = {};
+                _pairedHarmonicData = {};
 
                 // joint selectors
                 function selector(name, element, left, top, right, bottom) {
@@ -153,7 +156,7 @@
                 var translationJointSelector = new selector("Translation", document.getElementById("hips-translation-joint-selector"));
                 _jointSelectors.push(translationJointSelector);
                 
-                // map the (invisible) direction buttons
+                // map the transparent direction buttons
                 var _directionSelectors = [];
                 var faceNorth = new selector("North", null, 70, 0, 85, 20);
                 _directionSelectors.push(faceNorth);
@@ -212,7 +215,13 @@
                     }
                     for (i in _sliders) {
                         _sliders[i].slider("enable");
-                    }                 
+                    }
+                    _elPitchHarmonicsCheck.disabled = false;
+                    _elYawHarmonicsCheck.disabled = false;
+                    _elRollHarmonicsCheck.disabled = false;
+                    _elNumPitchHarmonics.disabled = false;
+                    _elNumYawHarmonics.disabled = false;
+                    _elNumRollHarmonics.disabled = false;
                 }
                 
                 turnOff = function() {             
@@ -234,15 +243,23 @@
                     for (i in _sliders) {
                         _sliders[i].slider("disable");
                     }
+                    _elPitchHarmonicsCheck.disabled = true;
+                    _elYawHarmonicsCheck.disabled = true;
+                    _elRollHarmonicsCheck.disabled = true;     
+                    _elNumPitchHarmonics.disabled = true;
+                    _elNumYawHarmonics.disabled = true;
+                    _elNumRollHarmonics.disabled = true;
                 }   
 
+                // call after any changes made */
                 updateBuffer = function() {
                     if (_dataReady) {
                         EventBridge.emitWebEvent(JSON.stringify({
                             type: "editorEvent",
                             action: "setJointData",
                             joint: _joint,
-                            jointData: _jointData
+                            jointData: _jointData,
+                            harmonicData: _harmonicData
                         }));
                         if (_pairedJoint !== "None" &&
                            (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing)) {
@@ -250,25 +267,16 @@
                                 type: "editorEvent",
                                 action: "setJointData",
                                 joint: _pairedJoint,
-                                jointData: _pairedJointData
+                                jointData: _pairedJointData,
+                                harmonicData: _pairedHarmonicData
                             }));
                         }
                     }
                 }
 
-                updateLabels = function(editingRotations) {
+                updateLabels = function() {
                 
-                    if (editingRotations) {
-                        $("#pitchOsc").html("Pitch Osc");
-                        $("#yawOsc").html("Yaw Osc");
-                        $("#rollOsc").html("Roll Osc");
-                        $("#pitchPhase").html("Pitch Phase");
-                        $("#yawPhase").html("Yaw Phase");
-                        $("#rollPhase").html("Roll Phase");
-                        $("#pitchOffset").html("Pitch Offset");
-                        $("#yawOffset").html("Yaw Offset");
-                        $("#rollOffset").html("Roll Offset");
-                    } else {
+                    if (_editMode.editingTranslation) {
                         $("#pitchOsc").html("Sway Osc");
                         $("#yawOsc").html("Bob Osc");
                         $("#rollOsc").html("Thrust Osc");
@@ -278,11 +286,148 @@
                         $("#pitchOffset").html("Sway Offset");
                         $("#yawOffset").html("Bob Offset");
                         $("#rollOffset").html("Thrust Offset");
+                        $("#pitch-harmonics-label").html("Sway");
+                        $("#yaw-harmonics-label").html("Bob");
+                        $("#roll-harmonics-label").html("Thrust");              
+                    } else {
+                        $("#pitchOsc").html("Pitch Osc");
+                        $("#yawOsc").html("Yaw Osc");
+                        $("#rollOsc").html("Roll Osc");
+                        $("#pitchPhase").html("Pitch Phase");
+                        $("#yawPhase").html("Yaw Phase");
+                        $("#rollPhase").html("Roll Phase");
+                        $("#pitchOffset").html("Pitch Offset");
+                        $("#yawOffset").html("Yaw Offset");
+                        $("#rollOffset").html("Roll Offset");
+                        $("#pitch-harmonics-label").html("Pitch");
+                        $("#yaw-harmonics-label").html("Yaw");
+                        $("#roll-harmonics-label").html("Roll");    
                     }
                     updateJointValues();
                 }                
 
-                var SHOW_DP = 3;
+                const MIN_HARMONICS = 2;
+                initialiseHarmonicsInputs = function() {
+                
+                    if (_harmonicData) {
+                    
+                        if (_editMode.editingTranslation) {
+                        
+                            if (_harmonicData.swayHarmonics) {
+                                _elPitchHarmonicsCheck.disabled = false;
+                                _elPitchHarmonicsCheck.checked = true;
+                                _elNumPitchHarmonics.value = _harmonicData.swayHarmonics.numHarmonics;
+                                _elNumPitchHarmonics.max = _harmonicData.swayHarmonics.magnitudes.length;
+                                _elNumPitchHarmonics.min = MIN_HARMONICS;
+                                _elNumPitchHarmonics.disabled = false;
+                            } else {
+                                _elPitchHarmonicsCheck.disabled = true;
+                                _elPitchHarmonicsCheck.checked = false;
+                                _elNumPitchHarmonics.value = 0;
+                                _elNumPitchHarmonics.max = 0;
+                                _elNumPitchHarmonics.min = 0;
+                                _elNumPitchHarmonics.disabled = true;
+                            }
+                            if (_harmonicData.bobHarmonics) {
+                                _elYawHarmonicsCheck.disabled = false;
+                                _elYawHarmonicsCheck.checked = true;
+                                _elNumYawHarmonics.value = _harmonicData.bobHarmonics.numHarmonics;
+                                _elNumYawHarmonics.max = _harmonicData.bobHarmonics.magnitudes.length;
+                                _elNumYawHarmonics.min = MIN_HARMONICS;
+                                _elNumYawHarmonics.disabled = false;
+                            } else {
+                                _elYawHarmonicsCheck.disabled = true;
+                                _elYawHarmonicsCheck.checked = false;
+                                _elNumYawHarmonics.value = 0;
+                                _elNumYawHarmonics.max = 0;
+                                _elNumYawHarmonics.min = 0;
+                                _elNumYawHarmonics.disabled = true;
+                            }
+                            if (_harmonicData.thrustHarmonics) {
+                                _elRollHarmonicsCheck.disabled = false;
+                                _elRollHarmonicsCheck.checked = true;
+                                _elNumRollHarmonics.value = _harmonicData.thrustHarmonics.numHarmonics;
+                                _elNumRollHarmonics.max = _harmonicData.thrustHarmonics.magnitudes.length;
+                                _elNumRollHarmonics.min = MIN_HARMONICS;
+                                _elNumRollHarmonics.disabled = false;
+                            } else {
+                                _elRollHarmonicsCheck.disabled = true;
+                                _elRollHarmonicsCheck.checked = false;
+                                _elNumRollHarmonics.value = 0;
+                                _elNumRollHarmonics.max = 0;
+                                _elNumRollHarmonics.min = 0;
+                                _elNumRollHarmonics.disabled = true;
+                            }
+                        } else {
+                            if (_harmonicData.pitchHarmonics) {
+                                _elPitchHarmonicsCheck.disabled = false;
+                                _elPitchHarmonicsCheck.checked = true;
+                                _elNumPitchHarmonics.value = _harmonicData.pitchHarmonics.numHarmonics;
+                                _elNumPitchHarmonics.max = _harmonicData.pitchHarmonics.magnitudes.length;
+                                _elNumPitchHarmonics.min = MIN_HARMONICS;
+                                _elNumPitchHarmonics.disabled = false;
+                            } else {
+                                _elPitchHarmonicsCheck.disabled = true;
+                                _elPitchHarmonicsCheck.checked = false;
+                                _elNumPitchHarmonics.value = 0;
+                                _elNumPitchHarmonics.max = 0;
+                                _elNumPitchHarmonics.min = 0;
+                                _elNumPitchHarmonics.disabled = true;
+                            }
+                            if (_harmonicData.yawHarmonics) {
+                                _elYawHarmonicsCheck.disabled = false;
+                                _elYawHarmonicsCheck.checked = true;
+                                _elNumYawHarmonics.value = _harmonicData.yawHarmonics.numHarmonics;
+                                _elNumYawHarmonics.max = _harmonicData.yawHarmonics.magnitudes.length;
+                                _elNumYawHarmonics.min = MIN_HARMONICS;
+                                _elNumYawHarmonics.disabled = false;
+                            } else {
+                                _elYawHarmonicsCheck.disabled = true;
+                                _elYawHarmonicsCheck.checked = false;
+                                _elNumYawHarmonics.value = 0;
+                                _elNumYawHarmonics.max = 0;
+                                _elNumYawHarmonics.min = 0;
+                                _elNumYawHarmonics.disabled = true;
+                            }
+                            if (_harmonicData.rollHarmonics) {
+                                _elRollHarmonicsCheck.disabled = false;
+                                _elRollHarmonicsCheck.checked = true;
+                                _elNumRollHarmonics.value = _harmonicData.rollHarmonics.numHarmonics;
+                                _elNumRollHarmonics.max = _harmonicData.rollHarmonics.magnitudes.length;
+                                _elNumRollHarmonics.min = MIN_HARMONICS;
+                                _elNumRollHarmonics.disabled = false;
+                            } else {
+                                _elRollHarmonicsCheck.disabled = true;
+                                _elRollHarmonicsCheck.checked = false;
+                                _elNumRollHarmonics.value = 0;
+                                _elNumRollHarmonics.max = 0;
+                                _elNumRollHarmonics.min = 0;
+                                _elNumRollHarmonics.disabled = true;
+                            }
+                        }
+                    } else {
+                        _elPitchHarmonicsCheck.disabled = true;
+                        _elPitchHarmonicsCheck.checked = false;
+                        _elNumPitchHarmonics.value = 0;
+                        _elNumPitchHarmonics.max = 0;
+                        _elNumPitchHarmonics.min = 0;
+                        _elNumPitchHarmonics.disabled = true;
+                        _elYawHarmonicsCheck.disabled = true;
+                        _elYawHarmonicsCheck.checked = false;
+                        _elNumYawHarmonics.value = 0; 
+                        _elNumYawHarmonics.max = 0;
+                        _elNumYawHarmonics.min = 0;
+                        _elNumYawHarmonics.disabled = true;
+                        _elRollHarmonicsCheck.disabled = true;
+                        _elRollHarmonicsCheck.checked = false;
+                        _elNumRollHarmonics.value = 0;
+                        _elNumRollHarmonics.max = 0;
+                        _elNumRollHarmonics.min = 0;
+                        _elNumRollHarmonics.disabled = true;
+                    }
+                }                
+                
+                var SHOW_DP = 4;
                 updateSlider = function(jointDataSlider, jointData, min, max) {
                     jointDataSlider.slider('option', 'min', min);
                     jointDataSlider.slider('option', 'max', max);
@@ -304,7 +449,7 @@
                         _elPitchOffset.value = _jointData.swayOffset.toFixed(SHOW_DP);
                         _elYawOffset.value = _jointData.bobOffset.toFixed(SHOW_DP);
                         _elRollOffset.value = _jointData.thrustOffset.toFixed(SHOW_DP);
-                        
+
                         // update slider values and positions
                         updateSlider($('#pitch-oscillation'), _jointData.sway, 0, _sliderRanges["Hips"].swayRange);
                         updateSlider($('#yaw-oscillation'), _jointData.bob, 0, _sliderRanges["Hips"].bobRange);
@@ -327,7 +472,7 @@
                         _elRollPhase.value = _jointData.rollPhase.toFixed(SHOW_DP);
                         _elPitchOffset.value = _jointData.pitchOffset.toFixed(SHOW_DP);
                         _elYawOffset.value = _jointData.yawOffset.toFixed(SHOW_DP);
-                        _elRollOffset.value = _jointData.rollOffset.toFixed(SHOW_DP);
+                        _elRollOffset.value = _jointData.rollOffset.toFixed(SHOW_DP);                
                         
                         // update slider values and positions
                         if (_editMode.editingFingersLeft || _editMode.editingFingersRight) {
@@ -655,12 +800,15 @@
                         _editMode.editingTranslation = false;
                         _elLeftHandSelect.value = "None";
                         _elRightHandSelect.value = "None";
-                        _elLeftHandSelect.disabled = false;
-                        _elRightHandSelect.disabled = false;                        
-                        updateJointValues();
-                        updateLabels(true);
+                        _elLeftHandSelect.disabled = true;
+                        _elRightHandSelect.disabled = true;
+                        lockData(true);
+                        EventBridge.emitWebEvent(JSON.stringify({
+                            type: "editorEvent",
+                            action: "getJointData",
+                            selectedJoint: _joint
+                        }));                        
                         turnOn();
-                        lockData(false);
                     }
                 });
                 _elEditingTranslations.addEventListener("click", function() {
@@ -670,7 +818,7 @@
                         _elLeftHandSelect.value = "None";
                         _elRightHandSelect.value = "None";
                         _elLeftHandSelect.disabled = true;
-                        _elRightHandSelect.disabled = true;
+                        _elRightHandSelect.disabled = true;   
                         _joint = "Hips";
                         lockData(true);
                         EventBridge.emitWebEvent(JSON.stringify({
@@ -679,7 +827,6 @@
                             selectedJoint: _joint
                         }));                        
                         turnOn();
-                        lockData(false);
                     }
                 });
 
@@ -687,7 +834,6 @@
                 _elAnimationSelect.onchange = function(){
                     lockData(true);
                     _animationBeingEdited = _elAnimationSelect.options[_elAnimationSelect.selectedIndex].value;
-                    //alert('_animationBeingEdited selected: '+_animationBeingEdited);
                     EventBridge.emitWebEvent(JSON.stringify({
                         type: "editorEvent",
                         action: "selectAnimation",
@@ -726,7 +872,148 @@
                         action: "getJointData",
                         selectedJoint: _joint
                     }));
-                }             
+                }
+
+                // harmonics controls event handlers
+                _elPitchHarmonicsCheck.onclick = function() {
+                    // access properties using this keyword
+                    if (this.checked) {
+                    
+                        if (_editMode.editingTranslation) {
+                            _harmonicData.swayHarmonics.numHarmonics = _harmonicData.swayHarmonics.magnitudes.length / 2;
+                            _elNumPitchHarmonics.value = _harmonicData.swayHarmonics.magnitudes.length / 2;
+                            _elNumPitchHarmonics.disabled = false;
+
+                        } else {
+                            _harmonicData.pitchHarmonics.numHarmonics = _harmonicData.pitchHarmonics.magnitudes.length / 2;
+                            _elNumPitchHarmonics.value = _harmonicData.pitchHarmonics.magnitudes.length / 2;
+                            _elNumPitchHarmonics.disabled = false;
+                        }
+                    } else {
+                    
+                        if (_editMode.editingTranslation) {
+                            _harmonicData.swayHarmonics.numHarmonics = 0;
+                            _elNumPitchHarmonics.value = 0;
+                            _elNumPitchHarmonics.disabled = true;
+
+                        } else {
+                            _harmonicData.pitchHarmonics.numHarmonics = 0;
+                            _elNumPitchHarmonics.value = 0;
+                            _elNumPitchHarmonics.disabled = true;
+
+                        }
+                    }
+                    updateBuffer();                      
+                };
+                _elYawHarmonicsCheck.onclick = function() {
+                    // access properties using this keyword
+                    if (this.checked) {
+                    
+                        if (_editMode.editingTranslation) {
+                            _harmonicData.bobHarmonics.numHarmonics = _harmonicData.bobHarmonics.magnitudes.length / 2;
+                            _elNumYawHarmonics.value = _harmonicData.bobHarmonics.magnitudes.length / 2;
+                            _elNumYawHarmonics.disabled = false;                        
+                        } else {
+                            _harmonicData.yawHarmonics.numHarmonics = _harmonicData.yawHarmonics.magnitudes.length / 2;
+                            _elNumYawHarmonics.value = _harmonicData.yawHarmonics.magnitudes.length / 2;
+                            _elNumYawHarmonics.disabled = false;
+                        }
+                    } else {
+                    
+                        if (_editMode.editingTranslation) {
+                            _harmonicData.bobHarmonics.numHarmonics = 0;
+                            _elNumYawHarmonics.value = 0;
+                            _elNumYawHarmonics.disabled = true;
+                        } else {
+                            _harmonicData.yawHarmonics.numHarmonics = 0;
+                            _elNumYawHarmonics.value = 0;
+                            _elNumYawHarmonics.disabled = true;
+                        }
+                    }
+                    updateBuffer();                      
+                };
+                _elRollHarmonicsCheck.onclick = function() {
+                    // access properties using this keyword
+                    if (this.checked) {
+                    
+                        if (_editMode.editingTranslation) {
+                            _harmonicData.thrustHarmonics.numHarmonics = _harmonicData.thrustHarmonics.magnitudes.length / 2;
+                            _elNumRollHarmonics.value = _harmonicData.thrustHarmonics.magnitudes.length / 2;
+                            _elNumRollHarmonics.disabled = false;
+                        } else {
+                            _harmonicData.rollHarmonics.numHarmonics = _harmonicData.rollHarmonics.magnitudes.length / 2;
+                            _elNumRollHarmonics.value = _harmonicData.rollHarmonics.magnitudes.length / 2;
+                            _elNumRollHarmonics.disabled = false;
+                        }
+                    } else {
+                    
+                        if (_editMode.editingTranslation) {
+                            _harmonicData.thrustHarmonics.numHarmonics = 0;
+                            _elNumRollHarmonics.value = 0;
+                            _elNumRollHarmonics.disabled = true;
+                        } else {
+                            _harmonicData.rollHarmonics.numHarmonics = 0;
+                            _elNumRollHarmonics.value = 0;
+                            _elNumRollHarmonics.disabled = true;
+                        }
+                    }
+                    updateBuffer();                     
+                };
+                _elNumPitchHarmonics.onchange = function() {
+                    if (_editMode.editingTranslation) {
+                        if (_elNumPitchHarmonics.value > _harmonicData.swayHarmonics.magnitudes.length) {
+                            _elNumPitchHarmonics.value = _harmonicData.swayHarmonics.magnitudes.length;
+                            
+                        } else if (_elNumPitchHarmonics.value < MIN_HARMONICS) {
+                            _elNumPitchHarmonics.value = MIN_HARMONICS;
+                        }
+                        _harmonicData.swayHarmonics.numHarmonics = _elNumPitchHarmonics.value;
+                    } else {
+                        if (_elNumPitchHarmonics.value > _harmonicData.pitchHarmonics.magnitudes.length) {
+                            _elNumPitchHarmonics.value = _harmonicData.pitchHarmonics.magnitudes.length;
+                        } else if (_elNumPitchHarmonics.value < MIN_HARMONICS) {
+                            _elNumPitchHarmonics.value = MIN_HARMONICS;
+                        }
+                        _harmonicData.pitchHarmonics.numHarmonics = _elNumPitchHarmonics.value;
+                    }
+                    updateBuffer();
+                };
+                _elNumYawHarmonics.onchange = function() {
+                    if (_editMode.editingTranslation) {
+                        if (_elNumYawHarmonics.value > _harmonicData.bobHarmonics.magnitudes.length) {
+                            _elNumYawHarmonics.value = _harmonicData.bobHarmonics.magnitudes.length;
+                        } else if (_elNumYawHarmonics.value < MIN_HARMONICS) {
+                            _elNumYawHarmonics.value = MIN_HARMONICS;
+                        }                        
+                        _harmonicData.bobHarmonics.numHarmonics = _elNumYawHarmonics.value;
+                    } else {
+                        if (_elNumYawHarmonics.value > _harmonicData.yawHarmonics.magnitudes.length) {
+                            _elNumYawHarmonics.value = _harmonicData.yawHarmonics.magnitudes.length;
+                        } else if (_elNumYawHarmonics.value < MIN_HARMONICS) {
+                            _elNumYawHarmonics.value = MIN_HARMONICS;
+                        }                       
+                        _harmonicData.yawHarmonics.numHarmonics = _elNumYawHarmonics.value;
+                    }
+                    updateBuffer();
+                };
+                _elNumRollHarmonics.onchange = function() {
+                    if (_editMode.editingTranslation) {
+                        if (_elNumRollHarmonics.value > _harmonicData.thrustHarmonics.magnitudes.length) {
+                            _elNumRollHarmonics.value = _harmonicData.thrustHarmonics.magnitudes.length;
+                        } else if (_elNumRollHarmonics.value < MIN_HARMONICS) {
+                            _elNumRollHarmonics.value = MIN_HARMONICS;
+                        }  
+                        _harmonicData.thrustHarmonics.numHarmonics = _elNumRollHarmonics.value;
+                    } else {
+                        if (_elNumRollHarmonics.value > _harmonicData.rollHarmonics.magnitudes.length) {
+                            _elNumRollHarmonics.value = _harmonicData.rollHarmonics.magnitudes.length;
+                        } else if (_elNumRollHarmonics.value < MIN_HARMONICS) {
+                            _elNumRollHarmonics.value = MIN_HARMONICS;
+                        }                      
+                        _harmonicData.rollHarmonics.numHarmonics = _elNumRollHarmonics.value;
+                    }
+                    updateBuffer();
+                };                
                 
                 // text input event handlers
                 for (i in _animationParamsTextInputs) {
@@ -899,8 +1186,8 @@
                     $( "#frequency-slider" ).slider({
                         min: 0,
                         max: 15,
-                        value: 5,
-                        step: SLIDER_STEP,
+                        value: 6.28319,
+                        step: MIN_SLIDER_STEP,
                         orientation: "horizontal",
                         slide: function(event, ui) {
                             EventBridge.emitWebEvent(JSON.stringify({
@@ -1004,20 +1291,25 @@
                                     _animationBeingEdited = data.currentAnimation;
                                     _joint = data.joint;
                                     _jointData = data.jointData;
+                                    _harmonicData = data.harmonicData;
                                     _pairedJoint = data.pairedJoint;
-                                    _pairedJointData = data.pairdJointData;
+                                    _pairedJointData = data.pairedJointData;
+                                    _pairedHarmonicData = data.pairedHarmonicData;
                                     _IKChain = data.IKChain;
                                     _sliderRanges = data.sliderRanges;
                                     initialise();
                                     updateJointValues();
+                                    initialiseHarmonicsInputs();
                                     lockData(false);
                                     return;
 
                                 case "jointData":
                                     _joint = data.joint;
                                     _jointData = data.jointData;
+                                    _harmonicData = data.harmonicData;
                                     _pairedJoint = data.pairedJoint;
                                     _pairedJointData = data.pairedJointData;
+                                    _pairedHarmonicData = data.pairedHarmonicData;
                                     _IKChain = data.IKChain;
                                     _elFrequencySlider.slider('option', 'value', data.frequency);
                                     _elFrequencySlider.slider('option','slide')
@@ -1025,15 +1317,14 @@
                                             handle: $('.ui-slider-handle', _elFrequencySlider), value: data.frequency
                                         });
                                     updateJointValues();
-                                    updateLabels(!_editMode.editingTranslation);
+                                    initialiseHarmonicsInputs();
+                                    updateLabels();
                                     lockData(false);
                                     return;
 
                                 case "update":
-                                    //lockData(true);
                                     _ftWheelPosition = data.ftWheelPosition;
                                     update();
-                                    //lockData(false);
                                     return;
                                     
                                 case "sliderRanges":
@@ -1207,6 +1498,28 @@
                 <div id="data-ready-led"></div>
                 
             </div>
+            
+            <div class="editor-harmonics">
+                <label>Harmonics</label>
+                <div id="harmonics-checkboxes">
+                    <div class="harmonics-selector" id="pitch-harmonics">
+                        <label id="pitch-harmonics-label">Pitch</label>
+                        <input type="checkbox" id="pitch-harmonics-enabled">
+                        <input class="num-harmonics" type="number" id="num-pitch-harmonics">
+                    </div>
+                    <div class="harmonics-selector" id="pitch-harmonics">
+                        <label id="yaw-harmonics-label">Yaw</label>
+                        <input type="checkbox" id="yaw-harmonics-enabled">
+                        <input class="num-harmonics" type="number" id="num-yaw-harmonics">
+                    </div>
+                    <div class="harmonics-selector" id="pitch-harmonics">
+                        <label id="roll-harmonics-label">Roll</label>
+                        <input type="checkbox" id="roll-harmonics-enabled">
+                        <input class="num-harmonics" type="number" id="num-roll-harmonics">
+                    </div>    
+                </div>
+            </div>
+            
         </div>
     </body>
 </html>

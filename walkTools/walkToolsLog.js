@@ -17,14 +17,15 @@ WalkToolsLog = function() {
     var that = {};
     
     var _visible = false;
-    var _debugLogLines = [];
-    _debugLogLines.length = 99;
+    //var _debugLogLines = [];
+    //_debugLogLines.length = 120;
 
     // web window
     var url = Script.resolvePath('html/walkToolsLog.html');
-    var webView = new WebWindow('walkTools Log', url, 1000, 400, false);
+    var webView = new WebWindow('walkTools Log', url, 550, 800, false);
     webView.setVisible(_visible);
 
+    // send new log entry to the web window
     that.logMessage = function(newLogEntry) {
          if (_visible) {
             webView.eventBridge.emitScriptEvent(JSON.stringify({
@@ -33,6 +34,22 @@ WalkToolsLog = function() {
             }));
         }
     }
+    
+    // events from webWindow arrive here
+    /*webView.eventBridge.webEventReceived.connect(function(data) {
+        data = JSON.parse(data);
+
+        if (data.type === "logEvent") {
+             
+             switch (data.action) {
+                 
+                 case "clearLog":
+                    _debugLogLines = [];
+                    //_debugLogLines.length = 120;
+                    return;
+             }
+        }
+    });*/
 
     that.setVisible = function(visible) {
         _visible = visible;

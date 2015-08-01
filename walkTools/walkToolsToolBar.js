@@ -17,7 +17,7 @@ WalkToolsToolBar = function() {
     var that = {};
 
     // web window
-    var url = Script.resolvePath('html/WalkToolsToolBar.html');
+    var url = Script.resolvePath('html/walkToolsToolBar.html');
     var webView = new WebWindow('walkToolsToolBar', url, 665, 70, false); // 965 for full range
     webView.setVisible(true);
 

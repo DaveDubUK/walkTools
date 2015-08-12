@@ -586,7 +586,7 @@ WalkToolsBVHPlayer = function() {
 				}
 				break;
 		}
-		if (node.id === 'LeftLeg') print ('Frame: '+frameNumber+': '+rotation.x.toFixed(2)+' '+rotation.y.toFixed(2)+' '+rotation.z.toFixed(2));
+		//if (node.id === 'LeftLeg') print ('Frame: '+frameNumber+': '+rotation.x.toFixed(2)+' '+rotation.y.toFixed(2)+' '+rotation.z.toFixed(2));
 		return rotation;				
 		/*
 

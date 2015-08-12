@@ -18,7 +18,7 @@
 //var pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
 //var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
 // https://hifi-public.s3.amazonaws.com/procedural-animator/assets/miscellaneous/mixamo-pre-rotations.js
-var pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets"
+var pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets/"
 
 Script.include([
     "./libraries/walkConstants.js",

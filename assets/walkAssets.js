@@ -16,7 +16,7 @@ walkAssets = (function () {
     //const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
     //var _pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
     //var _pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
-    var _pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets";
+    var _pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets/";
 	
 	var _animationSetPath = 'animation-sets/standard-male/';
 

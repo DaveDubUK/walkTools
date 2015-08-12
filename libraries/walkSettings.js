@@ -7,7 +7,7 @@
 //
 //  Presents settings for walk.js
 //
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//  Editing tools available here: https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/walk.js
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -19,6 +19,7 @@ WalkSettings = function() {
     
     var _visible = false;
     var _innerWidth = Window.innerWidth;
+	var _innerHeight = Window.innerHeight;
     const MARGIN_RIGHT = 58;
     const MARGIN_TOP = 145;
     const ICON_SIZE = 50;
@@ -33,7 +34,7 @@ WalkSettings = function() {
 
     function mousePressEvent(event) {
         if (Overlays.getOverlayAtPoint(event) === minimisedTab) {
-            _visible = !_visible;
+            _visible = true;
             _webWindow.setVisible(_visible);
         }
     }
@@ -71,29 +72,36 @@ WalkSettings = function() {
 
     // web window
     const PANEL_WIDTH = 180;
-    const PANEL_HEIGHT = 200;
+    const PANEL_HEIGHT = 235;
+	const PANEL_RIGHT = 75;
+	const PANEL_BOTTOM = 160;
     var _url = Script.resolvePath('html/walkSettings.html');
-    var _webWindow = new WebWindow('Walk Settings', _url, PANEL_WIDTH, PANEL_HEIGHT, false);
+    var _webWindow = new WebWindow('Settings', _url, PANEL_WIDTH, PANEL_HEIGHT, false);
     _webWindow.setVisible(false);
+	_webWindow.setPosition(_innerWidth - PANEL_RIGHT - PANEL_WIDTH, _innerHeight - PANEL_HEIGHT - PANEL_BOTTOM); 
     _webWindow.eventBridge.webEventReceived.connect(function(data) {
         data = JSON.parse(data);
 
-        if (data.type == "init") {
+        if (data.type === "init") {
             // send the current settings to the window
             _webWindow.eventBridge.emitScriptEvent(JSON.stringify({
                 type: "update",
                 armsFree: avatar.armsFree,
                 makesFootStepSounds: avatar.makesFootStepSounds,
-                mixamoPreRotations: avatar.mixamoPreRotations
+                mixamoPreRotations: avatar.mixamoPreRotations,
+                animationSets: walkAssets.getAnimationSets()
             }));
-        } else if (data.type == "powerToggle") {
+        } else if (data.type === "powerToggle") {
             motion.isLive = !motion.isLive;
-        } else if (data.type == "update") {
+        } else if (data.type === "update") {
             // receive settings from the window
             avatar.armsFree = data.armsFree;
             avatar.makesFootStepSounds = data.makesFootStepSounds;
             avatar.mixamoPreRotations = data.mixamoPreRotations;
-        }
+            walkAssets.setAnimationSet(data.animationSet);
+        } else if (data.type === "walkToolsDisplay" && walkTools) {
+			walkToolsToolBar.setVisible(data.walkToolsOn);
+		}
     });
     
     that.setVisible = function(visible) {

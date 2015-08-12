@@ -3,11 +3,11 @@
 //  version 0.1
 //
 //  Created by David Wooldridge, Summer 2015
-//  Copyright © 2015 High Fidelity, Inc.
+//  Copyright © 2015 David Wooldridge.
 //
-//  Presents settings for walk.js
+//  Displays a basic oscilloscope trace or three animation channels. 
 //
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//	Usage: include this file and call walkToolsOscilloscope.updateScopeTrace with three channels of data
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -20,7 +20,10 @@ WalkToolsOscilloscope = function() {
    
     // web window
     var url = Script.resolvePath('html/walkToolsOscilloscope.html');
-    var webView = new WebWindow('walkTools Oscilloscope', url, 620, 965, false);
+	const SCOPE_WIDTH = 620;
+	const SCOPE_HEIGHT = 965;
+    var webView = new WebWindow('walkTools Oscilloscope', url, SCOPE_WIDTH, SCOPE_HEIGHT, false);
+	webView.setPosition(0, 0);
     webView.setVisible(_visible);
 
     that.setVisible = function(visible) {

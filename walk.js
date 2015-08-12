@@ -7,7 +7,7 @@
 //
 //  Animates an avatar using procedural animation techniques.
 //
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//  Editing tools available here: https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/walk.js
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -16,8 +16,9 @@
 // animations, reach poses, reach pose parameters, transitions, transition parameters, sounds, image/s and reference files
 //const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
 //var pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
-var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+//var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
 // https://hifi-public.s3.amazonaws.com/procedural-animator/assets/miscellaneous/mixamo-pre-rotations.js
+var pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets"
 
 Script.include([
     "./libraries/walkConstants.js",
@@ -513,7 +514,7 @@ function renderMotion() {
         // REMOVE_FOR_RELEASE - walkTools scope probes
         if (jointName === walkTools.currentlySelectedJoint()) {
             
-            if (jointName === "Hips or not") {
+            if (jointName === "Hips no") {
                 scopeProbe1 = hipsTranslations.x * 100;
                 scopeProbe2 = hipsTranslations.y * 100;
                 scopeProbe3 = hipsTranslations.z * 100;  

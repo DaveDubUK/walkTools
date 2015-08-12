@@ -1,11 +1,12 @@
 {
     "name": "MaleIdleToWalk2RP",
-    "calibration": {
-        "frequency":1.4
+    "calibration":{
+        "frequency":6.28,
+        "strideLength":0.8525,
+        "strideMaxAt":75
     },
     "harmonics": {},
     "joints": {
-
         "Hips":{
             "pitch":0,
             "yaw":0,
@@ -154,9 +155,9 @@
             "pitchPhase":-135,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":6.11321,
-            "yawOffset":26.49057,
-            "rollOffset":-12
+            "pitchOffset":7.672,
+            "yawOffset":30.555,
+            "rollOffset":2.273
         },
         "RightShoulder":{
             "pitch":1.2,
@@ -165,9 +166,9 @@
             "pitchPhase":-135,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":6.11321,
-            "yawOffset":-26.49057,
-            "rollOffset":12
+            "pitchOffset":7.672,
+            "yawOffset":-30.555,
+            "rollOffset":-2.273
         },
         "LeftArm":{
             "pitch":1.35849,

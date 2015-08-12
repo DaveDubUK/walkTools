@@ -5,9 +5,7 @@
 //  Created by David Wooldridge, Summer 2015
 //  Copyright © 2015 David Wooldridge.
 //
-//  Presents settings for walk.js
-//
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//  Enables realtime editing of walk.js animation files
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -29,12 +27,17 @@ WalkToolsEditor = function() {
     var _dataHasBeenChanged = false;
 
     // web window
+	const EDITOR_WIDTH = 637;
+	const EDITOR_HEIGHT = 900;
+	var _innerWidth = Window.innerWidth;
+	var _innerHeight = Window.innerHeight;	
     var url = Script.resolvePath('html/walkToolsEditor.html');
-    var webView = new WebWindow('walkTools Editor', url, 637, 900, false);
-    webView.setVisible(_visible);
+    var _webView = new WebWindow('walkTools Editor', url, EDITOR_WIDTH, EDITOR_HEIGHT, false);
+	_webView.setPosition(_innerWidth - EDITOR_WIDTH, 0);
+    _webView.setVisible(_visible);
 
     // events from webWindow arrive here
-    webView.eventBridge.webEventReceived.connect(function(data) {
+    _webView.eventBridge.webEventReceived.connect(function(data) {
         data = JSON.parse(data);
 
         if (data.type === "editorEvent") {
@@ -51,7 +54,7 @@ WalkToolsEditor = function() {
                         rightHandJoints.push(walkAssets.animationReference.rightHand[knuckle]);
                     }
                     // send initial data
-                    webView.eventBridge.emitScriptEvent(JSON.stringify({
+                    _webView.eventBridge.emitScriptEvent(JSON.stringify({
                         type: "editorEvent",
                         action: "initialParams",
                         animations: walkAssets.getAnimationNamesAsArray(),
@@ -104,7 +107,7 @@ WalkToolsEditor = function() {
                     animationOperations.deepCopy(_currentlySelectedAnimation, _animationEditBuffer);
                     avatar.currentAnimation = _animationEditBuffer;
                     var IKChain = walkAssets.animationReference.joints[_currentlySelectedJoint].IKChain;
-                    webView.eventBridge.emitScriptEvent(JSON.stringify({
+                    _webView.eventBridge.emitScriptEvent(JSON.stringify({
                         type: "editorEvent",
                         action: "jointData",
                         frequency: _animationEditBuffer.calibration.frequency,
@@ -168,7 +171,7 @@ WalkToolsEditor = function() {
                     } else if (walkAssets.animationReference.rightHand[data.selectedJoint]) {
                         IKChain = walkAssets.animationReference.rightHand[data.selectedJoint].IKChain;
                     }
-                    webView.eventBridge.emitScriptEvent(JSON.stringify({
+                    _webView.eventBridge.emitScriptEvent(JSON.stringify({
                         type: "editorEvent",
                         action: "jointData",
                         joint: data.selectedJoint,
@@ -255,7 +258,7 @@ WalkToolsEditor = function() {
                         pairedJointData = _animationEditBuffer.joints[pairedJoint];
                         pairedHarmonicData = _animationEditBuffer.harmonics[pairedJoint];
                     }
-                    webView.eventBridge.emitScriptEvent(JSON.stringify({
+                    _webView.eventBridge.emitScriptEvent(JSON.stringify({
                         type: "editorEvent",
                         action: "jointData",
                         joint: _currentlySelectedJoint,
@@ -276,7 +279,7 @@ WalkToolsEditor = function() {
                 case "selectSliderRange":
                     switch (data.selectedSliderRange) {
                         case "Animation":
-                            webView.eventBridge.emitScriptEvent(JSON.stringify({
+                            _webView.eventBridge.emitScriptEvent(JSON.stringify({
                                 type: "editorEvent",
                                 action: "sliderRanges",
                                 sliderRanges: editingScaleRanges
@@ -284,7 +287,7 @@ WalkToolsEditor = function() {
                             break;
 
                         case "Full Range":
-                            webView.eventBridge.emitScriptEvent(JSON.stringify({
+                            _webView.eventBridge.emitScriptEvent(JSON.stringify({
                                 type: "editorEvent",
                                 action: "sliderRanges",
                                 sliderRanges: fullScaleRanges
@@ -380,7 +383,7 @@ WalkToolsEditor = function() {
     });
 
     Script.update.connect(function(deltaTime) {
-        webView.eventBridge.emitScriptEvent(JSON.stringify({
+        _webView.eventBridge.emitScriptEvent(JSON.stringify({
             type: "editorEvent",
             action: "update",
             ftWheelPosition: motion.frequencyTimeWheelPos
@@ -391,10 +394,10 @@ WalkToolsEditor = function() {
 
     that.setVisible = function(visible) {
         _visible = visible;
-        webView.setVisible(_visible);
+        _webView.setVisible(_visible);
         if (_visible) {
             Window.setFocus();
-            webView.raise();
+            _webView.raise();
         }
     };
     
@@ -405,7 +408,7 @@ WalkToolsEditor = function() {
         var pairedJointData = {};
         var pairedHarmonicData = {};
         var IKChain = walkAssets.animationReference.joints[_currentlySelectedJoint].IKChain;
-        webView.eventBridge.emitScriptEvent(JSON.stringify({
+        _webView.eventBridge.emitScriptEvent(JSON.stringify({
             type: "editorEvent",
             action: "jointData",
             joint: _currentlySelectedJoint,

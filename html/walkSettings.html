@@ -2,25 +2,43 @@
     <head>
         <link rel="stylesheet" type="text/css" href="walkStyle.css">
         <script>
+        
+            var powerOn = true;
+			var walkToolsOn = false;
+            var animationSets = [];
+            var currentAnimationSet = "Male";        
 
             function emitUpdate() {
                 EventBridge.emitWebEvent(JSON.stringify({
                     type: "update",
                     armsFree: elArmsFree.checked,
                     makesFootStepSounds: elFootstepSounds.checked,
-                    mixamoPreRotations: elMixamoPreRotations.checked
+                    mixamoPreRotations: elMixamoPreRotations.checked,
+                    animationSet: elAnimationCharacterSelect.value
                 }));
+            }
+            
+            function updateAnimationSets() {
+                for (set in animationSets) {
+                    var opt = animationSets[set];
+                    var el = document.createElement("option");
+                    el.textContent = opt;
+                    el.value = opt;
+                    elAnimationCharacterSelect.appendChild(el);
+                }
+                elAnimationCharacterSelect.value = currentAnimationSet; 
             }
 
             function loaded() {
-                // assign form elements to vars
-                var powerOn = true;
                 //elPower = document.getElementById("power");
                 elArmsFree = document.getElementById("arms-free");
                 elFootstepSounds = document.getElementById("footstep-sounds");
                 elMixamoPreRotations = document.getElementById("mixamo-pre-rotations");
                 elAnimationCharacterSelect = document.getElementById("animation-character-select");
+				elWalkToolsButton = document.getElementById("walk-tools-button");
+            
 
+                // messages from walkSettings.js come in here
                 if (window.EventBridge !== undefined) {
                     EventBridge.scriptEventReceived.connect(function(data) {
                         data = JSON.parse(data);
@@ -35,12 +53,32 @@
                             if (data.mixamoPreRotations !== undefined) {
                                 elMixamoPreRotations.checked = data.mixamoPreRotations;
                             }
+                            if (data.animationSets !== undefined) { 
+                                animationSets = [];
+                                for (set in data.animationSets) {
+                                    animationSets.push(data.animationSets[set]);
+                                }
+								animationSets.pop();
+                                updateAnimationSets();
+                                
+                            }
                         }
                     });
                 }
                 elArmsFree.addEventListener("change", emitUpdate);
                 elFootstepSounds.addEventListener("change", emitUpdate);
                 elMixamoPreRotations.addEventListener("change", emitUpdate);
+                elAnimationCharacterSelect.addEventListener("change", emitUpdate);
+				elWalkToolsButton.addEventListener("click", function() {
+                    walkToolsOn = !walkToolsOn;
+					EventBridge.emitWebEvent(JSON.stringify({
+						type: "walkToolsDisplay",
+						walkToolsOn: walkToolsOn
+					}));					
+					
+                });
+              
+                
                 /*elPower.addEventListener("click", function() {
                     EventBridge.emitWebEvent(JSON.stringify({
                         type: "powerToggle"
@@ -90,6 +128,12 @@
                 </span>
             </div>
 
-        </div>
+            <div class="settings-section">
+				<div class="button-group">
+					<input type="button" id="walk-tools-button" value="walkTools"></button>
+				</div>
+            </div>			
+
+			</div>
     </body>
 </html>

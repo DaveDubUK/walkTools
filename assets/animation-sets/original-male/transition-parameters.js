@@ -26,7 +26,7 @@ transitionParameters = (function() {
                         duration: 1.25,
                         easingLower: {x:0.0, y:1.0},
                         easingUpper: {x:0.0, y:1.0},
-                        reachPoses: ["MaleIdleToWalkRP", "MaleIdleToWalk2RP", "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
+                        reachPoses: ["MaleIdleToWalkRP", "MaleIdleToWalk2RP"] //, "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
                     },
 
                     "FlyBlend": {

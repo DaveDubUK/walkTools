@@ -7,7 +7,7 @@
 //
 //  Presents options as a button menu for walkTools
 //
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//  Editing tools available here: https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/walk.js
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -17,9 +17,15 @@ WalkToolsToolBar = function() {
     var that = {};
 
     // web window
+	var _innerWidth = Window.innerWidth;
+	var _innerHeight = Window.innerHeight;
+	const TOOLBAR_WIDTH = 665;
+	const TOOLBAR_HEIGHT = 70;	
+	const MARGIN_TOP = 0;
     var url = Script.resolvePath('html/walkToolsToolBar.html');
-    var webView = new WebWindow('walkToolsToolBar', url, 665, 70, false); // 965 for full range
-    webView.setVisible(true);
+    var webView = new WebWindow('walkToolsToolBar', url, TOOLBAR_WIDTH, TOOLBAR_HEIGHT, false); // 965 for full range
+	webView.setPosition((_innerWidth / 2) - (TOOLBAR_WIDTH / 2), MARGIN_TOP);
+    webView.setVisible(false);
 
     webView.eventBridge.webEventReceived.connect(function(data) {
         data = JSON.parse(data);

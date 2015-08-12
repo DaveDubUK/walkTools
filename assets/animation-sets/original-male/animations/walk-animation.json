@@ -1,14 +1,13 @@
 {
     "name":"Walk",
     "calibration":{
-        "frequency":1.58,
+        "frequency":6.28,
         "strideLength":0.8525,
         "strideMaxAt":75
     },
     "harmonics":{
         "Hips":{
             "pitchHarmonics":{
-                "name":"Hips.pitchHarmonics",
                 "magnitudes":[
                     0,
                     1
@@ -20,7 +19,6 @@
                 "numHarmonics":2
             },
             "yawHarmonics":{
-                "name":"Hips.yawHarmonics",
                 "magnitudes":[
                     0.41773,
                     0.39635,
@@ -33,10 +31,9 @@
                     -0.34284,
                     2.46701
                 ],
-                "numHarmonics":4
+                "numHarmonics":"2"
             },
             "bobHarmonics":{
-                "name":"Hips.bobHarmonics",
                 "magnitudes":[
                     -3.38943,
                     -0.02066,
@@ -62,7 +59,6 @@
         },
         "LeftUpLeg":{
             "pitchHarmonics":{
-                "name":"LeftUpLeg.pitchHarmonics",
                 "magnitudes":[
                     0.75978,
                     1,
@@ -78,7 +74,6 @@
         },
         "LeftLeg":{
             "pitchHarmonics":{
-                "name":"LeftLeg.pitchHarmonics",
                 "magnitudes":[
                     1,
                     0.3973,
@@ -104,7 +99,6 @@
         },
         "LeftFoot":{
             "pitchHarmonics":{
-                "name":"LeftFoot.pitchHarmonics",
                 "magnitudes":[
                     1,
                     0.07208,
@@ -130,7 +124,6 @@
         },
         "RightUpLeg":{
             "pitchHarmonics":{
-                "name":"RightUpLeg.pitchHarmonics",
                 "magnitudes":[
                     0.75978,
                     1,
@@ -146,7 +139,6 @@
         },
         "RightLeg":{
             "pitchHarmonics":{
-                "name":"RightLeg.pitchHarmonics",
                 "magnitudes":[
                     1,
                     0.3973,
@@ -172,7 +164,6 @@
         },
         "RightFoot":{
             "pitchHarmonics":{
-                "name":"RightFoot.pitchHarmonics",
                 "magnitudes":[
                     1,
                     0.07208,
@@ -199,16 +190,16 @@
     },
     "joints":{
         "Hips":{
-            "pitch":3.39623,
-            "yaw":4.68679,
+            "pitch":1.436,
+            "yaw":1.5,
             "roll":2.44528,
             "pitchPhase":-90,
             "yawPhase":0,
             "rollPhase":-141.96226,
-            "pitchOffset":0,
+            "pitchOffset":4.455,
             "yawOffset":0,
             "rollOffset":0,
-            "thrust":0.0283,
+            "thrust":0.016,
             "bob":0.0283,
             "sway":0.0283,
             "thrustPhase":-88.98113,
@@ -226,7 +217,7 @@
             "pitchPhase":345.0566,
             "yawPhase":90.33962,
             "rollPhase":94.41509,
-            "pitchOffset":-10.37736,
+            "pitchOffset":11.256,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -237,7 +228,7 @@
             "pitchPhase":165.0566,
             "yawPhase":90.33962,
             "rollPhase":94.41509,
-            "pitchOffset":-10.37736,
+            "pitchOffset":11.256,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -248,7 +239,7 @@
             "pitchPhase":340.98113,
             "yawPhase":4.75472,
             "rollPhase":93.0566,
-            "pitchOffset":44.15094,
+            "pitchOffset":-20.52,
             "yawOffset":-6.11321,
             "rollOffset":0
         },
@@ -259,7 +250,7 @@
             "pitchPhase":160.98113,
             "yawPhase":4.75472,
             "rollPhase":93.0566,
-            "pitchOffset":44.15094,
+            "pitchOffset":-20.52,
             "yawOffset":6.11321,
             "rollOffset":0
         },
@@ -270,7 +261,7 @@
             "pitchPhase":345.73585,
             "yawPhase":12.9,
             "rollPhase":0,
-            "pitchOffset":-125.66038,
+            "pitchOffset":-4.05,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -281,40 +272,40 @@
             "pitchPhase":165.73585,
             "yawPhase":12.9,
             "rollPhase":0,
-            "pitchOffset":-125.66038,
+            "pitchOffset":-2.543,
             "yawOffset":0,
             "rollOffset":0
         },
         "LeftToeBase":{
-            "pitch":15.62264,
+            "pitch":20,
             "yaw":2,
             "roll":0,
             "pitchPhase":285.28302,
             "yawPhase":-51.4,
             "rollPhase":-77.1,
-            "pitchOffset":14,
+            "pitchOffset":22.523,
             "yawOffset":0,
             "rollOffset":0
         },
         "RightToeBase":{
-            "pitch":15.62264,
+            "pitch":20,
             "yaw":2,
             "roll":0,
             "pitchPhase":105.28302,
             "yawPhase":-51.4,
             "rollPhase":-77.1,
-            "pitchOffset":14,
+            "pitchOffset":29.666,
             "yawOffset":0,
             "rollOffset":0
         },
         "Spine":{
-            "pitch":3.92453,
+            "pitch":2.58,
             "yaw":5.47,
             "roll":3.01887,
             "pitchPhase":-14.26415,
             "yawPhase":10.125,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":0.124,
             "yawOffset":0,
             "rollOffset":0,
             "pitchFrequencyMultiplier":2
@@ -350,9 +341,9 @@
             "pitchPhase":-135,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":6.11321,
-            "yawOffset":26.49057,
-            "rollOffset":-12
+            "pitchOffset":7.672,
+            "yawOffset":30.555,
+            "rollOffset":2.273
         },
         "RightShoulder":{
             "pitch":1.2,
@@ -361,9 +352,9 @@
             "pitchPhase":-135,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":6.11321,
-            "yawOffset":-26.49057,
-            "rollOffset":12
+            "pitchOffset":7.672,
+            "yawOffset":-30.555,
+            "rollOffset":-2.273
         },
         "LeftArm":{
             "pitch":1.35849,

@@ -14,17 +14,18 @@
 walkAssets = (function () {
 
     //const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
-    //const _pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
-
-    var _pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
-    var _animationSetPath = 'animation-sets/standard-male/';
+    //var _pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
+    //var _pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+    var _pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets";
+	
+	var _animationSetPath = 'animation-sets/standard-male/';
 
     // asset storage
     var _animationSets = [
-        {
-            name: 'Female',
-            url: 'animation-sets/standard-female/'
-        },
+        //{
+        //    name: 'Female',
+        //    url: 'animation-sets/standard-female/'
+        //},
         { 
             name: 'Male', 
             url: 'animation-sets/standard-male/'
@@ -34,19 +35,26 @@ walkAssets = (function () {
             url: 'animation-sets/original-male/'
         }
     ];
-    var _currentAnimationSet = _animationSets[1];
+    var _currentAnimationSet = _animationSets[1].name;
     var _animations = [];
     var _reachPoses = [];
     var _footsteps = [];
     var _transitionParameters = null;
+    
+    // blank animation buffer
+    Script.include(_pathToAssets + "miscellaneous/animation-buffer.js");
 
-    // load the sound files
-    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Right-12db.wav"));
-    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Right-12db.wav"));
-    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Left-12db.wav"));
-    _footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Right-12db.wav"));
+    // load the animation reference datafile
+    Script.include(_pathToAssets + "miscellaneous/animation-reference.js");
+
+    // load the Blender pre-rotations
+    Script.include(_pathToAssets + "miscellaneous/mixamo-pre-rotations.js");
+
+    // animation reference (lists joints, defines IK chains)
+    var _animationReference = new AnimationReference();
+
+    // Mixamo pre-rotations
+    var _mixamoPreRotations = new MixamoPreRotations();    
 
     // load the animation json datafiles
     function loadAnimation(path) {
@@ -65,11 +73,7 @@ walkAssets = (function () {
                         var numHarmonics = animation.harmonics[joint][jointHarmonics].numHarmonics;
                         animation.harmonics[joint][jointHarmonics] =
                             filter.createHarmonicsFilter(numHarmonics, magnitudes, phaseAngles);
-                        //if (path === (_pathToAssets + _animationSetPath + "animations/walk-animation.json") &&
-                        //   (joint === "LeftUpLeg" || joint === "RightUpLeg")) {
-                        //    print('Created '+jointHarmonics+' filter for '+joint+' joint using magnitudes: '+magnitudes);
-                        //    print('Created '+jointHarmonics+' filter for '+joint+' joint using phase angles: '+phaseAngles);
-                        //}
+						//print('created '+jointHarmonics+' filter for '+joint+' for '+path);
                     }
                 }
                 print(animation.name + ' animation file loaded');
@@ -85,75 +89,76 @@ walkAssets = (function () {
         }
     }
 
-    // load the JSON animation files
-    // note: loading synchronously, as there's no point running the script beforehand
-    print('Loading JSON animation files');
-    var idle = loadAnimation(_pathToAssets + _animationSetPath + "animations/idle-animation.json");
-    //var idle = loadAnimation(_pathToAssets + _animationSetPath + "animations/experiment.json");
-    
-    var walk = loadAnimation(_pathToAssets + _animationSetPath + "animations/walk-animation.json"); 
-    var walkBackwards = loadAnimation(_pathToAssets + _animationSetPath + "animations/walk-backwards-animation.json");
-    var sideStepLeft = loadAnimation(_pathToAssets + _animationSetPath + "animations/sidestep-left-animation.json");
-    var sideStepRight = loadAnimation(_pathToAssets + _animationSetPath + "animations/sidestep-right-animation.json");
-    var fly = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-animation.json");
-    var flyBackwards = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-backwards-animation.json");
-    var flyUp = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-up-animation.json");
-    var flyDown = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-down-animation.json");
-    var hover = loadAnimation(_pathToAssets + _animationSetPath + "animations/hover-animation.json");
+    function loadAnimationSet() {
+        
+        _animations = [];
+		_reachPoses = [];
+		_footsteps = [];
 
-    _animations.push(idle);
-    _animations.push(walk);
-    _animations.push(walkBackwards);
-    _animations.push(sideStepLeft);
-    _animations.push(sideStepRight);
-    _animations.push(fly);
-    _animations.push(flyBackwards);
-    _animations.push(flyUp);
-    _animations.push(flyDown);
-    _animations.push(hover);
+        // load the JSON animation files
+        // note: loading synchronously, as there's no point running the script beforehand
+        print('Loading JSON animation files from '+ _pathToAssets + _animationSetPath);
+        var idle = loadAnimation(_pathToAssets + _animationSetPath + "animations/idle-animation.json");
+        var walk = loadAnimation(_pathToAssets + _animationSetPath + "animations/walk-animation.json"); 
+        var walkBackwards = loadAnimation(_pathToAssets + _animationSetPath + "animations/walk-backwards-animation.json");
+        var sideStepLeft = loadAnimation(_pathToAssets + _animationSetPath + "animations/sidestep-left-animation.json");
+        var sideStepRight = loadAnimation(_pathToAssets + _animationSetPath + "animations/sidestep-right-animation.json");
+        var fly = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-animation.json");
+        var flyBackwards = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-backwards-animation.json");
+        var flyUp = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-up-animation.json");
+        var flyDown = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-down-animation.json");
+        var hover = loadAnimation(_pathToAssets + _animationSetPath + "animations/hover-animation.json");
 
-    // load the reach pose files
-    var idleToWalk = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-reach-pose.json");
-    var idleToWalk2 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-2-reach-pose.json");
-    var idleToWalk3 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-3-reach-pose.json");
-    var idleToWalk4 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-4-reach-pose.json");
-    var hoverToIdle = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-hover-to-idle-reach-pose.json");
-    var flyToWalk = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-fly-to-walk-reach-pose.json");
+        _animations.push(idle);
+        _animations.push(walk);
+        _animations.push(walkBackwards);
+        _animations.push(sideStepLeft);
+        _animations.push(sideStepRight);
+        _animations.push(fly);
+        _animations.push(flyBackwards);
+        _animations.push(flyUp);
+        _animations.push(flyDown);
+        _animations.push(hover);   
 
-    _reachPoses.push(idleToWalk);
-    _reachPoses.push(idleToWalk2);
-    _reachPoses.push(idleToWalk3);
-    _reachPoses.push(idleToWalk4);
-    _reachPoses.push(hoverToIdle);
-    _reachPoses.push(flyToWalk);
+        // load the reach pose files
+        var idleToWalk = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-reach-pose.json");
+        var idleToWalk2 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-2-reach-pose.json");
+        var idleToWalk3 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-3-reach-pose.json");
+        var idleToWalk4 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-4-reach-pose.json");
+        var hoverToIdle = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-hover-to-idle-reach-pose.json");
+        var flyToWalk = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-fly-to-walk-reach-pose.json");
 
-    print('JSON animation files loaded');
+        _reachPoses.push(idleToWalk);
+        _reachPoses.push(idleToWalk2);
+        _reachPoses.push(idleToWalk3);
+        _reachPoses.push(idleToWalk4);
+        _reachPoses.push(hoverToIdle);
+        _reachPoses.push(flyToWalk);
+		
+		// load the sound files
+		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Left-12db.wav"));
+		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Right-12db.wav"));
+		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Left-12db.wav"));
+		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Right-12db.wav"));
+		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Left-12db.wav"));
+		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Right-12db.wav"));		
+        
+        // instantiate buffers
+        _animations.push(new Buffer("FlyBlend"));
+        _animations.push(new Buffer("WalkBlend"));   		
 
-    // load the transition parameters datafile
-    Script.include(_pathToAssets + _animationSetPath + "transition-parameters.js");
-    _transitionParameters = transitionParameters;
+        // load the transition parameters datafile
+        Script.include(_pathToAssets + _animationSetPath + "transition-parameters.js");
+        _transitionParameters = transitionParameters;
 
-    // load the reachPose parameters datafile
-    Script.include(_pathToAssets + _animationSetPath + "reach-pose-parameters.js");
+        // load the reachPose parameters datafile
+        Script.include(_pathToAssets + _animationSetPath + "reach-pose-parameters.js");
 
-    // blank animation buffer
-    Script.include(_pathToAssets + "miscellaneous/animation-buffer.js");
-
-    // load the animation reference datafile
-    Script.include(_pathToAssets + "miscellaneous/animation-reference.js");
-
-    // load the Blender pre-rotations
-    Script.include(_pathToAssets + "miscellaneous/mixamo-pre-rotations.js");
-
-    // instantiate buffers
-    _animations.push(new Buffer("FlyBlend"));
-    _animations.push(new Buffer("WalkBlend"));
-
-    // animation reference (lists joints, defines IK chains)
-    var _animationReference = new AnimationReference();
-
-    // Blender pre-rotations
-    var _mixamoPreRotations = new MixamoPreRotations();
+        if (avatar) {
+            avatar.loadAnimations();
+        }
+    }
+    loadAnimationSet();
 
     return {
         // expose the sounds
@@ -210,11 +215,26 @@ walkAssets = (function () {
                 allAnimations.push(_reachPoses[pose].name);
             }
             return allAnimations;
-        }
+        },
         
         // fetch the list of current animation sets
-        //getAnimationSets: function() {
-            
-        //}
+        getAnimationSets: function() {
+            var animationSetNames = [];
+            for (set in _animationSets) {
+                animationSetNames.push(_animationSets[set].name);
+            }
+            animationSetNames.push(_currentAnimationSet);
+            return animationSetNames;
+        },
+        
+        setAnimationSet: function(animationSetName) {
+            for (set in _animationSets) {
+                if (_animationSets[set].name === animationSetName) {
+                    _currentAnimationSet = _animationSets[set].name;
+                    _animationSetPath = _animationSets[set].url;
+                    loadAnimationSet();
+                }
+            }
+        }
     }
 })();

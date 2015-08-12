@@ -20,8 +20,7 @@ transitionParameters = (function() {
                     "WalkBlend": {
                         duration: 1.25,
                         easingLower: {x:0.0, y:1.0},
-                        easingUpper: {x:0.0, y:1.0},
-                        reachPoses: [] //["MaleIdleToWalkRP", "MaleIdleToWalk2RP", "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
+                        easingUpper: {x:0.0, y:1.0}
                     },
 
                     "FlyBlend": {
@@ -91,15 +90,13 @@ transitionParameters = (function() {
                     "WalkBlend": {
                         duration: 0.5,
                         easingLower: {x:0.5, y:0.0},
-                        easingUpper: {x:0.2, y:1.0},
-                        reachPoses: ["MaleFlyToWalkRP"]
+                        easingUpper: {x:0.2, y:1.0}
                     },
 
                     "Idle": {
                         duration: 0.35,
                         easingLower: {x:0.3, y:0.0},
-                        easingUpper: {x:0.0, y:1.0},
-                        reachPoses: ["MaleHoverToIdleRP"]
+                        easingUpper: {x:0.0, y:1.0}
                     }
                 }
             }

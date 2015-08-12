@@ -8,7 +8,7 @@
 //  All the sliders in walkToolsEditor have a range (with the exception of phase controls that are always +-180)
 //  Two sets of slider ranges are given here; one for editing, one for joint troubleshooting / experimentation
 //
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//  Editing tools available here: https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/walk.js
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html

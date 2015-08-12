@@ -7,7 +7,7 @@
 //
 //  Presents animation statistics for walkTools
 //
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//  Editing tools available here: https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/walk.js
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html

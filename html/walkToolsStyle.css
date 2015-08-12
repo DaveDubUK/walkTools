@@ -399,6 +399,10 @@ textarea {
     float: right;
 }
 
+
+
+
+
 /* bvh player */
 .bvh-player-content {
     width: 600px;
@@ -411,6 +415,7 @@ textarea {
 #bvh-loader-info {
     font-size: 1.5em;
     text-align: center;
+	margin-top: 10px;
 }
 
 .bvh-player-text {
@@ -422,11 +427,19 @@ textarea {
 }
 
 .bvh-button-group {
-    margin: 0 auto;
+    margin: 15px auto 0;
     float: none;
     width: 375px;
 }
 
+#bvh-parser-choice {
+	width: 255px;
+	margin: 0 auto;
+}
+
+.bvh-parser-selector {
+    margin: 12px 0 0 24px;
+}
 
 
 

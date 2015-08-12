@@ -7,7 +7,7 @@
 //
 //  Exposes API for use by walk.js version 1.2+.
 //
-//  Editing tools for animation data files available here: https://github.com/DaveDubUK/walkTools
+//  Editing tools available here: https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/walk.js
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -38,32 +38,27 @@ Avatar = function() {
         }
     }
     // settings
-    this.headFree = false; //REMOVE_FOR_RELEASE - headFree must be true to enable Oculus head movement
+    this.headFree = true; 
     this.armsFree = this.hydraCheck(); // automatically sets true to enable Hydra support - temporary fix
     this.makesFootStepSounds = true;
     this.mixamoPreRotations = false; // temporary fix
-    this.animationSet = undefined; // currently just one animation set
-    this.setAnimationSet = function(animationSet) {
-        this.animationSet = animationSet;
-        switch (animationSet) {
-            case 'standardMale':
-                this.selectedIdle = walkAssets.getAnimationDataFile("Idle");
-                this.selectedWalk = walkAssets.getAnimationDataFile("Walk");
-                this.selectedWalkBackwards = walkAssets.getAnimationDataFile("WalkBackwards");
-                this.selectedSideStepLeft = walkAssets.getAnimationDataFile("SideStepLeft");
-                this.selectedSideStepRight = walkAssets.getAnimationDataFile("SideStepRight");
-                this.selectedWalkBlend = walkAssets.getAnimationDataFile("WalkBlend");
-                this.selectedHover = walkAssets.getAnimationDataFile("Hover");
-                this.selectedFly = walkAssets.getAnimationDataFile("Fly");
-                this.selectedFlyBackwards = walkAssets.getAnimationDataFile("FlyBackwards");
-                this.selectedFlyDown = walkAssets.getAnimationDataFile("FlyDown");
-                this.selectedFlyUp = walkAssets.getAnimationDataFile("FlyUp");
-                this.selectedFlyBlend = walkAssets.getAnimationDataFile("FlyBlend");
-                this.currentAnimation = this.selectedIdle;
-                return;
-        }
+    this.loadAnimations = function() {
+        this.selectedIdle = walkAssets.getAnimationDataFile("Idle");
+        this.selectedWalk = walkAssets.getAnimationDataFile("Walk");
+        this.selectedWalkBackwards = walkAssets.getAnimationDataFile("WalkBackwards");
+        this.selectedSideStepLeft = walkAssets.getAnimationDataFile("SideStepLeft");
+        this.selectedSideStepRight = walkAssets.getAnimationDataFile("SideStepRight");
+        this.selectedWalkBlend = walkAssets.getAnimationDataFile("WalkBlend");
+        this.selectedHover = walkAssets.getAnimationDataFile("Hover");
+        this.selectedFly = walkAssets.getAnimationDataFile("Fly");
+        this.selectedFlyBackwards = walkAssets.getAnimationDataFile("FlyBackwards");
+        this.selectedFlyDown = walkAssets.getAnimationDataFile("FlyDown");
+        this.selectedFlyUp = walkAssets.getAnimationDataFile("FlyUp");
+        this.selectedFlyBlend = walkAssets.getAnimationDataFile("FlyBlend");
+        this.currentAnimation = this.selectedIdle;
+        return;
     }
-    this.setAnimationSet('standardMale');
+    this.loadAnimations();
 
     // calibration
     this.calibration = {
@@ -456,7 +451,7 @@ animationOperations = (function() {
             modifiers = new FrequencyMultipliers(joint, direction);
 
             // calculate pitch
-            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].pitchHarmonics) {
+            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].pitchHarmonics) { 
                 jointRotations.x += joint.pitch * animation.harmonics[jointName].pitchHarmonics.calculate
                     (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
             } else {

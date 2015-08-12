@@ -23,6 +23,7 @@ body {
 }
 
 .settings-section {
+	position: relative;
     display: block;
     margin: 10 10;
     height: 22.5pt;
@@ -41,6 +42,12 @@ body {
     float: right;    
 }
 
+.button-group {
+	position: relative;
+    display: block;
+	text-align: center;
+}
+
 input[type=button] {
     cursor: pointer;
     background-color: #608e96;
@@ -50,4 +57,11 @@ input[type=button] {
     border: 0;
     color: #fff;
     font-weight: bold;
+	text-align: center;
+}
+
+#walk-tools-button {
+	margin: 0 auto;
+	float:none;
+	width:150px;
 }

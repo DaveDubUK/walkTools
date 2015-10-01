@@ -5,7 +5,7 @@
 //  Created by David Wooldridge, June 2015
 //  Copyright © 2014 - 2015 High Fidelity, Inc.
 //
-//  Organises, loads up and makes available the assets for use by the walk.js script v1.2+
+//  Organises, loads up and makes available the assets for use by the walk.js script
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -13,50 +13,47 @@
 
 walkAssets = (function () {
 
-    //const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
+    //var HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
     //var _pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
     //var _pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
     var _pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets/";
-	
-	var _animationSetPath = 'animation-sets/standard-male/';
 
-    // asset storage
-    var _animationSets = [
-        //{
-        //    name: 'Female',
-        //    url: 'animation-sets/standard-female/'
-        //},
-        { 
-            name: 'Male', 
-            url: 'animation-sets/standard-male/'
+    var _animationSets = {
+        "Male": {
+            path: 'animation-sets/standard-male/'
         },
-        {
-            name: 'Original',
-            url: 'animation-sets/original-male/'
+        "Original": {
+            path: 'animation-sets/original-male/'
         }
-    ];
-    var _currentAnimationSet = _animationSets[1].name;
-    var _animations = [];
-    var _reachPoses = [];
-    var _footsteps = [];
-    var _transitionParameters = null;
-    
-    // blank animation buffer
-    Script.include(_pathToAssets + "miscellaneous/animation-buffer.js");
+    };
+    var _currentAnimationSet = 'Male';
+    var _character = null;
 
-    // load the animation reference datafile
-    Script.include(_pathToAssets + "miscellaneous/animation-reference.js");
+    // load json datafiles
+    function loadFile(path, name) {
+        var _XMLHttpRequest = new XMLHttpRequest();
+        _XMLHttpRequest.open("GET", path, false);
+        _XMLHttpRequest.send();
+        if (_XMLHttpRequest.status == 200) {
+            try {
+                var file = JSON.parse(_XMLHttpRequest.responseText);
+                if (name === undefined) {
+                    name = file.name;
+                }
+                file.name = name;
+                return file;
+            } catch (e) {
+                print('walk.js: Error parsing JSON data for '+path+': '+e.toString());
+                print('walk.js: Response text was '+_XMLHttpRequest.responseText);
+                return null;
+            }
+        } else {
+            print("walk.js: Error "+_XMLHttpRequest.status+" encountered whilst loading JSON file from "+path);
+            return null;
+        }
+    }
 
-    // load the Blender pre-rotations
-    Script.include(_pathToAssets + "miscellaneous/mixamo-pre-rotations.js");
-
-    // animation reference (lists joints, defines IK chains)
-    var _animationReference = new AnimationReference();
-
-    // Mixamo pre-rotations
-    var _mixamoPreRotations = new MixamoPreRotations();    
-
-    // load the animation json datafiles
+    // load json animation datafiles
     function loadAnimation(path) {
         var _XMLHttpRequest = new XMLHttpRequest();
         _XMLHttpRequest.open("GET", path, false);
@@ -73,168 +70,175 @@ walkAssets = (function () {
                         var numHarmonics = animation.harmonics[joint][jointHarmonics].numHarmonics;
                         animation.harmonics[joint][jointHarmonics] =
                             filter.createHarmonicsFilter(numHarmonics, magnitudes, phaseAngles);
-						//print('created '+jointHarmonics+' filter for '+joint+' for '+path);
                     }
                 }
-                print(animation.name + ' animation file loaded');
                 return animation;
             } catch (e) {
-                print('Error parsing JSON data for '+path+': '+e.toString());
-                print('Response text was '+_XMLHttpRequest.responseText);
+                print('walk.js: Error parsing JSON data for '+path+': '+e.toString());
+                print('walk.js: Response text was '+_XMLHttpRequest.responseText);
                 return null;
             }
         } else {
-            print("Error "+_XMLHttpRequest.status+" encountered whilst loading JSON file from "+path);
+            print("walk.js: Error "+_XMLHttpRequest.status+" encountered whilst loading JSON file from "+path);
             return null;
         }
     }
 
     function loadAnimationSet() {
-        
-        _animations = [];
-		_reachPoses = [];
-		_footsteps = [];
 
-        // load the JSON animation files
-        // note: loading synchronously, as there's no point running the script beforehand
-        print('Loading JSON animation files from '+ _pathToAssets + _animationSetPath);
-        var idle = loadAnimation(_pathToAssets + _animationSetPath + "animations/idle-animation.json");
-        var walk = loadAnimation(_pathToAssets + _animationSetPath + "animations/walk-animation.json"); 
-        var walkBackwards = loadAnimation(_pathToAssets + _animationSetPath + "animations/walk-backwards-animation.json");
-        var sideStepLeft = loadAnimation(_pathToAssets + _animationSetPath + "animations/sidestep-left-animation.json");
-        var sideStepRight = loadAnimation(_pathToAssets + _animationSetPath + "animations/sidestep-right-animation.json");
-        var fly = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-animation.json");
-        var flyBackwards = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-backwards-animation.json");
-        var flyUp = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-up-animation.json");
-        var flyDown = loadAnimation(_pathToAssets + _animationSetPath + "animations/fly-down-animation.json");
-        var hover = loadAnimation(_pathToAssets + _animationSetPath + "animations/hover-animation.json");
+        // load the character animation definition file
+        print('walk.js: Loading animation set "'+_currentAnimationSet+'" from '+ _pathToAssets + _animationSets[_currentAnimationSet].path);
+        _character = loadFile(_pathToAssets + _animationSets[_currentAnimationSet].path + "character.json");
 
-        _animations.push(idle);
-        _animations.push(walk);
-        _animations.push(walkBackwards);
-        _animations.push(sideStepLeft);
-        _animations.push(sideStepRight);
-        _animations.push(fly);
-        _animations.push(flyBackwards);
-        _animations.push(flyUp);
-        _animations.push(flyDown);
-        _animations.push(hover);   
+        // load animations data
+        for (animation in _character.animations) {
+            _character.animations[animation] = loadAnimation(_pathToAssets + _character.animations[animation].path);
+            print('walk.js: Loaded ' + _character.animations[animation].name+' animation');
+        }
 
-        // load the reach pose files
-        var idleToWalk = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-reach-pose.json");
-        var idleToWalk2 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-2-reach-pose.json");
-        var idleToWalk3 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-3-reach-pose.json");
-        var idleToWalk4 = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-idle-to-walk-4-reach-pose.json");
-        var hoverToIdle = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-hover-to-idle-reach-pose.json");
-        var flyToWalk = loadAnimation(_pathToAssets + _animationSetPath + "reach-poses/male-fly-to-walk-reach-pose.json");
+        // load reach poses data
+        for (pose in _character.reachPoses) {
+            _character.reachPoses[pose].animation = loadAnimation(_pathToAssets + _character.reachPoses[pose].path);
+            print('walk.js: Loaded ' + _character.reachPoses[pose].animation.name+ ' reach pose');
+        }
 
-        _reachPoses.push(idleToWalk);
-        _reachPoses.push(idleToWalk2);
-        _reachPoses.push(idleToWalk3);
-        _reachPoses.push(idleToWalk4);
-        _reachPoses.push(hoverToIdle);
-        _reachPoses.push(flyToWalk);
-		
-		// load the sound files
-		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Left-12db.wav"));
-		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW2Right-12db.wav"));
-		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Left-12db.wav"));
-		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW3Right-12db.wav"));
-		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Left-12db.wav"));
-		_footsteps.push(SoundCache.getSound(_pathToAssets + _animationSetPath + "sounds/FootstepW5Right-12db.wav"));		
-        
-        // instantiate buffers
-        _animations.push(new Buffer("FlyBlend"));
-        _animations.push(new Buffer("WalkBlend"));   		
+        // load sounds
+        for (sound in _character.sounds) {
+            _character.sounds[sound].audioData = SoundCache.getSound(_pathToAssets + _character.sounds[sound].path);
+        }
+        print('walk.js: Loaded audio files');
 
-        // load the transition parameters datafile
-        Script.include(_pathToAssets + _animationSetPath + "transition-parameters.js");
-        _transitionParameters = transitionParameters;
+        // create walk and fly animation blending buffers
+        var flyBlend = loadFile(_pathToAssets + "miscellaneous/animation-buffer.json", "FlyBlend");
+        var walkBlend = loadFile(_pathToAssets + "miscellaneous/animation-buffer.json", "WalkBlend");
+        _character.animations["FlyBlend"] = flyBlend;
+        _character.animations["WalkBlend"] = walkBlend;
+        print('walk.js: Buffers created');
 
-        // load the reachPose parameters datafile
-        Script.include(_pathToAssets + _animationSetPath + "reach-pose-parameters.js");
+        // add a t-pose
+        _character.animations["T-Pose"] = loadAnimation(_pathToAssets + "miscellaneous/t-pose.json");
 
         if (avatar) {
             avatar.loadAnimations();
         }
+        print('walk.js: '+_currentAnimationSet + ' animation set loaded');
     }
+
+    // initialise
+    var _animationReference = loadFile(_pathToAssets + "miscellaneous/animation-reference.json");
+    var _preRotations = loadFile(_pathToAssets + "miscellaneous/pre-rotations.json");
     loadAnimationSet();
 
     return {
-        // expose the sounds
-        footsteps: _footsteps,
 
-        // expose the animation reference
+        // expose the reference files
         animationReference: _animationReference,
+        preRotations: _preRotations,
 
-        // expose the Blender pre-rotations
-        mixamoPreRotations: _mixamoPreRotations,
+        // fetch animation data file by name
+        getAnimation: function(animationName) {
+            var animation = null;
+            try {
+                animation = _character.animations[animationName];
+            } catch(e) {
+                print('walk.js: Animation '+animationName+' not found');
+            }
+            return animation;
+        },
 
-        // populates passed transitionParameters object with any situation specific params from transition-parameters.js
-        getTransitionParameters: function(lastAnimation, nextAnimation, transitionParameters) {
-            _transitionParameters.fetch(lastAnimation, nextAnimation, transitionParameters);
+        // fetch reach pose data file by name
+        getReachPose: function(reachPoseName) {
+            var reachPose = null;
+            try {
+                reachPose = _character.reachPoses[reachPoseName].animation;
+            } catch(e) {
+                print('walk.js: Reach pose '+reachPoseName+' not found');
+            }
+            return reachPose;
+        },
+
+        // fetch transition parameters
+        getTransitionParameters: function(lastAnimationName, nextAnimationName) {
+            // defaults for when no parameters are defined for this character
+            var transitionParameters = {
+                duration: 0.5,
+                easingLower: {x:0.5, y:0.0},
+                easingUpper: {x:0.5, y:1.0}
+            }
+            try {
+                if (_character.transitions[lastAnimationName]) {
+                    if (_character.transitions[lastAnimationName][nextAnimationName]) {
+                        transitionParameters = _character.transitions[lastAnimationName][nextAnimationName];
+                    }
+                }
+            } catch (e) {
+                print('walk.js: Transition parameters for '+lastAnimationName+' to '+nextAnimationName+' not found - using default values');
+            }
+            return transitionParameters;
         },
 
         // fetch reach pose parameters by name
         getReachPoseParameters: function(reachPoseName) {
-            for (pose in reachPoseParameters) {
-                if (reachPoseParameters[pose].name === reachPoseName) {
-                    return reachPoseParameters[pose];
-                }
+            var reachPoseParameters = undefined;
+            try {
+                reachPoseParameters = _character.reachPoses[reachPoseName];
+            } catch (e) {
+                print('walk.js: Reach pose parameters for '+reachPoseName+' not found');
             }
-            return undefined;
+            return reachPoseParameters;
         },
 
-        // fetch reach pose data file by name
-        getReachPoseDataFile: function(reachPoseName) {
-            for (pose in _reachPoses) {
-                if (_reachPoses[pose].name === reachPoseName) {
-                    return _reachPoses[pose];
-                }
-            }
-            return undefined;
-        },
-
-        // fetch animation data file by name
-        getAnimationDataFile: function(animationName) {
-            for (animation in _animations) {
-                if (_animations[animation].name === animationName) {
-                    return _animations[animation];
-                }
-            }
-            return undefined;
+        getSound: function(soundName) {
+            return _character.sounds[soundName];
         },
 
         // return array containing names of all animations and reach poses
         getAnimationNamesAsArray: function() {
             var allAnimations = [];
-            for (animation in _animations) {
-                allAnimations.push(_animations[animation].name);
+            for (animation in _character.animations) {
+                if (_character.animations[animation].name !== "WalkBlend" &&
+                    _character.animations[animation].name !== "FlyBlend") {
+                    allAnimations.push(_character.animations[animation].name);
+                }
             }
-            for (pose in _reachPoses) {
-                allAnimations.push(_reachPoses[pose].name);
+            for (pose in _character.reachPoses) {
+                allAnimations.push(_character.reachPoses[pose].animation.name);
             }
             return allAnimations;
         },
-        
-        // fetch the list of current animation sets
+
+        // animation set stuff
         getAnimationSets: function() {
             var animationSetNames = [];
             for (set in _animationSets) {
-                animationSetNames.push(_animationSets[set].name);
+                animationSetNames.push(set);
             }
-            animationSetNames.push(_currentAnimationSet);
             return animationSetNames;
         },
-        
+
         setAnimationSet: function(animationSetName) {
+            print('setting animation set to '+animationSetName);
             for (set in _animationSets) {
-                if (_animationSets[set].name === animationSetName) {
-                    _currentAnimationSet = _animationSets[set].name;
-                    _animationSetPath = _animationSets[set].url;
+                if (set === animationSetName) {
+                    _currentAnimationSet = set;
                     loadAnimationSet();
+                    print('walk.js: Loaded '+_currentAnimationSet+' animation set');
                 }
             }
+        },
+
+        getCurrentAnimationSet: function() {
+            return _currentAnimationSet;
+        },
+
+        createAnimationBuffer: function(bufferName) {
+            var newBuffer = loadFile(_pathToAssets + "miscellaneous/animation-buffer.json", bufferName);
+            return newBuffer;
+        },
+
+        setPathToAssets: function(newPath) {
+            _pathToAssets = newPath;
+            loadAnimationSet();
         }
     }
 })();

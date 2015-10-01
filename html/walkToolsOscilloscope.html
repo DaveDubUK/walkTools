@@ -12,6 +12,9 @@
 
                 elScopeDisplayCanvas = document.getElementById("scope-display-canvas");
                 elPauseButton = document.getElementById("pause-button");
+				elScopeChannelOneValues = document.getElementById("scope-channel-one-values");
+				elScopeChannelTwoValues = document.getElementById("scope-channel-two-values");
+				elScopeChannelThreeValues = document.getElementById("scope-channel-three-values");
 
                 // scope stuff
                 var _paused = false;
@@ -34,6 +37,14 @@
                     _channelTwoData.push(0);
                     _channelThreeData.push(0);
                 };
+				var _chOneMin = Number.POSITIVE_INFINITY;
+				var _chOneMax = Number.NEGATIVE_INFINITY;
+				var _chTwoMin = Number.POSITIVE_INFINITY;
+				var _chTwoMax = Number.NEGATIVE_INFINITY;
+				var _chThreeMin = Number.POSITIVE_INFINITY;
+				var _chThreeMax = Number.NEGATIVE_INFINITY;	
+				var _lastJoint = 'Hips';	
+			    var _lastTitle = 'Joint rotation data';
 
                 function gainSliderSliding(ui, id) {
                     switch (id) {
@@ -72,6 +83,15 @@
                 function timeBaseSliderSliding(ui) {
                     _timeBase = ui.value;
                 }
+				
+				function resetMinMax() {
+					_chOneMin = Number.POSITIVE_INFINITY;
+					_chOneMax = Number.NEGATIVE_INFINITY;
+					_chTwoMin = Number.POSITIVE_INFINITY;
+					_chTwoMax = Number.NEGATIVE_INFINITY;
+					_chThreeMin = Number.POSITIVE_INFINITY;
+					_chThreeMax = Number.NEGATIVE_INFINITY;
+				}
 
                 elPauseButton.addEventListener("click", function() {
                     if (_paused) {
@@ -87,6 +107,7 @@
                 var _displayMargin = 3;
                 var _context = elScopeDisplayCanvas.getContext('2d');
                 var _scopeBackgroundImage = new Image();
+
 
                 _scopeBackgroundImage.onload = function() {
                     _context.drawImage(_scopeBackgroundImage, 0, 0);
@@ -138,7 +159,7 @@
                     EventBridge.scriptEventReceived.connect(function(data) {
                         data = JSON.parse(data);
 
-                        if (data.type === "scopeData") {
+                        if (data.type === "updateScopeTrace") {
 
                             if (!_paused) {
                                 _channelOneData.push(-data.ch1);
@@ -148,9 +169,80 @@
                                 _channelThreeData.push(-data.ch3);
                                 _channelThreeData.shift();
                             }
+						}
+						
+						if (data.type === "updateScopeData") {
+						
+							if (!_paused) {
+								_channelOneData.push(-data.scopeDataPacket.ch1);
+								_channelOneData.shift();
+								_channelTwoData.push(-data.scopeDataPacket.ch2);
+								_channelTwoData.shift();
+								_channelThreeData.push(-data.scopeDataPacket.ch3);
+								_channelThreeData.shift();
+							}
+						}						
 
-                            _context.clearRect(0, 0, elScopeDisplayCanvas.width, elScopeDisplayCanvas.height);
+                        if (data.type === "updateScopeTrace" || data.type === "updateScopeData") { 
+						
+							_context.clearRect(0, 0, elScopeDisplayCanvas.width, elScopeDisplayCanvas.height);
                             _context.drawImage(_scopeBackgroundImage, 0, 0);
+							if (data.type === "updateScopeData") {
+								if (data.scopeDataPacket.joint !== _lastJoint || data.scopeDataPacket.title !== _lastTitle) {
+									_lastJoint = data.scopeDataPacket.joint;
+									_lastTitle = data.scopeDataPacket.title;
+									resetMinMax();
+								}
+								// update joint values (are stored negative because of y-down screen coords)
+								var DP = 2;
+								var channel1 = -_channelOneData[SCOPE_RESOLUTION - 1];
+								var channel2 = -_channelTwoData[SCOPE_RESOLUTION - 1];
+								var channel3 = -_channelThreeData[SCOPE_RESOLUTION - 1];
+								
+								if (channel1 > _chOneMax) {
+									_chOneMax = channel1;
+								}
+								if (channel1 < _chOneMin) {
+									_chOneMin = channel1;
+								}
+								if (channel2 > _chTwoMax) {
+									_chTwoMax = channel2;
+								}
+								if (channel2 < _chTwoMin) {
+									_chTwoMin = channel2;
+								}
+								if (channel3 > _chThreeMax) {
+									_chThreeMax = channel3;
+								}
+								if (channel3 < _chThreeMin) {
+									_chThreeMin = channel3;
+								}							
+								elScopeChannelOneValues.innerHTML = _chOneMax.toFixed(DP)+"&nbsp;:&nbsp;"+
+																	channel1.toFixed(DP)+"&nbsp;:&nbsp;"+
+																	_chOneMin.toFixed(DP)
+																	+" ("+(_chOneMax - _chOneMin).toFixed(DP)+")";
+								elScopeChannelTwoValues.innerHTML = _chTwoMax.toFixed(DP)+"&nbsp;:&nbsp;"+
+																	channel2.toFixed(DP)+"&nbsp;:&nbsp;"+
+																	_chTwoMin.toFixed(DP)
+																	+" ("+(_chTwoMax - _chTwoMin).toFixed(DP)+")";
+								elScopeChannelThreeValues.innerHTML = _chThreeMax.toFixed(DP)+"&nbsp;:&nbsp;"+
+																	channel3.toFixed(DP)+"&nbsp;:&nbsp;"+
+																	_chThreeMin.toFixed(DP)
+																	+" ("+(_chThreeMax - _chThreeMin).toFixed(DP)+")";
+								// update scope overlay info
+								_context.font = "14px Arial";
+								_context.fillStyle = "gray";
+								_context.textAlign = "right";
+								var traceInfo = data.scopeDataPacket.title;
+								_context.fillText(traceInfo, 580, 30);
+								traceInfo = 'Joint: '+data.scopeDataPacket.joint;
+								_context.fillText(traceInfo, 580, 50);
+								traceInfo = 'IK chain: ' + data.scopeDataPacket.iKChain;
+								_context.fillText(traceInfo, 580, 70);
+								traceInfo = data.scopeDataPacket.metaDataLabel+
+								       ': '+data.scopeDataPacket.metaData;
+								_context.fillText(traceInfo, 580, 90);								
+							}								
                             _context.beginPath();
                             _context.moveTo(_displayMargin,
                                             _heightOverTwo + _channelOneOffset + _channelOneGain * _channelOneData[0]);
@@ -228,6 +320,11 @@
             <div class="button-group">
                 <input type="button" id="pause-button" class="scope-button" value="Pause"></button>
             </div>
+			<div class="scope-values">
+				<div id="scope-channel-one-values">Channel 1</div>
+				<div id="scope-channel-two-values">Channel 2</div>
+				<div id="scope-channel-three-values">Channel 3</div>
+			</div>			
         </div>
 
     </body>

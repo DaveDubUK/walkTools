@@ -3,7 +3,7 @@
 //  version 0.1
 //
 //  Created by David Wooldridge, Summer 2015
-//  Copyright © 2015 High Fidelity, Inc.
+//  Copyright © 2015 David Wooldridge
 //
 //  Logs debug messages. Avoids the clutter of the Interface log.
 //
@@ -14,52 +14,52 @@
 //
 
 WalkToolsLog = function() {
+    // web window
+    var _visible = false;
+    var _url = Script.resolvePath('html/walkToolsLog.html');
+    var _innerWidth = Window.innerWidth;
+	var _innerHeight = Window.innerHeight;
+	const PLAYER_WIDTH = 637;
+	const PLAYER_HEIGHT = 900;
+    const TOP = 0;
+    const LEFT = 0;
+    var _url = Script.resolvePath('html/walkToolsLog.html');
+    var _webView = new WebWindow('walkTools Log', _url, PLAYER_WIDTH, PLAYER_HEIGHT, false);
+	_webView.setPosition(LEFT, TOP);
+    _webView.setVisible(_visible);
+
+    // public
     var that = {};
     
-    var _visible = false;
-    //var _debugLogLines = [];
-    //_debugLogLines.length = 120;
-
-    // web window
-    var url = Script.resolvePath('html/walkToolsLog.html');
-    var webView = new WebWindow('walkTools Log', url, 550, 800, false);
-    webView.setVisible(_visible);
-
-    // send new log entry to the web window
-    that.logMessage = function(newLogEntry) {
-         if (_visible) {
-            webView.eventBridge.emitScriptEvent(JSON.stringify({
-                type: "log",
-                logEntry: newLogEntry
-            }));
+    that.setVisible = function(visible) {
+        _visible = visible;
+        _webView.setVisible(_visible);
+        if (_visible) {
+            Window.setFocus();
+            //_webView.raise();
         }
     }
     
-    // events from webWindow arrive here
-    /*webView.eventBridge.webEventReceived.connect(function(data) {
-        data = JSON.parse(data);
-
-        if (data.type === "logEvent") {
-             
-             switch (data.action) {
-                 
-                 case "clearLog":
-                    _debugLogLines = [];
-                    //_debugLogLines.length = 120;
-                    return;
-             }
+    that.logMessage = function(newLogEntry, decorate) {
+        if (decorate === undefined) {
+            decorate = true;
         }
-    });*/
-
-    that.setVisible = function(visible) {
-        _visible = visible;
-        webView.setVisible(_visible);
-        if (_visible) {
-            Window.setFocus();
-            webView.raise();
-        }
+        if (decorate) {
+            newLogEntry = walkTools.framesElapsed() + ': '+newLogEntry + '\n';
+        }        
+        _webView.eventBridge.emitScriptEvent(JSON.stringify({
+            type: "logEvent",         
+            action: "newLogEntry",
+            logEntry: newLogEntry
+        }));
     }
-
+    
+    that.clearLog = function() {
+        _webView.eventBridge.emitScriptEvent(JSON.stringify({
+            type: "logEvent",         
+            action: "clearLog"
+        }));
+    }
     return that;
 };
 

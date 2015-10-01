@@ -38,23 +38,31 @@ Avatar = function() {
         }
     }
     // settings
-    this.headFree = true; 
-    this.armsFree = this.hydraCheck(); // automatically sets true to enable Hydra support - temporary fix
+    this.headNotAnimated = false; // 'true' means script will not animate the head (to avoid interfering with Oculus tracking)
+    this.armsNotAnimated = this.hydraCheck(); // automatically sets true to enable Hydra support - temporary fix
+    this.hasAnimatedFingers = true;
     this.makesFootStepSounds = true;
-    this.mixamoPreRotations = false; // temporary fix
+    this.isMissingPreRotations = false; // temporary fix
+    
+    // references to current animations
     this.loadAnimations = function() {
-        this.selectedIdle = walkAssets.getAnimationDataFile("Idle");
-        this.selectedWalk = walkAssets.getAnimationDataFile("Walk");
-        this.selectedWalkBackwards = walkAssets.getAnimationDataFile("WalkBackwards");
-        this.selectedSideStepLeft = walkAssets.getAnimationDataFile("SideStepLeft");
-        this.selectedSideStepRight = walkAssets.getAnimationDataFile("SideStepRight");
-        this.selectedWalkBlend = walkAssets.getAnimationDataFile("WalkBlend");
-        this.selectedHover = walkAssets.getAnimationDataFile("Hover");
-        this.selectedFly = walkAssets.getAnimationDataFile("Fly");
-        this.selectedFlyBackwards = walkAssets.getAnimationDataFile("FlyBackwards");
-        this.selectedFlyDown = walkAssets.getAnimationDataFile("FlyDown");
-        this.selectedFlyUp = walkAssets.getAnimationDataFile("FlyUp");
-        this.selectedFlyBlend = walkAssets.getAnimationDataFile("FlyBlend");
+        this.selectedIdle = walkAssets.getAnimation("Idle");
+        this.selectedWalk = walkAssets.getAnimation("Walk");
+        this.selectedWalkBackwards = walkAssets.getAnimation("WalkBackwards");
+        this.selectedSideStepLeft = walkAssets.getAnimation("SideStepLeft");
+        this.selectedSideStepRight = walkAssets.getAnimation("SideStepRight");
+        this.selectedTurnLeft = walkAssets.getAnimation("TurnLeft");
+        this.selectedTurnRight = walkAssets.getAnimation("TurnRight");
+        this.selectedRun =  walkAssets.getAnimation("Run");
+        this.selectedWalkBlend = walkAssets.getAnimation("WalkBlend");
+        this.selectedHover = walkAssets.getAnimation("Hover");
+        this.selectedFly = walkAssets.getAnimation("Fly");
+        this.selectedFlyBackwards = walkAssets.getAnimation("FlyBackwards");
+        this.selectedFlyDown = walkAssets.getAnimation("FlyDown");
+        this.selectedFlyUp = walkAssets.getAnimation("FlyUp");
+        this.selectedFlyBlend = walkAssets.getAnimation("FlyBlend");
+        this.selectedFlySlow = walkAssets.getAnimation("FlySlow");
+        this.selectedFlyTurning = walkAssets.getAnimation("FlyTurning");
         this.currentAnimation = this.selectedIdle;
         return;
     }
@@ -66,7 +74,9 @@ Avatar = function() {
         strideLength: this.selectedWalk.calibration.strideLength
     }
     this.distanceFromSurface = 0;
-    this.calibrate = function() {
+    this.calibrate = function(quickCalibration) {
+        quickCalibration = quickCalibration | false;
+        print('walk.js: calibrating for avatar animation');
         // Triple check: measurements are taken three times to ensure accuracy - the first result is often too large
         const MAX_ATTEMPTS = 3;
         var attempts = MAX_ATTEMPTS;
@@ -82,8 +92,8 @@ Avatar = function() {
             }
             this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightToeBase").y;
 
-            // maybe measuring before Blender pre-rotations have been applied?
-            if (this.calibration.hipsToFeet < 0 && this.mixamoPreRotations) {
+            // maybe measuring avatar with no pre-rotations?
+            if (this.calibration.hipsToFeet < 0 && this.isMissingPreRotations) {
                 this.calibration.hipsToFeet *= -1;
             }
 
@@ -92,36 +102,94 @@ Avatar = function() {
                 extraAttempts++;// Interface can sometimes report zero for hips to feet. if so, we try again.
             }
         } while (attempts-- > 1)
-
-        // just in case
+        
+        // measure the various stride lengths
+        var animationsToCalibrate = ["Walk", "WalkBackwards", "SideStepLeft", "SideStepRight", "Run"];
+        motion.state = EDIT;
+        
+        if (quickCalibration) {
+            // if the max stride angle has already been calibrated
+            // then we just need to calibrate stride length for this avatar
+            
+            for (animation in animationsToCalibrate) {
+                var repeatedMeasurements = 0;    
+                do { // a few times for accuracy
+                    this.currentAnimation = walkAssets.getAnimation(animationsToCalibrate[animation]);
+                    for (jointName in this.currentAnimation.joints) {
+                        var joint = null;
+                        var jointRotations = {x:0, y:0, z:0};
+                        
+                        if (walkAssets.animationReference.joints[jointName]) {
+                            joint = walkAssets.animationReference.joints[jointName];
+                        }  
+                        jointRotations = animationOperations.calculateRotations(jointName,
+                                                            this.currentAnimation,
+                                                            avatar.currentAnimation.calibration.strideMaxAt
+                                                            , "None");
+                        // apply rotations
+                        MyAvatar.setJointData(jointName, Quat.fromVec3Degrees(jointRotations));
+                    }
+                    // measure and save stride length
+                    var footRPos = MyAvatar.getJointPosition("RightFoot");
+                    var footLPos = MyAvatar.getJointPosition("LeftFoot");
+                    this.currentAnimation.calibration.strideLength = Vec3.distance(footRPos, footLPos);
+                    print('Measurement '+repeatedMeasurements+': distance is '+Vec3.distance(footRPos, footLPos).toFixed(4));
+                } while (++repeatedMeasurements < 3);
+            }
+        } else {
+            // if the max stride angle has not yet been calibrated then do all 
+            const ACCURACY = 0.2;
+            for (animation in animationsToCalibrate) {
+                this.currentAnimation = walkAssets.getAnimation(animationsToCalibrate[animation]);
+                this.currentAnimation.calibration.strideLength = 0;
+                for (angle = 0 ; angle < FULL_CYCLE ; angle += ACCURACY) {
+                    // apply joint rotations
+                    for (jointName in this.currentAnimation.joints) {
+                        var joint = null;
+                        var jointRotations = {x:0, y:0, z:0};
+                        
+                        if (walkAssets.animationReference.joints[jointName]) {
+                            joint = walkAssets.animationReference.joints[jointName];
+                        }  
+                        jointRotations = animationOperations.calculateRotations(jointName,
+                                                            this.currentAnimation,
+                                                            angle,
+                                                            "None");
+                        // apply rotations
+                        MyAvatar.setJointData(jointName, Quat.fromVec3Degrees(jointRotations));
+                    }
+                    // measure and save stride length
+                    var footRPos = MyAvatar.getJointPosition("RightFoot");
+                    var footLPos = MyAvatar.getJointPosition("LeftFoot");
+                    var strideLength = Vec3.distance(footRPos, footLPos);
+                    if (strideLength > this.currentAnimation.calibration.strideLength) {
+                        this.currentAnimation.calibration.strideLength = strideLength;
+                        this.currentAnimation.calibration.strideMaxAt = angle;
+                    }
+                    print('walk.js info: Calibration '+this.currentAnimation.name+': '+(100 * angle / FULL_CYCLE).toFixed(2)+'% complete');
+                }
+            }
+        }
+        
+        // final checks
+        for (animation in animationsToCalibrate) {
+            walkTools.toLog('walk.js info: Stride length for '+walkAssets.getAnimation(animationsToCalibrate[animation]).name+
+                  ' is ' + walkAssets.getAnimation(animationsToCalibrate[animation]).calibration.strideLength.toFixed(4)+
+                  ' at ' + walkAssets.getAnimation(animationsToCalibrate[animation]).calibration.strideMaxAt.toFixed(1)+
+                  ' degreees');
+        }        
         if (this.calibration.hipsToFeet <= 0 || isNaN(this.calibration.hipsToFeet)) {
             this.calibration.hipsToFeet = 1;
             print('walk.js error: Unable to get a non-zero measurement for the avatar hips to feet measure. Hips to feet set to default value ('+
                   this.calibration.hipsToFeet.toFixed(3)+'m). This will cause some foot sliding. If your avatar has only just appeared, it is recommended that you re-load the walk script.');
         } else {
-            print('walk.js info: Hips to feet calibrated to '+this.calibration.hipsToFeet.toFixed(3)+'m');
-        }
+            walkTools.toLog('walk.js info: Hips to feet calibrated to '+this.calibration.hipsToFeet.toFixed(3)+'m');
+        }   
+                
+        // resume
+        motion.state = STATIC;
+        this.currentAnimation = this.selectedIdle;
     }
-
-    // pose the fingers
-    this.poseFingers = function() {
-        for (knuckle in walkAssets.animationReference.leftHand) {
-            if (walkAssets.animationReference.leftHand[knuckle].IKChain === "LeftHandThumb") {
-                MyAvatar.setJointData(knuckle, Quat.fromPitchYawRollDegrees(0, 0, -4));
-            } else {
-                MyAvatar.setJointData(knuckle, Quat.fromPitchYawRollDegrees(16, 0, 5));
-            }
-        }
-        for (knuckle in walkAssets.animationReference.rightHand) {
-            if (walkAssets.animationReference.rightHand[knuckle].IKChain === "RightHandThumb") {
-                MyAvatar.setJointData(knuckle, Quat.fromPitchYawRollDegrees(0, 0, 4));
-            } else {
-                MyAvatar.setJointData(knuckle, Quat.fromPitchYawRollDegrees(16, 0, -5));
-            }
-        }
-    };
-    this.calibrate();
-    this.poseFingers();
 
     // footsteps
     this.nextStep = RIGHT; // the first step is right, because the waveforms say so
@@ -130,8 +198,8 @@ Avatar = function() {
     this.makeFootStepSound = function() {
         // correlate footstep volume with avatar speed. place the audio source at the feet, not the hips
         const SPEED_THRESHOLD = 0.4;
-        const VOLUME_ATTENUATION = 0.8;
-        const MIN_VOLUME = 0.5;
+        const VOLUME_ATTENUATION = 0.5;
+        const MIN_VOLUME = 0.3;
         var volume = Vec3.length(motion.velocity) > SPEED_THRESHOLD ?
                      VOLUME_ATTENUATION * Vec3.length(motion.velocity) / MAX_WALK_SPEED : MIN_VOLUME;
         volume = volume > 1 ? 1 : volume; // occurs when landing at speed - can be walking faster than max walk speed
@@ -142,7 +210,7 @@ Avatar = function() {
         
         if (this.nextStep === RIGHT) {
             if (this.rightAudioInjector === null) {
-                this.rightAudioInjector = Audio.playSound(walkAssets.footsteps[0], options);
+                this.rightAudioInjector = Audio.playSound(walkAssets.getSound("FootStepLeft").audioData, options);
             } else {
                 this.rightAudioInjector.setOptions(options);
                 this.rightAudioInjector.restart();
@@ -150,7 +218,7 @@ Avatar = function() {
             this.nextStep = LEFT;
         } else if (this.nextStep === LEFT) {
             if (this.leftAudioInjector === null) {
-                this.leftAudioInjector = Audio.playSound(walkAssets.footsteps[1], options);
+                this.leftAudioInjector = Audio.playSound(walkAssets.getSound("FootStepRight").audioData, options);
             } else {
                 this.leftAudioInjector.setOptions(options);
                 this.leftAudioInjector.restart();
@@ -178,8 +246,23 @@ Motion = function() {
     // used to make sure at least one step has been taken when transitioning from a walk cycle
     this.elapsedFTDegrees = 0;
 
-    // the current transition (any layered transitions are nested within this transition)
+    // the current transition (any previous, unfinished transitions are nested within this transition)
     this.currentTransition = null;
+    
+    // holds a list of live, pre (state change) reach poses
+    this.preReachPoses = [];
+    this.addPreReachPose = function(reachPoseName) {
+
+        // check this reach pose is not already active
+        for (pose in this.preReachPoses) {
+            if (this.preReachPoses[pose].animation.name === reachPoseName) {
+                return;
+            }
+        }
+        var activeReachPose = new ReachPoseWrapper(reachPoseName, true);
+        this.preReachPoses.push(activeReachPose);
+        //walkTools.toLog('Added new pre reach pose: '+activeReachPose.animation.name+'. Now have '+this.preReachPoses.length+' in queue');
+    }    
 
     // orientation, locomotion and timing
     this.velocity = {x:0, y:0, z:0};
@@ -198,7 +281,7 @@ Motion = function() {
     this.lastYawDeltaAcceleration = 0;
 
     // Quat.safeEulerAngles(MyAvatar.orientation).y tends to repeat values between frames, so values are filtered
-    var YAW_SMOOTHING = 22;
+    const YAW_SMOOTHING = 22;
     this.yawFilter = filter.createAveragingFilter(YAW_SMOOTHING);
     this.deltaTimeFilter = filter.createAveragingFilter(YAW_SMOOTHING);
     this.yawDeltaAccelerationFilter = filter.createAveragingFilter(YAW_SMOOTHING);
@@ -215,6 +298,7 @@ Motion = function() {
         this.acceleration.x = (this.velocity.x - this.lastVelocity.x) / deltaTime;
         this.acceleration.y = (this.velocity.y - this.lastVelocity.y) / deltaTime;
         this.acceleration.z = (this.velocity.z - this.lastVelocity.z) / deltaTime;
+        //var acceleration = MyAvatar.getAcceleration();
 
         // MyAvatar.getAngularVelocity and MyAvatar.getAngularAcceleration currently not working. bug report submitted
         this.yaw = Quat.safeEulerAngles(MyAvatar.orientation).y;
@@ -225,13 +309,13 @@ Motion = function() {
         this.yawDelta = filter.degToRad(this.yawFilter.process(this.lastYaw - this.yaw)) / timeDelta;
         this.yawDeltaAcceleration = this.yawDeltaAccelerationFilter.process(this.lastYawDelta - this.yawDelta) / timeDelta;
 
-        // how far above the surface is the avatar? (for testing / validation purposes)
+        // how far above the surface is the avatar?
         var pickRay = {origin: MyAvatar.position, direction: {x:0, y:-1, z:0}};
-        var distanceFromSurface = Entities.findRayIntersectionBlocking(pickRay).distance;
+        var distanceFromSurface = Entities.findRayIntersectionBlocking(pickRay).distance; // bugged value is - 1.757;
         avatar.distanceFromSurface = distanceFromSurface - avatar.calibration.hipsToFeet;
 
         // determine principle direction of locomotion
-        var FWD_BACK_BIAS = 100; // helps prevent false sidestep condition detection when banking hard
+        var FWD_BACK_BIAS = 1; // helps prevent false sidestep condition detection when banking hard
         if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y) &&
             Math.abs(this.velocity.x) > FWD_BACK_BIAS * Math.abs(this.velocity.z)) {
             if (this.velocity.x < 0) {
@@ -308,6 +392,16 @@ Motion = function() {
         var movingDirectlyUpOrDown = (this.direction === UP || this.direction === DOWN)
         var maybeBouncing = Math.abs(this.acceleration.y > BOUNCE_ACCELERATION_THRESHOLD) ? true : false;
 
+        // update any pre reach poses
+        for (pose in this.preReachPoses) {
+            this.preReachPoses[pose].updateProgress(this.deltaTime / this.preReachPoses[pose].reachPoseParameters.duration);
+            if (this.preReachPoses[pose].progress >= 1) {
+                // time to kill off this reach pose
+                walkTools.toLog('Pre reach pose '+this.preReachPoses[pose].name + ' is complete');
+                this.preReachPoses.splice(pose, 1);
+            }
+        }       
+
         // we now have enough information to set the appropriate locomotion mode
         switch (this.state) {
             case STATIC:
@@ -323,6 +417,7 @@ Motion = function() {
                 } else {
                     this.nextState = STATIC;
                 }
+                // not possible to predict impending state change and call preReachPoses
                 break;
 
             case SURFACE_MOTION:
@@ -347,9 +442,22 @@ Motion = function() {
                 break;
 
             case AIR_MOTION:
-                var airMotionToSurfaceMotion = (surfaceMotion || aboutToLand) && !movingDirectlyUpOrDown;
+                var airMotionToSurfaceMotion = surfaceMotion && !movingDirectlyUpOrDown;
                 var airMotionToStatic = !this.isMoving && this.direction === this.lastDirection;
 
+                // trigger any pre (state change) reach poses
+                if (aboutToLand) {
+                    var probableNextAnimation = this.surfaceAnimationFromDirection(this.direction);
+                    if (probableNextAnimation) {
+                        var transitionParameters = walkAssets.getTransitionParameters("FlyBlend", probableNextAnimation);
+                        if (transitionParameters.preReachPoses) {
+                            for (pose in transitionParameters.preReachPoses) {
+                                motion.addPreReachPose(transitionParameters.preReachPoses[pose]);
+                            }
+                        }
+                    }
+                }
+                
                 if (airMotionToSurfaceMotion){
                     this.nextState = SURFACE_MOTION;
                 } else if (airMotionToStatic) {
@@ -359,6 +467,27 @@ Motion = function() {
                 }
                 break;
         }
+    }
+    
+    this.surfaceAnimationFromDirection = function(direction) {
+        var walkName = null;
+        switch (direction) {
+            
+            case FORWARDS:
+                return "Walk";
+                
+            case BACKWARDS:
+                return "WalkBackwards";
+                
+            case LEFT:
+                return "SideStepLeft";
+                
+            case RIGHT:
+                return "SideStepRight";
+
+            case DOWN:
+                return "Idle";
+        } 
     }
 
     // frequency time wheel (foot / ground speed matching)
@@ -404,6 +533,7 @@ animationOperations = (function() {
 
         // helper function for renderMotion(). calculate joint translations based on animation file settings and frequency * time
         calculateTranslations: function(animation, ft, direction) {
+            try {
             var jointName = "Hips";
             var joint = animation.joints[jointName];
             var jointTranslations = {x:0, y:0, z:0};
@@ -435,45 +565,49 @@ animationOperations = (function() {
                 jointTranslations.z = joint.thrust * Math.sin
                     (filter.degToRad(modifiers.thrustFrequencyMultiplier * ft + joint.thrustPhase)) + joint.thrustOffset;
             }
+            } catch(e) {print ('Exception caught in walkApi - AnimationOperations - calculateTranslations: '+e.toString());} 
             return jointTranslations;
         },
 
         // helper function for renderMotion(). calculate joint rotations based on animation file settings and frequency * time
         calculateRotations: function(jointName, animation, ft, direction) {
-            var joint = animation.joints[jointName];
             var jointRotations = {x:0, y:0, z:0};
+            var joint = animation.joints[jointName];
+            
+            if (joint) {
 
-            if (avatar.mixamoPreRotations) {
-                jointRotations = Vec3.sum(jointRotations, walkAssets.mixamoPreRotations.joints[jointName]);
-            }
+                if (avatar.isMissingPreRotations) {
+                    jointRotations = Vec3.sum(jointRotations, walkAssets.preRotations.joints[jointName]);
+                }
 
-            // gather frequency multipliers for this joint - TODO: phase these out, no need if using harmonics 
-            modifiers = new FrequencyMultipliers(joint, direction);
+                // gather frequency multipliers for this joint - TODO: phase these out, no need if using harmonics 
+                modifiers = new FrequencyMultipliers(joint, direction);
 
-            // calculate pitch
-            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].pitchHarmonics) { 
-                jointRotations.x += joint.pitch * animation.harmonics[jointName].pitchHarmonics.calculate
-                    (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
-            } else {
-                jointRotations.x += joint.pitch * Math.sin
-                    (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
-            }
-            // calculate yaw
-            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].yawHarmonics) {
-                jointRotations.y += joint.yaw * animation.harmonics[jointName].yawHarmonics.calculate
-                    (filter.degToRad(ft * modifiers.yawFrequencyMultiplier + joint.yawPhase)) + joint.yawOffset;
-            } else {
-                jointRotations.y += joint.yaw * Math.sin
-                    (filter.degToRad(ft * modifiers.yawFrequencyMultiplier + joint.yawPhase)) + joint.yawOffset;
-            }
-            // calculate roll
-            if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].rollHarmonics) {
-                jointRotations.z += joint.roll * animation.harmonics[jointName].rollHarmonics.calculate
-                    (filter.degToRad(ft * modifiers.rollFrequencyMultiplier + joint.rollPhase)) + joint.rollOffset;
-            } else {
-                jointRotations.z += joint.roll * Math.sin
-                    (filter.degToRad(ft * modifiers.rollFrequencyMultiplier + joint.rollPhase)) + joint.rollOffset;
-            }
+                // calculate pitch
+                if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].pitchHarmonics) { 
+                    jointRotations.x += joint.pitch * animation.harmonics[jointName].pitchHarmonics.calculate
+                        (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
+                } else {
+                    jointRotations.x += joint.pitch * Math.sin
+                        (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
+                }
+                // calculate yaw
+                if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].yawHarmonics) {
+                    jointRotations.y += joint.yaw * animation.harmonics[jointName].yawHarmonics.calculate
+                        (filter.degToRad(ft * modifiers.yawFrequencyMultiplier + joint.yawPhase)) + joint.yawOffset;
+                } else {
+                    jointRotations.y += joint.yaw * Math.sin
+                        (filter.degToRad(ft * modifiers.yawFrequencyMultiplier + joint.yawPhase)) + joint.yawOffset;
+                }
+                // calculate roll
+                if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].rollHarmonics) {
+                    jointRotations.z += joint.roll * animation.harmonics[jointName].rollHarmonics.calculate
+                        (filter.degToRad(ft * modifiers.rollFrequencyMultiplier + joint.rollPhase)) + joint.rollOffset;
+                } else {
+                    jointRotations.z += joint.roll * Math.sin
+                        (filter.degToRad(ft * modifiers.rollFrequencyMultiplier + joint.rollPhase)) + joint.rollOffset;
+                }
+            } 
             return jointRotations;
         },
 
@@ -485,28 +619,78 @@ animationOperations = (function() {
             }
         },
 
+        // blend source animation into target animation by given percentage
+        // note: does NOT blend harmonic information
         blendAnimation: function(sourceAnimation, targetAnimation, percent) {
-            for (i in targetAnimation.joints) {
-                targetAnimation.joints[i].pitch += percent * sourceAnimation.joints[i].pitch;
-                targetAnimation.joints[i].yaw += percent * sourceAnimation.joints[i].yaw;
-                targetAnimation.joints[i].roll += percent * sourceAnimation.joints[i].roll;
-                targetAnimation.joints[i].pitchPhase += percent * sourceAnimation.joints[i].pitchPhase;
-                targetAnimation.joints[i].yawPhase += percent * sourceAnimation.joints[i].yawPhase;
-                targetAnimation.joints[i].rollPhase += percent * sourceAnimation.joints[i].rollPhase;
-                targetAnimation.joints[i].pitchOffset += percent * sourceAnimation.joints[i].pitchOffset;
-                targetAnimation.joints[i].yawOffset += percent * sourceAnimation.joints[i].yawOffset;
-                targetAnimation.joints[i].rollOffset += percent * sourceAnimation.joints[i].rollOffset;
-                if (i === "Hips") {
+            
+            // blend harmonics (with a degree of uncertainty...)
+            for (joint in sourceAnimation.harmonics) {
+                if (targetAnimation.harmonics[joint] === undefined) {
+                    targetAnimation.harmonics[joint] = {};
+                }
+                for (harmonic in sourceAnimation.harmonics[joint]) {
+                    
+                    if (!targetAnimation.harmonics[joint][harmonic]) {
+                        targetAnimation.harmonics[joint][harmonic] = {
+                            "magnitudes": [],
+                            "phaseAngles": []
+                        };
+                        var numHarmonics = sourceAnimation.harmonics[joint][harmonic].numHarmonics;
+                        for (value in sourceAnimation.harmonics[joint][harmonic].magnitudes) {
+                            targetAnimation.harmonics[joint][harmonic].magnitudes.push(0);
+                            targetAnimation.harmonics[joint][harmonic].phaseAngles.push(0);
+                        }
+                        targetAnimation.harmonics[joint][harmonic] =
+                            filter.createHarmonicsFilter(numHarmonics, 
+                                targetAnimation.harmonics[joint][harmonic].magnitudes,
+                                targetAnimation.harmonics[joint][harmonic].phaseAngles);
+                    }                    
+                    for (magnitude in sourceAnimation.harmonics[joint][harmonic].magnitudes) {
+                        targetAnimation.harmonics[joint][harmonic][magnitude] += percent * sourceAnimation.harmonics[joint][harmonic][magnitude];
+                    }
+                    //for (phaseAngle in sourceAnimation.harmonics[joint][harmonic].phaseAngles) {
+                    //    targetAnimation.harmonics[joint][harmonic][magnitude] += percent * sourceAnimation.harmonics[joint][harmonic][magnitude];
+                    //}                    
+                }
+            }
+            
+            // blend joint values
+            for (joint in sourceAnimation.joints) {
+                targetAnimation.joints[joint].pitch += percent * sourceAnimation.joints[joint].pitch;
+                targetAnimation.joints[joint].yaw += percent * sourceAnimation.joints[joint].yaw;
+                targetAnimation.joints[joint].roll += percent * sourceAnimation.joints[joint].roll;
+                targetAnimation.joints[joint].pitchPhase += percent * sourceAnimation.joints[joint].pitchPhase;
+                targetAnimation.joints[joint].yawPhase += percent * sourceAnimation.joints[joint].yawPhase;
+                targetAnimation.joints[joint].rollPhase += percent * sourceAnimation.joints[joint].rollPhase;
+                targetAnimation.joints[joint].pitchOffset += percent * sourceAnimation.joints[joint].pitchOffset;
+                targetAnimation.joints[joint].yawOffset += percent * sourceAnimation.joints[joint].yawOffset;
+                targetAnimation.joints[joint].rollOffset += percent * sourceAnimation.joints[joint].rollOffset;
+                if (joint === "Hips") {
                     // Hips only
-                    targetAnimation.joints[i].thrust += percent * sourceAnimation.joints[i].thrust;
-                    targetAnimation.joints[i].sway += percent * sourceAnimation.joints[i].sway;
-                    targetAnimation.joints[i].bob += percent * sourceAnimation.joints[i].bob;
-                    targetAnimation.joints[i].thrustPhase += percent * sourceAnimation.joints[i].thrustPhase;
-                    targetAnimation.joints[i].swayPhase += percent * sourceAnimation.joints[i].swayPhase;
-                    targetAnimation.joints[i].bobPhase += percent * sourceAnimation.joints[i].bobPhase;
-                    targetAnimation.joints[i].thrustOffset += percent * sourceAnimation.joints[i].thrustOffset;
-                    targetAnimation.joints[i].swayOffset += percent * sourceAnimation.joints[i].swayOffset;
-                    targetAnimation.joints[i].bobOffset += percent * sourceAnimation.joints[i].bobOffset;
+                    targetAnimation.joints[joint].thrust += percent * sourceAnimation.joints[joint].thrust;
+                    targetAnimation.joints[joint].sway += percent * sourceAnimation.joints[joint].sway;
+                    targetAnimation.joints[joint].bob += percent * sourceAnimation.joints[joint].bob;
+                    targetAnimation.joints[joint].thrustPhase += percent * sourceAnimation.joints[joint].thrustPhase;
+                    targetAnimation.joints[joint].swayPhase += percent * sourceAnimation.joints[joint].swayPhase;
+                    targetAnimation.joints[joint].bobPhase += percent * sourceAnimation.joints[joint].bobPhase;
+                    targetAnimation.joints[joint].thrustOffset += percent * sourceAnimation.joints[joint].thrustOffset;
+                    targetAnimation.joints[joint].swayOffset += percent * sourceAnimation.joints[joint].swayOffset;
+                    targetAnimation.joints[joint].bobOffset += percent * sourceAnimation.joints[joint].bobOffset;
+                    
+                    /*walkTools.toLog('\n'+sourceAnimation.name+':'+
+                                    ' pitch: '+sourceAnimation.joints[joint].pitch.toFixed(1) +
+                                    ' yaw: '+sourceAnimation.joints[joint].yaw.toFixed(1) +
+                                    ' roll: '+sourceAnimation.joints[joint].roll.toFixed(1) +
+                                    ' sway: '+sourceAnimation.joints[joint].sway.toFixed(1) +
+                                    ' bob: '+sourceAnimation.joints[joint].bob.toFixed(1) +
+                                    ' thrust: '+sourceAnimation.joints[joint].thrust.toFixed(1) +
+                                    '\n'+targetAnimation.name+':'+
+                                    ' pitch: '+targetAnimation.joints[joint].pitch.toFixed(1) +
+                                    ' yaw: '+targetAnimation.joints[joint].yaw.toFixed(1) +
+                                    ' roll: '+targetAnimation.joints[joint].roll.toFixed(1) +
+                                    ' sway: '+targetAnimation.joints[joint].sway.toFixed(1) +
+                                    ' bob: '+targetAnimation.joints[joint].bob.toFixed(1) +
+                                    ' thrust: '+targetAnimation.joints[joint].thrust.toFixed(1));  */                  
                 }
             }
         },
@@ -526,13 +710,26 @@ animationOperations = (function() {
 
 })(); // end animation object literal
 
-// ReachPose datafile wrapper object
-ReachPose = function(reachPoseName) {
+// reach pose wrapper (contains reach pose animation and reach pose parameters)
+ReachPoseWrapper = function(reachPoseName, sustainHold) {
+    //walkTools.toLog('New reach pose created: '+reachPoseName);
     this.name = reachPoseName;
+    this.animation = walkAssets.getReachPose(reachPoseName);
     this.reachPoseParameters = walkAssets.getReachPoseParameters(reachPoseName);
-    this.reachPoseDataFile = walkAssets.getReachPoseDataFile(reachPoseName);
+    this.sustainHold = sustainHold | false;
     this.progress = 0;
     this.smoothingFilter = filter.createAveragingFilter(this.reachPoseParameters.smoothing);
+    
+    this.updateProgress = function(increment) {
+        if (this.progress < this.reachPoseParameters.sustain.timing || !this.sustainHold) {
+            this.progress += increment;
+        }
+    };
+    this.release = function() {
+        this.sustainHold = false;
+    }
+    
+    // returns the current strength (i.e. influence) of this reach pose (based on the current progress value)
     this.currentStrength = function() {
         // apply optionally smoothed (D)ASDR envelope to reach pose's strength / influence whilst active
         var segmentProgress = undefined; // progress through chosen segment
@@ -565,7 +762,7 @@ ReachPose = function(reachPoseName) {
             segmentProgress = this.progress - this.reachPoseParameters.delay.timing;
             segmentTimeDelta = this.reachPoseParameters.attack.timing - this.reachPoseParameters.delay.timing;
             segmentStrengthDelta = this.reachPoseParameters.attack.strength - this.reachPoseParameters.delay.strength;
-            lastStrength = 0; //this.delay.strength;
+            lastStrength = this.reachPoseParameters.delay.strength;
         } else {
             // delay phase
             segmentProgress = this.progress;
@@ -581,26 +778,13 @@ ReachPose = function(reachPoseName) {
     }
 };
 
-// constructor with default parameters
-TransitionParameters = function() {
-    this.duration = 0.5;
-    this.easingLower = {x:0.25, y:0.75};
-    this.easingUpper = {x:0.75, y:0.25};
-    this.reachPoses = [];
-}
-
-const QUARTER_CYCLE = 90;
-const HALF_CYCLE = 180;
-const THREE_QUARTER_CYCLE = 270;
-const FULL_CYCLE = 360;
-
 // constructor for animation Transition
 Transition = function(nextAnimation, lastAnimation, lastTransition, playTransitionReachPoses) {
 
     if (playTransitionReachPoses === undefined) {
         playTransitionReachPoses = true;
     }
-
+    
     // record the current state of animation
     this.nextAnimation = nextAnimation;
     this.lastAnimation = lastAnimation;
@@ -618,16 +802,28 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     motion.elapsedFTDegrees = 0; // reset ready for the next transition
     motion.frequencyTimeWheelPos = 0; // start the next animation's frequency time wheel from zero
 
-    // set parameters for the transition
-    this.parameters = new TransitionParameters();
+    // set the parameters for the transition
     this.liveReachPoses = [];
+    this.parameters = {};
     if (walkAssets && lastAnimation && nextAnimation) {
-        // overwrite this.parameters with any transition parameters specified for this particular transition
-        walkAssets.getTransitionParameters(lastAnimation, nextAnimation, this.parameters);
-        // fire up any reach poses for this transition
+        var next = nextAnimation.name;
+        if (this.nextAnimation.name === "WalkBlend") {
+            next = motion.surfaceAnimationFromDirection(this.direction)
+        }   
+        var last = lastAnimation.name;
+        if (this.lastAnimation.name === "WalkBlend") {
+            last = motion.surfaceAnimationFromDirection(this.direction)
+        }         
+        walkTools.toLog('Transition from '+last+' to '+next+' instantiated');
+        this.parameters = walkAssets.getTransitionParameters(last, next);
+        
+        // fire up any post event reach poses for this transition
         if (playTransitionReachPoses) {
-            for (poseName in this.parameters.reachPoses) {
-                this.liveReachPoses.push(new ReachPose(this.parameters.reachPoses[poseName]));
+            if (this.parameters.postReachPoses) 
+                //walkTools.toLog('Transition from '+last+' to '+next+' has '+this.parameters.postReachPoses.length+' post reach poses');
+                            
+            for (pose in this.parameters.postReachPoses) {                         
+                this.liveReachPoses.push(new ReachPoseWrapper(this.parameters.postReachPoses[pose], false));
             }
         }
     }
@@ -688,6 +884,8 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         if (this.lastTransition !== nullTransition) {
             this.lastTransition.incrementRecursion();
             if (this.lastTransition.recursionDepth > MAX_TRANSITION_RECURSION) {
+                //walkTools.toLog('Transition from '+this.lastTransition.lastAnimation.name+
+                //' to '+this.lastTransition.nextAnimation.name+' deleted due to excessive recursion.'); 
                 this.lastTransition = nullTransition;
             }
         }
@@ -716,7 +914,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                 }
             } else {
                 wheelAdvance = this.lastFrequencyTimeIncrement;
-                var distanceToTravel = avatar.calibration.strideLength * wheelAdvance / HALF_CYCLE;
+                var distanceToTravel = avatar.currentAnimation.calibration.strideLength * wheelAdvance / HALF_CYCLE;
                 if (this.degreesRemaining <= 0) {
                     distanceToTravel = 0;
                     this.degreesRemaining = 0;
@@ -753,21 +951,31 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         // updated nested transition/s
         if (this.lastTransition !== nullTransition) {
             if (this.lastTransition.updateProgress() === TRANSITION_COMPLETE) {
+                //walkTools.toLog('Transition from '+this.lastTransition.lastAnimation.name+
+                //' to '+this.lastTransition.nextAnimation.name+' (nested) complete.');                 
                 // the previous transition is now complete
                 this.lastTransition = nullTransition;
             }
         }
+    
+        if (this.progress >= 1) {
+            // release any pre-state change reach poses
+            for (reachPose in motion.preReachPoses) {
+                //walkTools.toLog(motion.preReachPoses[reachPose].name + ' sustain hold released');
+                motion.preReachPoses[reachPose].release();
+            }       
+        }            
 
-        // update any reachPoses
+        // update any post-state change reach poses
         for (pose in this.liveReachPoses) {
-            // use independent timing for reachPoses
-            this.liveReachPoses[pose].progress += (motion.deltaTime / this.liveReachPoses[pose].reachPoseParameters.duration);
+            this.liveReachPoses[pose].updateProgress(motion.deltaTime / this.liveReachPoses[pose].reachPoseParameters.duration);
             if (this.liveReachPoses[pose].progress >= 1) {
                 // time to kill off this reach pose
+                walkTools.toLog('Post reach pose '+this.liveReachPoses[pose].name + ' is complete');
                 this.liveReachPoses.splice(pose, 1);
             }
         }
-
+        
         // update transition progress
         this.filteredProgress = filter.bezier(this.progress, this.parameters.easingLower, this.parameters.easingUpper);
         return this.progress >= 1 ? TRANSITION_COMPLETE : false;
@@ -797,7 +1005,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
             for (pose in this.liveReachPoses) {
                 var reachPoseStrength = this.liveReachPoses[pose].currentStrength();
                 var poseTranslations = animationOperations.calculateTranslations(
-                                                             this.liveReachPoses[pose].reachPoseDataFile,
+                                                             this.liveReachPoses[pose].animation,
                                                              frequencyTimeWheelPos,
                                                              direction);
 
@@ -817,6 +1025,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     };
 
     this.blendRotations = function(jointName, frequencyTimeWheelPos, direction) {
+        try {
         var lastRotations = {x:0, y:0, z:0};
         var nextRotations = animationOperations.calculateRotations(jointName,
                                                this.nextAnimation,
@@ -840,11 +1049,11 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         nextRotations = Vec3.sum(nextRotations, lastRotations);
 
         // are there reachPoses defined for this transition?
-        if (this.liveReachPoses.length > 0) {
+        if (this.liveReachPoses.length > 0) { // TODO: does this really need checking?
             for (pose in this.liveReachPoses) {
                 var reachPoseStrength = this.liveReachPoses[pose].currentStrength();
                 var poseRotations = animationOperations.calculateRotations(jointName,
-                                                       this.liveReachPoses[pose].reachPoseDataFile,
+                                                       this.liveReachPoses[pose].animation,
                                                        frequencyTimeWheelPos,
                                                        direction);
 
@@ -860,6 +1069,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                 }
             }
         }
+        } catch(e) {print ('Exception caught in walkApi - Transition - blendRotations: '+e.toString());}
         return nextRotations;
     };
 }; // end Transition constructor

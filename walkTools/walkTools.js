@@ -11,7 +11,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-// load up the UI elements
+// load up the tools
 Script.include("./walkTools/walkToolsToolBar.js");
 Script.include("./walkTools/walkToolsStats.js");
 Script.include("./walkTools/walkToolsEditor.js");
@@ -21,10 +21,12 @@ Script.include("./walkTools/walkToolsOscilloscope.js");
 Script.include("./walkTools/walkToolsCameras.js");
 //Script.include("./walkTools/walkToolsGrid.js");
 Script.include("./walkTools/walkToolsBVHPlayer.js");
+//Script.include("./walkTools/walkToolsEEGDisplay.js");
 
 walkTools = (function () {
 
     var _walkToolsEnabled = true;
+    // this needs removing
     var _visibility = {
         visible: true,
         editorVisible: false,
@@ -48,6 +50,14 @@ walkTools = (function () {
     var _yawDeltaAccelerationPeak = 0;
     var _nFrames = 0;
     var _globalPhase = 0;
+    
+    var _stride = {
+        animationName: "",
+        rightFootStrideMax: 0,
+        rightFootStrideMaxAt: 0,
+        leftFootStrideMax: 0,
+        leftFootStrideMaxAt: 0,
+    }
 
     // helper function for stats display
     function directionAsString(directionEnum) {
@@ -87,6 +97,129 @@ walkTools = (function () {
         }
     };
     
+    function dumpCurrentAnimation(optimise) {
+        // can either produce smaller, optimised animation file (rounded parameters, no un-used harmonics, Ctrl-Shift-Q)
+        // or a larger 'raw' animation file (no rounding, keep all un-used harmonics for later editing, Shift-Q)
+        const JOINTS_DP = 5; // TODO: experiment reducing this once animations get to polished standard
+        const HARMONICS_DP = 16; // TODO: experiment reducing this once animations get to polished standard            
+        
+        try {
+            
+            if (optimise) {
+                // clear out any un-used harmonics in the actual animation file
+                for (joint in avatar.currentAnimation.harmonics) {
+                    for (harmonicData in avatar.currentAnimation.harmonics[joint]) {
+                        var numHarmonics = avatar.currentAnimation.harmonics[joint][harmonicData].numHarmonics;
+                        var magnitudes = [];
+                        var phaseAngles = [];
+                        for (i = 0 ; i < numHarmonics ; i++) {
+                            var magnitude = avatar.currentAnimation.harmonics[joint][harmonicData].magnitudes[i];
+                            var phaseAngle = avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles[i];                           
+                            magnitudes.push(magnitude);
+                            phaseAngles.push(phaseAngle);
+                        }
+                        if (avatar.currentAnimation.harmonics[joint][harmonicData].numHarmonics === 0) {
+                            delete avatar.currentAnimation.harmonics[joint][harmonicData];
+                            print('Setting null for '+joint+' '+harmonicData);
+                        } else {
+                            avatar.currentAnimation.harmonics[joint][harmonicData].magnitudes = magnitudes;
+                            avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles = phaseAngles;
+                        }
+                    }
+                    if (Object.keys(avatar.currentAnimation.harmonics[joint]).length === 0) {
+                        delete avatar.currentAnimation.harmonics[joint];
+                    }
+                }
+            }
+            
+            // export avatar.currentAnimation as json string when q key is pressed.
+            // reformat result at http://jsonformatter.curiousconcept.com/
+            print('___________________________________\n');
+            if (optimise) {
+                print('walk.js dumping optimised animation: ' + avatar.currentAnimation.name + '\n');
+            } else {
+                print('walk.js dumping animation: ' + avatar.currentAnimation.name + '\n');
+            }
+            print('___________________________________\n');
+            print(JSON.stringify(avatar.currentAnimation, function(key, val) {
+                
+                if (optimise) {
+                    
+                    if (isNaN(Number(key))) {
+                        // shorten joint parameters
+                        if (!isNaN(val)) {
+                            val = Number(val).toFixed(JOINTS_DP); 
+                        }
+                    } else {
+                        // shorten harmonics parameters
+                        if (!isNaN(val)) {
+                            val = Number(val).toFixed(HARMONICS_DP);              
+                        }
+                    }
+                }
+                return val;
+            }));
+            print('\n');
+            print('___________________________________\n');
+            print(avatar.currentAnimation.name + ' animation dumped\n');
+            print('___________________________________\n');
+        
+            // dump to walkTools log also
+            walkToolsLog.clearLog();
+            walkToolsLog.setVisible(true);
+            walkToolsLog.logMessage(JSON.stringify(avatar.currentAnimation, function(key, val) {
+                
+                if (optimise) {
+                    
+                    if (isNaN(Number(key))) {
+                        // shorten joint parameters
+                        if (!isNaN(val)) {
+                            val = Number(val).toFixed(JOINTS_DP); 
+                        }
+                    } else {
+                        // shorten harmonics parameters
+                        if (!isNaN(val)) {
+                            val = Number(val).toFixed(HARMONICS_DP);              
+                        }
+                    }
+                }
+                return val;
+            }), false);
+        } catch (error) {
+            print('Error dumping animation file: ' + error.toString() + '\n');
+            walkToolsLog.logMessage('Error dumping animation file: ' + error.toString());
+            return;
+        }  
+    }
+    
+    function dumpPreRotations() {
+        try {
+            // export avatar pre rotations as json string
+            // reformat result at http://jsonformatter.curiousconcept.com/
+            print('___________________________________\n');
+            print('walk.js dumping pre-rotations\n');
+            print('___________________________________\n');
+            print(JSON.stringify(walkAssets.preRotations, function(key, val) {
+                return val;
+            }));
+            print('\n');
+            print('___________________________________\n');
+            print('pre-rotations dumped\n');
+            print('___________________________________\n');
+        
+            // dump to walkTools log also
+            walkToolsLog.clearLog();
+            walkToolsLog.setVisible(true);
+            walkToolsLog.logMessage(JSON.stringify(walkAssets.preRotations, function(key, val) {
+                return val;
+            }), false);
+        } catch (error) {
+            print('Error dumping pre-rotations: ' + error.toString() + '\n');
+            walkToolsLog.logMessage('Error dumping pre-rotations: ' + error.toString() + '\n');
+            return;
+        }
+    }
+    
     var _shift = false;
     var _control = false;
     function keyPressEvent(event) {
@@ -96,104 +229,8 @@ walkTools = (function () {
         if (event.text === "CONTROL") {
             _control = true;
         }        
-        if (_shift && (event.text === 'r' || event.text === 'R')) {
-            animationOperations.zeroAnimation(avatar.currentAnimation);
-            print('joints zeroed for '+avatar.currentAnimation.name);
-            walkToolsEditor.update();
-        }
         if (_shift && (event.text === 'q' || event.text === 'Q')) {
-            
-            // can either produce smaller, optimised animation file (rounded parameters, no un-used harmonics, Ctrl-Shift-Q)
-            // or a larger 'raw' animation file (no rounding, keep all un-used harmonics for later editing, Shift-Q)
-            var OPTIMISE = _control;
-            const JOINTS_DP = 5; // TODO: experiment reducing this once animations get to polished standard
-            const HARMONICS_DP = 16; // TODO: experiment reducing this once animations get to polished standard            
-            
-            try {
-                
-                if (OPTIMISE) {
-                    // clear out any un-used harmonics in the actual animation file
-                    for (joint in avatar.currentAnimation.harmonics) {
-                        for (harmonicData in avatar.currentAnimation.harmonics[joint]) {
-                            var numHarmonics = avatar.currentAnimation.harmonics[joint][harmonicData].numHarmonics;
-                            var magnitudes = [];
-                            var phaseAngles = [];
-                            for (i = 0 ; i < numHarmonics ; i++) {
-                                var magnitude = avatar.currentAnimation.harmonics[joint][harmonicData].magnitudes[i];
-                                var phaseAngle = avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles[i];                           
-                                magnitudes.push(magnitude);
-                                phaseAngles.push(phaseAngle);
-                            }
-                            if (avatar.currentAnimation.harmonics[joint][harmonicData].numHarmonics === 0) {
-                                delete avatar.currentAnimation.harmonics[joint][harmonicData];
-                                print('Setting null for '+joint+' '+harmonicData);
-                            } else {
-                                avatar.currentAnimation.harmonics[joint][harmonicData].magnitudes = magnitudes;
-                                avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles = phaseAngles;
-                            }
-                        }
-                        if (Object.keys(avatar.currentAnimation.harmonics[joint]).length === 0) {
-                            delete avatar.currentAnimation.harmonics[joint];
-                        }
-                    }
-                }
-                
-                // export avatar.currentAnimation as json string when q key is pressed.
-                // reformat result at http://jsonformatter.curiousconcept.com/
-                print('___________________________________\n');
-                if (OPTIMISE) {
-                    print('walk.js dumping optimised animation: ' + avatar.currentAnimation.name + '\n');
-                } else {
-                    print('walk.js dumping animation: ' + avatar.currentAnimation.name + '\n');
-                }
-                print('___________________________________\n');
-                print(JSON.stringify(avatar.currentAnimation, function(key, val) {
-                    
-                    if (OPTIMISE) {
-                        
-                        if (isNaN(Number(key))) {
-                            // shorten joint parameters
-                            if (!isNaN(val)) {
-                                val = Number(val).toFixed(JOINTS_DP); 
-                            }
-                        } else {
-                            // shorten harmonics parameters
-                            if (!isNaN(val)) {
-                                val = Number(val).toFixed(HARMONICS_DP);              
-                            }
-                        }
-                    }
-                    return val;
-                }));
-                print('\n');
-                print('___________________________________\n');
-                print(avatar.currentAnimation.name + ' animation dumped\n');
-                print('___________________________________\n');
-            
-                // dump to walkTools log also
-                walkToolsLog.logMessage(JSON.stringify(avatar.currentAnimation, function(key, val) {
-                    
-                    if (OPTIMISE) {
-                        
-                        if (isNaN(Number(key))) {
-                            // shorten joint parameters
-                            if (!isNaN(val)) {
-                                val = Number(val).toFixed(JOINTS_DP); 
-                            }
-                        } else {
-                            // shorten harmonics parameters
-                            if (!isNaN(val)) {
-                                val = Number(val).toFixed(HARMONICS_DP);              
-                            }
-                        }
-                    }
-                    return val;
-                }));
-            } catch (error) {
-                print('Error dumping animation file: ' + error.toString() + '\n');
-                walkToolsLog.logMessage('Error dumping animation file: ' + error.toString() + '\n');
-                return;
-            }            
+            dumpCurrentAnimation(_control);
         }        
     }
     function keyReleaseEvent(event) {
@@ -211,9 +248,14 @@ walkTools = (function () {
     return {
 
         // often useful elsewhere too
+        dumpCurrentAnimation: dumpCurrentAnimation,
+        dumpPreRotations: dumpPreRotations,
         stateAsString: stateAsString,
         directionAsString: directionAsString,
         nFrames: _nFrames,
+        framesElapsed: function() {
+            return _nFrames;
+        },
         visibility: _visibility,
         enableWalkTools: function(enabled) {
             _walkToolsEnabled = enabled;
@@ -328,6 +370,8 @@ walkTools = (function () {
                     stats.decelerating = motion.isDecelerating;
                     stats.deceleratingFast = motion.isDeceleratingFast;
                     stats.comingToAHalt = motion.isComingToHalt;
+                    stats.strideMax = avatar.currentAnimation.calibration.strideMax;
+                    stats.strideMaxAt = avatar.currentAnimation.calibration.strideMaxAt;
                 }
 
                 if (_visibility.statsVisible && _nFrames % 15 === 0) {
@@ -349,6 +393,34 @@ walkTools = (function () {
 
         updateFrequencyTimeWheelStats: function(deltaTime, speed, wheelRadius, degreesTurnedSinceLastFrame) {
             if (_visibility.visible && _walkToolsEnabled) {
+                
+                // stride calibration
+                if (avatar.currentAnimation.name !== _stride.animationName) {
+                    _stride = {
+                        animationName: avatar.currentAnimation.name,
+                        rightFootStrideMax: 0,
+                        rightFootStrideMaxAt: 0,
+                        leftFootStrideMax: 0,
+                        leftFootStrideMaxAt: 0,
+                    }    
+                }/*
+                var footRPos = MyAvatar.getJointPosition("RightFoot");
+                var footLPos = MyAvatar.getJointPosition("LeftFoot");
+                var distanceBetweenFeet = Vec3.distance(footRPos, footLPos);
+                if (motion.frequencyTimeWheelPos < HALF_CYCLE) {
+                    // right foot leading
+                    if (distanceBetweenFeet > _stride.rightFootStrideMax) {
+                        _stride.rightFootStrideMax = distanceBetweenFeet;
+                        _stride.rightFootStrideMaxAt = motion.frequencyTimeWheelPos;
+                    }
+                } else {
+                    // left foot leading
+                    if (distanceBetweenFeet > _stride.leftFootStrideMax) {
+                        _stride.leftFootStrideMax = distanceBetweenFeet;
+                        _stride.leftFootStrideMaxAt = motion.frequencyTimeWheelPos;
+                    }
+                }*/
+                
                 var distanceTravelled = speed * deltaTime;
                 var ftWheelAngularVelocity = speed / wheelRadius;
 
@@ -376,7 +448,7 @@ walkTools = (function () {
                         cosWalkWheelPosition = wheelRadius * Math.cos(filter.degToRad(-directionSign * motion.frequencyTimeWheelPos + 90));
                         wheelCoordinates.wheelYPos = {x: cosWalkWheelPosition, y: sinWalkWheelPosition - yOffset, z: 0};
                         wheelCoordinates.wheelYEnd = {x: -cosWalkWheelPosition, y: -sinWalkWheelPosition - yOffset, z: 0};
-                        //walkInterface.updateFTWheelDisplay(wheelCoordinates);
+                        //.updateFTWheelDisplay(wheelCoordinates);
                     } else {
                         // draw the frequency time turning around the x axis for walking forwards or backwards
                         var forwardModifier = 1;
@@ -388,7 +460,7 @@ walkTools = (function () {
                         wheelCoordinates.wheelYEnd = {x: 0, y: -sinFTWheelPosition - yOffset, z: -cosFTWheelPosition};
                         wheelCoordinates.wheelZPos = {x: 0, y: -sinFTWheelPosition - yOffset, z: cosFTWheelPosition};
                         wheelCoordinates.wheelZEnd = {x: 0, y: sinFTWheelPosition - yOffset, z: -cosFTWheelPosition};
-                        //walkInterface.updateFTWheelDisplay(wheelCoordinates);
+                        //.updateFTWheelDisplay(wheelCoordinates);
                     }
                 }
 
@@ -396,16 +468,15 @@ walkTools = (function () {
                     var stats = {};
                     stats.wheelPositon = motion.frequencyTimeWheelPos;
                     stats.hipsToFeet = avatar.calibration.hipsToFeet;
-                    stats.stride = avatar.calibration.strideLength;
+                    stats.stride = avatar.currentAnimation.calibration.strideLength;
                     stats.wheelRadius = wheelRadius;
                     stats.ftWheelAngularVelocity = ftWheelAngularVelocity;
                     stats.degreesToTurn = degreesTurnedSinceLastFrame;
                     stats.distanceTravelled = distanceTravelled;
+                    stats.strideInfo = _stride;
                     walkToolsStats.updateStats(stats);
                 }
             }
         }
     }
 })();
-
-//Script.include("./walkTools/WalkToolsBVHLoader.js");

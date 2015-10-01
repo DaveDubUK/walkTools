@@ -15,7 +15,7 @@
 AveragingFilter = function(length) {
     // initialise the array of past values
     this.pastValues = [];
-    for (var i = 0; i < length; i++) {
+    for (var i = 0 ; i < length ; i++) {
         this.pastValues.push(0);
     }
     // single arg is the nextInputValue
@@ -34,9 +34,38 @@ AveragingFilter = function(length) {
     };
 };
 
+// 4th order 24Hz butterworth filter
+// coefficients calculated at: http://www-users.cs.york.ac.uk/~fisher/mkfilter/trad.html
+// Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher
+/*Butterworth24Hz = function() {
+    
+    this.gain = 2.310287053;
+
+    // initialise the arrays
+    this.xv = [];
+    this.yv = [];
+    for (var i = 0; i < 5; i++) {
+        this.xv.push(0);
+        this.yv.push(0);
+    }
+
+    // process values
+    this.process = function(nextInputValue) {
+        this.xv[0] = this.xv[1]; this.xv[1] = this.xv[2]; this.xv[2] = this.xv[3]; this.xv[3] = this.xv[4];
+        this.xv[4] = nextInputValue / this.gain;
+        this.yv[0] = this.yv[1]; this.yv[1] = this.yv[2]; this.yv[2] = this.yv[3]; this.yv[3] = this.yv[4];
+        this.yv[4] =   (this.xv[0] + this.xv[4]) + 4 * (this.xv[1] + this.xv[3]) + 6 * this.xv[2]
+                     + ( -0.1873794924 * this.yv[0]) + ( -1.0546654059 * this.yv[1])
+                     + ( -2.3139884144 * this.yv[2]) + ( -2.3695130072 * this.yv[3]);
+        return this.yv[4];
+    }
+}; // end Butterworth 24Hz filter constructor  
+*/
+  
 // 2nd order 2Hz Butterworth LP filter
+// coefficients calculated at: http://www-users.cs.york.ac.uk/~fisher/mkfilter/trad.html
+// Digital filter designed by mkfilter/mkshape/gencode   A.J. Fisher
 ButterworthFilter = function() {
-    // coefficients calculated at: http://www-users.cs.york.ac.uk/~fisher/mkfilter/trad.html
     this.gain = 104.9784742;
     this.coeffOne = -0.7436551950;
     this.coeffTwo = 1.7055521455;
@@ -64,58 +93,6 @@ ButterworthFilter = function() {
     };
 }; // end Butterworth filter constructor
 
-/*
-// Add harmonics to a given sine wave to form square, sawtooth or triangle waves
-// Geometric wave synthesis fundamentals taken from: http://hyperphysics.phy-astr.gsu.edu/hbase/audio/geowv.html
-WaveSynth = function(waveShape, numHarmonics, smoothing) {
-    this.numHarmonics = numHarmonics;
-    this.waveShape = waveShape;
-    this.smoothingFilter = new AveragingFilter(smoothing);
-
-    // NB: frequency in radians
-    this.calculate = function(frequency) {
-        // make some shapes
-        var harmonics = 0;
-        var multiplier = 0;
-        var iterations = this.numHarmonics * 2 + 2;
-        if (this.waveShape === TRIANGLE) {
-            iterations++;
-        }
-        for (var n = 1; n < iterations; n++) {
-            switch (this.waveShape) {
-                case SAWTOOTH: {
-                    multiplier = 1 / n;
-                    harmonics += multiplier * Math.sin(n * frequency);
-                    break;
-                }
-
-                case TRIANGLE: {
-                    if (n % 2 === 1) {
-                        var mulitplier = 1 / (n * n);
-                        // multiply (4n-1)th harmonics by -1
-                        if (n === 3 || n === 7 || n === 11 || n === 15) {
-                            mulitplier *= -1;
-                        }
-                        harmonics += mulitplier * Math.sin(n * frequency); 
-                    }
-                    break;
-                }
-
-                case SQUARE: {
-                    if (n % 2 === 1) {
-                        multiplier = 1 / n;
-                        harmonics += multiplier * Math.sin(n * frequency);
-                    }
-                    break;
-                }
-            }
-        }
-        // smooth the result and return
-        return this.smoothingFilter.process(harmonics);
-    };
-};
-*/
-
 // Create a motion wave by summing pre-calculated harmonics (Fourier synthesis)
 HarmonicsFilter = function(numHarmonics, magnitudes, phaseAngles) {
     this.magnitudes = magnitudes;
@@ -142,8 +119,6 @@ HarmonicsFilter = function(numHarmonics, magnitudes, phaseAngles) {
 
 // the main filter object literal
 filter = (function() {
-    const HALF_CYCLE = 180;
-
     // Bezier private variables
     var _C1 = {x:0, y:0};
     var _C4 = {x:1, y:1};
@@ -180,12 +155,11 @@ filter = (function() {
             var newButterworthFilter = new ButterworthFilter();
             return newButterworthFilter;
         },
+        //createButterworth24HzFilter: function() {
+        //    var newButterworthFilter = new Butterworth24Hz();
+        //    return newButterworthFilter;
+        //},        
 
-        // generates sawtooth, triangle or square waves using harmonics
-        /*createWaveSynth: function(waveShape, numHarmonics, smoothing) {
-            var newWaveSynth = new WaveSynth(waveShape, numHarmonics, smoothing);
-            return newWaveSynth;
-        },*/
 
         // generates arbitrary waveforms using pre-calculated harmonics
         createHarmonicsFilter: function(numHarmonics, magnitudes, phaseAngles) {

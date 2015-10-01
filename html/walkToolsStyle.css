@@ -83,7 +83,7 @@ textarea {
     padding: 1%;
     font-size: 15px;
     width:98%;
-    height:85%;
+    height:90%;
     background-color:rgb(0, 0, 0);
     resize: vertical;
     color: rgb(204, 204, 204);
@@ -135,7 +135,20 @@ textarea {
     width:600px;
     padding: 20px 10px 40px;
 }
-
+.scope-values {
+	width: 190px;
+	float: right;
+	padding: 3px 15px 0px 0px;
+}
+#scope-channel-one-values {
+	color:#ff0000;
+}
+#scope-channel-two-values {
+	color:#00ff00;
+}
+#scope-channel-three-values {
+	color:#0000ff;
+}
 
 /* walkTools editor */
 #editor-content {
@@ -166,7 +179,7 @@ textarea {
     padding: 0;
 }
 .editor-left label{
-    font-size: 16px;
+    font-size: 14px;
     padding-left: 13px;
 }
 
@@ -399,13 +412,17 @@ textarea {
     float: right;
 }
 
-
+#editor-buttons {
+    position: absolute;
+    top: 715px;
+    left: 505px;
+}
 
 
 
 /* bvh player */
 .bvh-player-content {
-    width: 600px;
+    width: 648px;
     height: 90px;
     margin: 0px;
     padding: 8px;
@@ -427,20 +444,23 @@ textarea {
 }
 
 .bvh-button-group {
-    margin: 15px auto 0;
+    margin: 10px auto 0;
     float: none;
-    width: 375px;
+    width: 185px;
 }
 
-#bvh-parser-choice {
-	width: 255px;
-	margin: 0 auto;
+.bvh-settings {
+	width: 320px;
+	margin: 0px auto 10px;
 }
 
 .bvh-parser-selector {
     margin: 12px 0 0 24px;
 }
 
+#bvh-advanced-settings {
+	margin-top:10px;
+}
 
 
 

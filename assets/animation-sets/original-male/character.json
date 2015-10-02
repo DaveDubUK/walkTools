@@ -1,0 +1,172 @@
+{
+    "name": "Original",
+    "animations": {
+        "Walk": {
+            "path": "animation-sets/original-male/animations/walk-animation.json"
+        },
+        "Idle": {
+            "path": "animation-sets/original-male/animations/idle-animation.json"
+        },
+        "WalkBackwards": {
+            "path": "animation-sets/original-male/animations/walk-backwards-animation.json"
+        },
+        "Hover": {
+            "path": "animation-sets/original-male/animations/hover-animation.json"
+        },
+        "SideStepLeft": {
+            "path": "animation-sets/original-male/animations/sidestep-left-animation.json"
+        },
+        "SideStepRight": {
+            "path": "animation-sets/original-male/animations/sidestep-right-animation.json"
+        },
+        "TurnLeft": {
+            "path": "animation-sets/original-male/animations/turn-left-animation.json"
+        },
+        "TurnRight": {
+            "path": "animation-sets/original-male/animations/turn-right-animation.json"
+        },
+        "Fly": {
+            "path": "animation-sets/original-male/animations/fly-animation.json"
+        },
+        "FlyUp": {
+            "path": "animation-sets/original-male/animations/fly-up-animation.json"
+        },
+        "FlyDown": {
+            "path": "animation-sets/original-male/animations/fly-down-animation.json"
+        },
+        "FlyBackwards": {
+            "path": "animation-sets/original-male/animations/fly-backwards-animation.json"
+        }
+    },
+    "sounds": {
+        "FootStepLeft": {
+            "path": "animation-sets/original-male/sounds/FootstepW2Left-12db.wav"
+        },
+        "FootStepRight": {
+            "path": "animation-sets/original-male/sounds/FootstepW2Right-12db.wav"
+        }
+    },
+    "reachPoses": {
+        "MaleIdleToWalkRP": {
+            "path": "animation-sets/original-male/reach-poses/male-idle-to-walk-reach-pose.json",
+            "duration": 1.0,
+            "delay": {"timing":0, "strength":0},
+            "attack": {"timing":0.5, "strength":1},
+            "decay": {"timing":0.5, "strength":1},
+            "sustain": {"timing":0.5, "strength":1},
+            "release": {"timing":1, "strength":0},
+            "smoothing": 50
+        },
+        "MaleIdleToWalk2RP": {
+            "path": "animation-sets/original-male/reach-poses/male-idle-to-walk-2-reach-pose.json",
+            "duration": 1.25,
+            "delay": {"timing":0, "strength":0},
+            "attack": {"timing":0.7, "strength":1},
+            "decay": {"timing":0.7, "strength":1},
+            "sustain": {"timing":0.7, "strength":1},
+            "release": {"timing":1, "strength":1},
+            "smoothing": 50
+        },
+        "MaleIdleToWalk3RP": {
+            "path": "animation-sets/original-male/reach-poses/male-idle-to-walk-3-reach-pose.json",
+            "duration": 1.25,
+            "delay": {"timing":0, "strength":0},
+            "attack": {"timing":0.3, "strength":0.3},
+            "decay": {"timing":0.3, "strength":0.3},
+            "sustain": {"timing":0.3, "strength":0.3},
+            "release": {"timing":1, "strength":0.3},
+            "smoothing": 2
+        },
+        "MaleIdleToWalk4RP": {
+            "path": "animation-sets/original-male/reach-poses/male-idle-to-walk-4-reach-pose.json",
+            "duration": 0.6,
+            "delay": {"timing":0, "strength":0},
+            "attack": {"timing":0.6, "strength":1},
+            "decay": {"timing":0.7, "strength":1},
+            "sustain": {"timing":0.7, "strength":1},
+            "release": {"timing":1, "strength":0},
+            "smoothing": 2
+        },
+        "MaleFlyToWalkRP": {
+            "path": "animation-sets/original-male/reach-poses/male-fly-to-walk-reach-pose.json",
+            "duration": 0.4,
+            "delay": {"timing":0, "strength":0},
+            "attack": {"timing":0.4, "strength":1.0},
+            "decay": {"timing":0.4, "strength":1.0},
+            "sustain": {"timing":0.4, "strength":1.0},
+            "release": {"timing":1, "strength":0},
+            "smoothing": 8
+        }
+    },
+    "transitions": {
+        "Idle": {
+            "WalkBlend": {
+                "duration": 1.25,
+                "easingLower": {"x":0.0, "y":1.0},
+                "easingUpper": {"x":0.0, "y":1.0},
+                "preReachPoses": [],
+                "postReachPoses": ["MaleIdleToWalkRP", "MaleIdleToWalk2RP", "MaleIdleToWalk3RP", "MaleIdleToWalk4RP"]
+            },
+            "FlyBlend": {
+                "duration": 0.55,
+                "easingLower": {"x":0.74, "y":0.10},
+                "easingUpper": {"x":0.23, "y":0.92}
+            },
+            "Hover": {
+                "duration": 0.5,
+                "easingLower": {"x":0.74, "y":0.10},
+                "easingUpper": {"x":0.23, "y":0.92}
+            }
+        },
+        "Hover": {
+            "Idle": {
+                "duration": 0.33,
+                "easingLower": {"x":0.74, "y":0.10},
+                "easingUpper": {"x":0.23, "y":0.92}
+            }
+        },
+        "Walk": {
+            "Idle": {
+                "duration": 0.35,
+                "easingLower": {"x":0.25, "y":0.0},
+                "easingUpper": {"x":0.0, "y":1.0}
+            },
+            "FlyBlend" : {
+                "duration": 0.55,
+                "easingLower": {"x":0.74, "y":0.10},
+                "easingUpper": {"x":0.23, "y":0.92}
+            }
+        },
+        "WalkBackwards": {
+            "Idle": {
+                "duration": 0.35,
+                "easingLower": {"x":0.25, "y":0.0},
+                "easingUpper": {"x":0.0, "y":1.0}
+            },
+            "FlyBlend": {
+                "duration": 0.55,
+                "easingLower": {"x":0.74, "y":0.10},
+                "easingUpper": {"x":0.23, "y":0.92}
+            }
+        },
+        "FlyBlend": {
+            "Hover": {
+                "duration": 0.55,
+                "easingLower": {"x":0.74, "y":0.10},
+                "easingUpper": {"x":0.23, "y":0.92}
+            },
+            "WalkBlend": {
+                "duration": 0.5,
+                "easingLower": {"x":0.5, "y":0.0},
+                "easingUpper": {"x":0.2, "y":1.0},
+                "preReachPoses": ["MaleFlyToWalkRP"],
+                "postReachPoses": ["MaleFlyToWalkRP"]
+            },
+            "Idle": {
+                "duration": 0.35,
+                "easingLower": {"x":0.3, "y":0.0},
+                "easingUpper": {"x":0.0, "y":1.0}
+            }
+        }
+    }
+}

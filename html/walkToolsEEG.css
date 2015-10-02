@@ -1,0 +1,57 @@
+body {
+    background-color: rgb(34, 34, 34);
+    color: rgb(204, 204, 204);
+    font-family: Arial;
+    font-size: 12pt;	
+}
+
+.eeg-graph {
+	width: 680px;
+	height: 250px;
+	margin: 0;
+	padding: 0;
+}
+
+.graph-block {
+	width: 80px;
+	height: 250px;
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	vertical-align: middle;
+}
+
+
+#delta-block {
+	background-color: #ff0000;
+	vertical-align: bottom;
+}
+
+#theta-block {
+	background-color: #f55047;
+}
+
+#alpha-low-block {
+	background-color: #ed0077;
+}
+
+#alpha-high-block {
+	background-color: #d40095;
+}
+
+#beta-low-block {
+	background-color: #9e12bc;
+}
+
+#beta-high-block {
+	background-color: #7417be;
+}
+
+#gamma-low-block {
+	background-color: #27199f;
+}
+
+#gamma-high-block {
+	background-color: #171a99;
+}

@@ -103,7 +103,7 @@ Avatar = function() {
         } while (attempts-- > 1)
 
         // measure the various stride lengths
-        var animationsToCalibrate = ["Walk", "WalkBackwards", "SideStepLeft", "SideStepRight", "Run"];
+        var animationsToCalibrate = ["Walk", "WalkBackwards", "SideStepLeft", "SideStepRight"];
         motion.state = EDIT;
 
         if (quickCalibration) {

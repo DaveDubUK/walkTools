@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkToolsEEG.css">
+        <script>
+
+            function loaded() {
+				elDataDisplay = document.getElementById("eeg-data");
+				elDelta = document.getElementById("delta-block"); // Delta (0.5-4Hz) – The Deep Sleep Wave
+				elTheta = document.getElementById("theta-block"); // Theta (4-7.5Hz) – The Light Meditation And Sleeping Wave
+				elAlphaLow = document.getElementById("alpha-low-block"); // Alpha (7.5-14Hz) – The Deep Relaxation Wave
+				elAlphaHigh = document.getElementById("alpha-high-block"); // Alpha (7.5-14Hz) – The Deep Relaxation Wave
+				elBetaLow = document.getElementById("beta-low-block"); // Beta (14-40Hz) – The Waking Consciousness And Reasoning Wave
+				elBetaHigh = document.getElementById("beta-high-block"); // Beta (14-40Hz) – The Waking Consciousness And Reasoning Wave
+				elGammaLow = document.getElementById("gamma-low-block"); // Gamma (above 40Hz) – The Insight Wave
+				elGammaHigh = document.getElementById("gamma-high-block"); // Gamma (above 40Hz) – The Insight Wave
+				
+				var ws = new WebSocket('ws://dave-pc:8080/');
+				var dataLabels = ["Signal Strength", "Attention", "Meditation", "Delta", "Theta", "Low Alpha", "High Alpha", "Low Beta", "High Beta", "Low Gamma", "High Gamma"];
+				var maximums = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity];
+				var minimums = [Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity];
+				var graphBlocks = [elDelta, elTheta, elAlphaLow, elAlphaHigh, elBetaLow, elBetaHigh, elGammaLow, elGammaHigh];
+				
+				ws.onmessage = function(event) {
+				
+					var displayText = '';
+					var values = event.data.split(",");
+					// normalise the values
+					for (i = 3 ; i < values.length ; i++) {
+						values[i] /= 2800000;	 // from observation			
+					}		
+					const DP = 3;
+					
+					if (!isNaN(values[0])) {
+					
+						try {
+						
+							EventBridge.emitWebEvent(JSON.stringify({
+								type: "action",
+								action: "walkToolsEEGRawData",
+								values: values
+							}));	
+						
+							for (i = 0 ; i < values.length ; i++) {						
+								if (values[i] > maximums[i]) {
+									maximums[i] = values[i];
+								}
+								if (values[i] < minimums[i]) {
+									minimums[i] = values[i];
+								}
+								if (i > 2) {
+									var index = i - 3;
+									var text = dataLabels[i] + '<br />' +maximums[i].toFixed(DP) + '<br />' +  values[i].toFixed(DP) + '<br />' + minimums[i].toFixed(DP);
+									graphBlocks[index].innerHTML = text;
+									//graphBlocks[index].height = 250 * values[i]; // grr css type updates don't work unless Interface is restarted - will have to use canvas instead then...
+								} else {
+									displayText += dataLabels[i] + ': ' + values[i] + ' (max:' + maximums[i] + ' min:' + minimums[i] + ')<br />';
+								}
+							}
+						} catch(e) {
+							displayText = 'Error: ' + e.toString();
+						}
+						
+					} else {
+						displayText = 'Waiting for meaningful data. Last data was ' + values[0];
+					}
+					elDelta
+					elDataDisplay.innerHTML = displayText;				
+				}				
+            }
+        </script>
+    </head>
+    <body onload='loaded();'>
+		<div class="eeg-graph">
+			<div id="delta-block" class="graph-block">Delta</div>
+			<div id="theta-block" class="graph-block">Theta</div>
+			<div id="alpha-low-block" class="graph-block">Alpha Low</div>
+			<div id="alpha-high-block" class="graph-block">Alpha High</div>
+			<div id="beta-low-block" class="graph-block">Beta Low</div>
+			<div id="beta-high-block" class="graph-block">Beta High</div>
+			<div id="gamma-low-block" class="graph-block">Gamma Low</div>
+			<div id="gamma-high-block" class="graph-block">Gamma High</div>
+		</div>
+		<div id="eeg-data">Starting up...</div>
+    </body>
+</html>

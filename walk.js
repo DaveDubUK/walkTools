@@ -16,8 +16,8 @@
 // animations, reach poses, reach pose parameters, transitions, transition parameters, sounds, image/s and reference files
 //const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
 //var pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
-var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
-//var pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets/"
+//var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-1.4-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
+var pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets/"
 
 print('walk.js: Loading assets from ' + pathToAssets);
 
@@ -90,32 +90,32 @@ if (walkTools) walkTools.beginProfiling(deltaTime);
 
         // REMOVE_FOR_RELEASE
         if (walkToolsOscilloscope) {
-			var selectedJoint = walkTools.currentlySelectedJoint();
-			var selectedIKChain = walkAssets.animationReference.joints[selectedJoint].IKChain;
-			walkToolsOscilloscope.updateScopeData(
+            var selectedJoint = walkTools.currentlySelectedJoint();
+            var selectedIKChain = walkAssets.animationReference.joints[selectedJoint].IKChain;
+            walkToolsOscilloscope.updateScopeData(
                 {
-					title: 'Joint '+walkToolsEditor.editMode()+' data',
-					metaDataLabel: 'FT Wheel',
-					metaData: motion.frequencyTimeWheelPos.toFixed(1)+' deg',
-					joint: selectedJoint,
-					iKChain: selectedIKChain,
-					ch1: scopeProbe1,
-					ch2: scopeProbe2,
-					ch3: scopeProbe3
-				}   
-			);
+                    title: 'Joint '+walkToolsEditor.editMode()+' data',
+                    metaDataLabel: 'FT Wheel',
+                    metaData: motion.frequencyTimeWheelPos.toFixed(1)+' deg',
+                    joint: selectedJoint,
+                    iKChain: selectedIKChain,
+                    ch1: scopeProbe1,
+                    ch2: scopeProbe2,
+                    ch3: scopeProbe3
+                }
+            );
             /*
-				{
-					title: 'speed, acceleration, yaw delta accn.',
-					metaDataLabel: 'FT Wheel',
-					metaData: motion.frequencyTimeWheelPos.toFixed(1)+' deg',
-					joint: selectedJoint,
-					iKChain: selectedIKChain,
-					ch1: scopeProbe1,
-					ch2: scopeProbe2,
-					ch3: scopeProbe3
-				}        
-            
+                {
+                    title: 'speed, acceleration, yaw delta accn.',
+                    metaDataLabel: 'FT Wheel',
+                    metaData: motion.frequencyTimeWheelPos.toFixed(1)+' deg',
+                    joint: selectedJoint,
+                    iKChain: selectedIKChain,
+                    ch1: scopeProbe1,
+                    ch2: scopeProbe2,
+                    ch3: scopeProbe3
+                }
+
             ); */
         }
         //
@@ -180,19 +180,19 @@ if (motion.state !== EDIT) {
     // select appropriate animation. create transitions where appropriate
     switch (motion.nextState) {
         case STATIC: {
-            
+
             if (avatar.distanceFromSurface <= ON_SURFACE_THRESHOLD) {
-                
-                if (motion.yawDelta < -YAW_THRESHOLD && 
+
+                if (motion.yawDelta < -YAW_THRESHOLD &&
                     avatar.currentAnimation !== avatar.selectedTurnLeft) {
                     setTransition(avatar.selectedTurnLeft, playTransitionReachPoses);
-                } else if  (motion.yawDelta > YAW_THRESHOLD && 
+                } else if  (motion.yawDelta > YAW_THRESHOLD &&
                             avatar.currentAnimation !== avatar.selectedTurnRight) {
                     setTransition(avatar.selectedTurnRight, playTransitionReachPoses);
                 } else if (motion.yawDelta > -YAW_THRESHOLD && motion.yawDelta < YAW_THRESHOLD &&
                            avatar.currentAnimation !== avatar.selectedIdle) {
                     setTransition(avatar.selectedIdle, playTransitionReachPoses);
-                }            
+                }
             } else if (avatar.distanceFromSurface > ON_SURFACE_THRESHOLD &&
                        avatar.currentAnimation !== avatar.selectedHover) {
                 setTransition(avatar.selectedHover, playTransitionReachPoses);
@@ -252,42 +252,42 @@ if (motion.state !== EDIT) {
 
             // calculate influences based on velocity and direction
             var speed = Vec3.length(motion.velocity);
-            var sumOfSpeeds = Math.abs(motion.velocity.x) + 
-                              Math.abs(motion.velocity.y) + 
+            var sumOfSpeeds = Math.abs(motion.velocity.x) +
+                              Math.abs(motion.velocity.y) +
                               Math.abs(motion.velocity.z);
             var verticalProportion = motion.velocity.y / sumOfSpeeds;
             var lateralProportion = motion.velocity.x / sumOfSpeeds;
             var forwardProportion = -motion.velocity.z / sumOfSpeeds;
-            
+
             // factor in slow flying and turning influences (overwrite velocity / direction influences)
             const FLY_SPEED_MULTIPLIER = 2;
-            var flyingSlowlySpeed = MAX_WALK_SPEED * FLY_SPEED_MULTIPLIER * 
+            var flyingSlowlySpeed = MAX_WALK_SPEED * FLY_SPEED_MULTIPLIER *
                                    (GRAVITY_THRESHOLD - avatar.distanceFromSurface) > 0 ?
-                                    MAX_WALK_SPEED * FLY_SPEED_MULTIPLIER * 
+                                    MAX_WALK_SPEED * FLY_SPEED_MULTIPLIER *
                                    (GRAVITY_THRESHOLD - avatar.distanceFromSurface) : 0;
             var slowFlyComponent = speed > flyingSlowlySpeed ? 0 :
                                    (flyingSlowlySpeed - speed) / flyingSlowlySpeed;
             // only use slow flying animation when moving forwards
             slowFlyComponent *= motion.direction === FORWARDS ? 1 : 0;
             var turningComponent = Math.abs(motion.yawDelta) / DELTA_YAW_MAX > 1 ? 1 :
-                                   Math.abs(motion.yawDelta) / DELTA_YAW_MAX;   
+                                   Math.abs(motion.yawDelta) / DELTA_YAW_MAX;
             turningComponent *= (1 - slowFlyComponent); // reduce turning influence at low speeds
-            // final proportions      
+            // final proportions
             var overallDirectionInfluence = 1 - slowFlyComponent - turningComponent > 0 ?
                                             1 - slowFlyComponent - turningComponent : 0;
             verticalProportion *= overallDirectionInfluence;
             lateralProportion *= overallDirectionInfluence;
             forwardProportion *= overallDirectionInfluence;
-              
+
             /*print('Fly blend components: verticalProportion: '+verticalProportion.toFixed(2)+
                                        ' lateralProportion: '+lateralProportion.toFixed(2)+
                                        ' forwardProportion: '+forwardProportion.toFixed(2)+
                                        ' slowFlyComponent: '+slowFlyComponent.toFixed(2)+
                                        ' turningComponent: '+turningComponent.toFixed(2)+
                                        ' overallDirectionInfluence: '+overallDirectionInfluence.toFixed(2));*/
-                                       
-     
-            // smooth / damp to add visual 'weight'         
+
+
+            // smooth / damp to add visual 'weight'
             verticalProportion = verticalFilter.process(verticalProportion);
             lateralProportion = lateralFilter.process(lateralProportion);
             forwardProportion = forwardFilter.process(forwardProportion);
@@ -331,7 +331,7 @@ if (motion.state !== EDIT) {
                                      avatar.selectedFlyBlend,
                                      turningComponent);
             }
-            
+
             // set transition?
             if (avatar.currentAnimation !== avatar.selectedFlyBlend) {
                 setTransition(avatar.selectedFlyBlend, playTransitionReachPoses);
@@ -434,7 +434,7 @@ function updateTransitions() {
         }
         if (motion.currentTransition.updateProgress() === TRANSITION_COMPLETE) {
             //walkTools.toLog('Transition from '+motion.currentTransition.lastAnimation.name+
-            //                ' to '+motion.currentTransition.nextAnimation.name+' complete'); 
+            //                ' to '+motion.currentTransition.nextAnimation.name+' complete');
             motion.currentTransition = nullTransition;
         }
     }
@@ -483,7 +483,7 @@ function getLeanRoll() {
 }
 
 // animate the avatar using sine waves, geometric waveforms and harmonic generators
-function renderMotion() {    
+function renderMotion() {
     // leaning in response to speed and acceleration
     var leanPitch = motion.state === SURFACE_MOTION ? getLeanPitch() : 0;
     var leanRoll = motion.state === STATIC ? 0 : getLeanRoll();
@@ -503,10 +503,10 @@ function renderMotion() {
                                                                      motion.frequencyTimeWheelPos,
                                                                      motion.direction);
     }
-    
+
     // animation translations are calibrated for a 1m hips to feet height, so we adjust for this particular avatar
     hipsTranslations = Vec3.multiply(hipsTranslations, avatar.calibration.hipsToFeet);
-    
+
     // factor any leaning into the hips offset
     hipsTranslations.z += avatar.calibration.hipsToFeet * Math.sin(filter.degToRad(leanPitch));
     hipsTranslations.x += avatar.calibration.hipsToFeet * Math.sin(filter.degToRad(leanRoll));
@@ -548,7 +548,7 @@ function renderMotion() {
     for (jointName in avatar.currentAnimation.joints) {
         var joint = null;
         var jointRotations = {x:0, y:0, z:0};
-        
+
         if (walkAssets.animationReference.joints[jointName]) {
             joint = walkAssets.animationReference.joints[jointName];
         }
@@ -571,7 +571,7 @@ function renderMotion() {
                                                 motion.frequencyTimeWheelPos,
                                                 motion.direction);
         }
-        
+
         // apply any pre-state change reach poses
         for (reachPose in motion.preReachPoses) {
             var reachPoseStrength = motion.preReachPoses[reachPose].currentStrength();
@@ -579,7 +579,7 @@ function renderMotion() {
                                                    motion.preReachPoses[reachPose].animation,
                                                    motion.frequencyTimeWheelPos,
                                                    motion.direction);
-                                                   
+
             // don't use Vec3 operations here, as if x,y or z is zero, the reach pose should not have any influence
             if (Math.abs(poseRotations.x) > 0) {
                 jointRotations.x = reachPoseStrength * poseRotations.x + (1 - reachPoseStrength) * jointRotations.x;
@@ -609,7 +609,7 @@ function renderMotion() {
                 scopeProbe1 = walkAssets.preRotations.joints[jointName].x * scopePreAmp;
                 scopeProbe2 = walkAssets.preRotations.joints[jointName].y * scopePreAmp;
                 scopeProbe3 = walkAssets.preRotations.joints[jointName].z * scopePreAmp;
-			} else {
+            } else {
                 scopeProbe1 = jointRotations.x * scopePreAmp;
                 scopeProbe2 = jointRotations.y * scopePreAmp;
                 scopeProbe3 = jointRotations.z * scopePreAmp;

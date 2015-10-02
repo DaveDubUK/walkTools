@@ -20,6 +20,7 @@ WalkToolsStats = function() {
     // web window
     var url = Script.resolvePath('html/walkToolsStats.html');
     var webView = new WebWindow('walkTools Stats', url, 390, 940, false);
+    webView.setPosition(200, 0);
     webView.setVisible(_visible);
 
     that.updateStats = function(updatedStats) {
@@ -34,7 +35,7 @@ WalkToolsStats = function() {
         webView.setVisible(_visible);
         if (_visible) {
             Window.setFocus();
-            webView.raise();
+            //webView.raise();
         }
     }
 

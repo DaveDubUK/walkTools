@@ -31,21 +31,31 @@ WalkToolsOscilloscope = function() {
         webView.setVisible(_visible);
         if (_visible) {
             Window.setFocus();
-            webView.raise();
+            //webView.raise();
         }
     }
     
-    that.updateScopeTrace = function(channel1, channel2, channel3) {
+    /*that.updateScopeTrace = function(channel1, channel2, channel3) {
 
-            if (_visible) {
-                webView.eventBridge.emitScriptEvent(JSON.stringify({
-                    type: "scopeData",
-                    ch1: channel1,
-                    ch2: channel2,
-                    ch3: channel3
-                }));
-            }
-        },    
+		if (_visible) {
+			webView.eventBridge.emitScriptEvent(JSON.stringify({
+				type: "updateScopeTrace",
+				ch1: channel1,
+				ch2: channel2,
+				ch3: channel3
+			}));
+		}
+	}*/ 
+
+	that.updateScopeData = function(scopeDataPacket) {
+
+		if (_visible) {
+			webView.eventBridge.emitScriptEvent(JSON.stringify({
+				type: "updateScopeData",
+				scopeDataPacket: scopeDataPacket
+			})); 
+		}
+	},
 
     return that;
 };

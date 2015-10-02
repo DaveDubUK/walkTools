@@ -25,7 +25,7 @@ WalkToolsToolBar = function() {
     var url = Script.resolvePath('html/walkToolsToolBar.html');
     var webView = new WebWindow('walkToolsToolBar', url, TOOLBAR_WIDTH, TOOLBAR_HEIGHT, false); // 965 for full range
 	webView.setPosition((_innerWidth / 2) - (TOOLBAR_WIDTH / 2), MARGIN_TOP);
-    webView.setVisible(false);
+    webView.setVisible(true);
 
     webView.eventBridge.webEventReceived.connect(function(data) {
         data = JSON.parse(data);
@@ -86,7 +86,7 @@ WalkToolsToolBar = function() {
         webView.setVisible(visible);
         if (visible) {
             Window.setFocus();
-            webView.raise();
+            //webView.raise();
         }
     }
 

@@ -5,32 +5,99 @@
 
             function loaded() {
                 // assign form elements to vars
-                var _loadBVHButton = document.getElementById("load-bvh");
+				var _loadURLBVHButton = document.getElementById("load-url-bvh");
+				var _loadTStanceBVHButton = document.getElementById("load-t-stance-bvh");
+				var _loadWalkBVHButton = document.getElementById("load-walk-bvh");
+				var _loadDanceBVHButton = document.getElementById("load-dance-bvh");
+				var _loadIdleBVHButton = document.getElementById("load-idle-bvh");
+				var _exportButton = document.getElementById("export-animation");
+
                 var _playBVHFasterButton = document.getElementById("play-bvh-faster");
                 var _playBVHSlowerButton = document.getElementById("play-bvh-slower");
                 var _stopButton = document.getElementById("stop-bvh");
                 var _bvhFileURL = document.getElementById("bvh-url");
                 var _bvhLoaderInfo = document.getElementById("bvh-loader-info");
+				// options
 				var _jangaParser = document.getElementById("jaanga-bvh-parser-radio");
 				var _murayamaParser = document.getElementById("murayama-bvh-parser-radio");
-                
+				var _ignorePreRotationsOption = document.getElementById("ignore-pre-rotations-radio");
+				var _subtractPreRotationsOption = document.getElementById("subtract-pre-rotations-radio");
+
                 _playBVHFasterButton.disabled = true;
                 _playBVHSlowerButton.disabled = true;
-				
-				_jangaParser.checked = false;
-				_murayamaParser.checked = true;
 
-                _loadBVHButton.addEventListener("click", function() {
+				_jangaParser.checked = true;
+				_murayamaParser.checked = false;
+				_ignorePreRotationsOption.checked = true;
+				_subtractPreRotationsOption.checked = false;
+
+				// then just a load of event listeners...
+                _loadURLBVHButton.addEventListener("click", function() {
                     _playBVHFasterButton.disabled = true;
-                    _playBVHSlowerButton.disabled = true;                
+                    _playBVHSlowerButton.disabled = true;
                     EventBridge.emitWebEvent(JSON.stringify({
                         type: "bvhPlayerEvent",
                         action: "openBVHFile",
                         url: _bvhFileURL.value
                     }));
-                    _bvhLoaderInfo.innerHTML = "Loading...";
+                    _bvhLoaderInfo.innerHTML = "Loading from URL";
                 });
-                
+
+                _loadWalkBVHButton.addEventListener("click", function() {
+                    _playBVHFasterButton.disabled = true;
+                    _playBVHSlowerButton.disabled = true;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "openBVHFile",
+                        url: "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/bvh/walk_fwd_fbx_2009_70-128.bvh"
+                    }));
+                    _bvhLoaderInfo.innerHTML = "Loading male walk";
+                });
+
+				_loadTStanceBVHButton.addEventListener("click", function() {
+                    _playBVHFasterButton.disabled = true;
+                    _playBVHSlowerButton.disabled = true;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "openBVHFile",
+                        url: "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/bvh/bind_pose_no_pre_rotations.bvh"
+                    }));
+                    _bvhLoaderInfo.innerHTML = "Loading t-stance";
+                });
+
+				_loadDanceBVHButton.addEventListener("click", function() {
+                    _playBVHFasterButton.disabled = true;
+                    _playBVHSlowerButton.disabled = true;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "openBVHFile",
+                        url: "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/bvh/standard_walk_backwards_no_pre_rotations.bvh"
+                    }));
+                    _bvhLoaderInfo.innerHTML = "Loading dance";
+                });
+
+				_loadIdleBVHButton.addEventListener("click", function() {
+                    _playBVHFasterButton.disabled = true;
+                    _playBVHSlowerButton.disabled = true;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "openBVHFile",
+                        url: "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/bvh/idle_fbx_2009_181-256.bvh"
+                    }));
+                    _bvhLoaderInfo.innerHTML = "Loading dance";
+                });
+
+				_exportButton.addEventListener("click", function() {
+                    _playBVHFasterButton.disabled = true;
+                    _playBVHSlowerButton.disabled = true;
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "bvhPlayerEvent",
+                        action: "export",
+                        url: _bvhFileURL.value
+                    }));
+					//alert('No exporter available');
+                });
+
                 _playBVHFasterButton.addEventListener("click", function() {
                     EventBridge.emitWebEvent(JSON.stringify({
                         type: "bvhPlayerEvent",
@@ -44,17 +111,17 @@
                         action: "playBVHSlower"
                     }));
                 });
-    
+
                 _stopButton.addEventListener("click", function() {
                     _playBVHFasterButton.disabled = true;
-                    _playBVHSlowerButton.disabled = true;                
+                    _playBVHSlowerButton.disabled = true;
                     EventBridge.emitWebEvent(JSON.stringify({
                         type: "bvhPlayerEvent",
                         action: "stop"
                     }));
                     _bvhLoaderInfo.innerHTML = "BVH file stopped";
                 });
-				
+
                 // radio click event handlers
                 _jangaParser.addEventListener("click", function() {
                     if (this.checked) {
@@ -65,11 +132,11 @@
 							action: "changeParser",
 							parser: "jaanga",
 							url: _bvhFileURL.value
-						}));						
+						}));
                     } else {
 						_murayamaParser.checked = true;
 					}
-                });		
+                });
                 _murayamaParser.addEventListener("click", function() {
                     if (this.checked) {
 						_bvhLoaderInfo.innerHTML = "Loading bvh file using Murayama parser";
@@ -83,47 +150,85 @@
                     } else {
 						_jangaParser.checked = true;
 					}
-                });						
+                });
+                _ignorePreRotationsOption.addEventListener("click", function() {
+                    if (this.checked) {
+						_subtractPreRotationsOption.checked = false;
+						EventBridge.emitWebEvent(JSON.stringify({
+							type: "bvhPlayerEvent",
+							action: "preRotationIgnore"
+						}));
+                    } else {
+						_subtractPreRotationsOption.checked = true;
+					}
+                });
+                _subtractPreRotationsOption.addEventListener("click", function() {
+                    if (this.checked) {
+						_ignorePreRotationsOption.checked = false;
+						EventBridge.emitWebEvent(JSON.stringify({
+							type: "bvhPlayerEvent",
+							action: "preRotationSubtract"
+						}));
+                    } else {
+						_ignorePreRotationsOption.checked = true;
+					}
+                });
 
                 if (window.EventBridge !== undefined) {
                     EventBridge.scriptEventReceived.connect(function(data) {
                         data = JSON.parse(data);
 
                         if (data.type === "bvhPlayerEvent") {
-                        
+
                             if (data.action === "bvhFileLoaded") {
                                 _playBVHFasterButton.disabled = false;
-                                _playBVHSlowerButton.disabled = false;    
-                                _bvhLoaderInfo.innerHTML = "BVH file loaded";                                
+                                _playBVHSlowerButton.disabled = false;
+                                _bvhLoaderInfo.innerHTML = "BVH file loaded";
                             }
                         }
                     });
-                }              
+                }
             }
             
-            //walk_without_pre_rotations.bvh//Walk_Looped_with_pre_rotations.bvh// Female_Walk_Looped.bvh// "Bangkok-Arm_Experiment.bvh" AnimationsFromOzanJuly2015_walk_forwards.bvh"; //"AnimationsFromOzanJuly2015_run.bvh"; //"AnimationsFromOzanJuly2015_walk_backwards.bvh"; //AnimationsFromOzanJuly2015_walk_forwards.bvh
-            // //"Sintel-T-Stance-Test.bvh"; //"Sintel-2.2-character-female-walk.bvh"; //"Sintel-90-Deg-Test.bvh"; //"Sintel-Fly-Back-Test.bvh"; //"Sintel-Star-Open-Test.bvh"; //"Sintel-Knee-Yaw-Test.bvh"; //"Sintel-Foot-Roll-Test.bvh"; //"Sintel-Knee-Roll-Test.bvh"; //"Sintel-IK-Primary-Roll-Test-.bvh"; //"Sintel-Star-Jump-Test-.bvh"; //"Bangkok-Arm_dancehall01_looped.bvh"; //"Bangkok-Arm.bvh"; //"AnimationsFromOzanJuly2015_idle.bvh"; //"AnimationsFromOzanJuly2015_walk_forwards.bvh"; //"AnimationsFromOzanJuly2015_walk_backwards.bvh"; //"AnimationsFromOzanJuly2015_run.bvh"; //
-			//  The-Female-Walk-no-pre-rotations.bvh  The-Female-Walk-reversed-legs.bvh   hifi_idle_with_pre_rotations.bvh    hifi_walk_with_pre_rotations.bvh   Thaila-Shy-Walk.bvh The-Female-Walk.bvh
-            //  Thaila-corporate-standing-2.bvh  
+            // list of good ones:
+            // walk_bwd_fbx_2009_74-128.bvh  turn_right_fbx_2009_60-128.bvh turn_left_fbx_2009_56-128.bvh strafe_right_fbx_2009_63-128.bvh strafe_left_fbx_2009_63-128.bvh  hifi-breakdance.bvh
+            // run_fbx_2009_44-64 thaila_party_girl_standing_06_pt2_looped_679-1024.bvh
 		</script>
     </head>
     <body onload='loaded();'>
 
         <div class="bvh-player-content">
-            <input class="bvh-player-text" type="text" id="bvh-url" value="https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/bvh/Nats_Dance_1_Intro.bvh">; 
-            <div class="bvh-button-group">
-                <input type="button" class="bvh-player-button" id="load-bvh" value="Load BVH"></button>
+            <input class="bvh-player-text" type="text" id="bvh-url" value="https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/bvh/hifi-breakdance.bvh">
+            <div class="bvh-button-group" style='width: 605px'>
+				<input type="button" class="bvh-player-button" id="load-url-bvh" value="URL"></button>
+                <input type="button" class="bvh-player-button" id="load-t-stance-bvh" value="T-Stance"></button>
+                <input type="button" class="bvh-player-button" id="load-walk-bvh" value="Walk"></button>
+                <input type="button" class="bvh-player-button" id="load-dance-bvh" value="Backwards"></button>
+                <input type="button" class="bvh-player-button" id="load-idle-bvh" value="Idle"></button>
+                <input type="button" class="bvh-player-button" id="stop-bvh" value="None"></button>
+				<input type="button" class="bvh-player-button" id="export-animation" value="Export"></button>
+			</div>
+			<div class="bvh-button-group">
                 <input type="button" class="bvh-player-button" id="play-bvh-faster" value="Faster"></button>
                 <input type="button" class="bvh-player-button" id="play-bvh-slower" value="Slower"></button>
-                <input type="button" class="bvh-player-button" id="stop-bvh" value="Stop"></button>
 			</div>
-            
-            <div id="bvh-loader-info">Ready to load...</div>			
-			
-			<div id="bvh-parser-choice">
-                <strong><label>BVH Parser:</label></strong>
-                <input type="radio" id="jaanga-bvh-parser-radio" value="disabled" class="bvh-parser-selector" > Jaanga
-                <input type="radio" id="murayama-bvh-parser-radio" value="enabled" class="bvh-parser-selector"> Murayama
+
+            <div id="bvh-loader-info">Ready to load...</div>
+
+			<div id="bvh-advanced-settings">
+
+				<div id="bvh-pre-rotations" class="bvh-settings">
+					<strong><label>Pre-rotations:</label></strong>
+					<input type="radio" id="ignore-pre-rotations-radio" class="bvh-parser-selector" > Ignore
+					<input type="radio" id="subtract-pre-rotations-radio" class="bvh-parser-selector" > Subtract
+				</div>
+
+				<div id="bvh-parser-choice" class="bvh-settings">
+					<strong><label>BVH Parser:</label></strong>
+					<input type="radio" id="jaanga-bvh-parser-radio" class="bvh-parser-selector" > Jaanga
+					<input type="radio" id="murayama-bvh-parser-radio" class="bvh-parser-selector"> Murayama
+				</div>
+
 			</div>
 
         </div>

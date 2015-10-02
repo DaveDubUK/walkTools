@@ -17,6 +17,7 @@
 STATIC = 1;
 SURFACE_MOTION = 2;
 AIR_MOTION = 4;
+EDIT = 8; // used during calibration
 
 // directions
 UP = 1;
@@ -32,18 +33,25 @@ SAWTOOTH = 1;
 TRIANGLE = 2;
 SQUARE = 4;
 
+// quadrants
+QUARTER_CYCLE = 90;
+HALF_CYCLE = 180;
+THREE_QUARTER_CYCLE = 270;
+FULL_CYCLE = 360;
+
 // used by walk.js and walkApi.js 
-MAX_WALK_SPEED = 2.9; // peak, by observation
+MAX_WALK_SPEED = 2.65; // peak, by observation
 MAX_FT_WHEEL_INCREMENT = 25; // avoid fast walk when landing
 TOP_SPEED = 300;
-ON_SURFACE_THRESHOLD = 0.1; // height above surface to be considered as on the surface
+ON_SURFACE_THRESHOLD = 0.11; // height above surface to be considered as on the surface
 TRANSITION_COMPLETE = 1000;
-PITCH_MAX = 60; // maximum speed induced pitch
+PITCH_MAX = 40; // maximum speed induced pitch
 ROLL_MAX = 80;  // maximum speed induced leaning / banking
-DELTA_YAW_MAX = 1.85; //6.2; //1.7; // maximum change in yaw in rad/s
+DELTA_YAW_MAX = Math.PI / 2; //6.2; //1.7; // maximum change in yaw in rad/s
+YAW_THRESHOLD = 0.0001; // angular velocity threshold for turn left / right animation trigger
 
 // used by walkApi.js only
-MOVE_THRESHOLD = 0.075; // movement dead zone
+MOVE_THRESHOLD = 0.01; //0.075; // movement dead zone
 ACCELERATION_THRESHOLD = 0.2;  // detect stop to walking
 DECELERATION_THRESHOLD = -6; // detect walking to stop
 FAST_DECELERATION_THRESHOLD = -150; // detect flying to stop

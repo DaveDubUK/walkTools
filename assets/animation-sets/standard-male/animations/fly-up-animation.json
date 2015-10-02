@@ -1,17 +1,13 @@
 {
-    "name": "FlyUp",
-
-    "calibration": {
-
-        "frequency":1.4
+    "name":"FlyUp",
+    "version":"1.0",
+    "calibration":{
+        "frequency":3.0
     },
-
-    "harmonics": {},
-
-    "joints": {
-
+    "harmonics":{},
+    "joints":{
         "Hips":{
-            "pitch":0,
+            "pitch":0.01,
             "yaw":0,
             "roll":0,
             "pitchPhase":0,
@@ -21,7 +17,7 @@
             "yawOffset":0,
             "rollOffset":0,
             "sway":0,
-            "bob":0,
+            "bob":0.0025,
             "thrust":0,
             "swayPhase":0,
             "bobPhase":0,
@@ -60,7 +56,7 @@
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":-10.18868,
-            "yawOffset":0,
+            "yawOffset":4.77,
             "rollOffset":0
         },
         "RightLeg":{
@@ -71,7 +67,7 @@
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":-10.18868,
-            "yawOffset":0,
+            "yawOffset":-4.77,
             "rollOffset":0
         },
         "LeftFoot":{
@@ -136,7 +132,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-2.813,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -181,7 +177,7 @@
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":74.03774,
-            "yawOffset":10.18868,
+            "yawOffset":21.577,
             "rollOffset":0
         },
         "RightArm":{
@@ -192,7 +188,7 @@
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":74.03774,
-            "yawOffset":-10.18868,
+            "yawOffset":-21.577,
             "rollOffset":0
         },
         "LeftForeArm":{
@@ -246,7 +242,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-12.173,
             "yawOffset":0,
             "rollOffset":0
         },
@@ -257,9 +253,449 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":0,
+            "pitchOffset":-14.996,
             "yawOffset":0,
             "rollOffset":0
+        },
+        "LeftHandPinky1": {
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandPinky2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandPinky3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandPinky4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandRing1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandRing2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandRing3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandRing4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandMiddle1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandMiddle2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandMiddle3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandMiddle4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandIndex1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandIndex2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandIndex3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandIndex4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":5
+        },
+        "LeftHandThumb1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":-4
+        },
+        "LeftHandThumb2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":-4
+        },
+        "LeftHandThumb3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":-4
+        },
+        "LeftHandThumb4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":-4
+        },
+        "RightHandPinky1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandPinky2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandPinky3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandPinky4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandRing1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandRing2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandRing3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandRing4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandMiddle1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandMiddle2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandMiddle3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandMiddle4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandIndex1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandIndex2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandIndex3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandIndex4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":16,
+            "yawOffset":0,
+            "rollOffset":-5
+        },
+        "RightHandThumb1":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":4
+        },
+        "RightHandThumb2":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":4
+        },
+        "RightHandThumb3":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":4
+        },
+        "RightHandThumb4":{
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0,
+            "pitchOffset":0,
+            "yawOffset":0,
+            "rollOffset":4
         }
     }
 }

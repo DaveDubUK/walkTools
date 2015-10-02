@@ -1,6 +1,6 @@
 //
 //  walkSettings.js
-//  version 0.1
+//  version 1.0
 //
 //  Created by David Wooldridge, June 2015
 //  Copyright © 2015 High Fidelity, Inc.
@@ -70,9 +70,9 @@ WalkSettings = function() {
     Controller.keyPressEvent.connect(keyPressEvent);
     Controller.keyReleaseEvent.connect(keyReleaseEvent);
 
-    // web window
+    // web windows
     const PANEL_WIDTH = 180;
-    const PANEL_HEIGHT = 235;
+    const PANEL_HEIGHT = 265;
 	const PANEL_RIGHT = 75;
 	const PANEL_BOTTOM = 160;
     var _url = Script.resolvePath('html/walkSettings.html');
@@ -82,26 +82,60 @@ WalkSettings = function() {
     _webWindow.eventBridge.webEventReceived.connect(function(data) {
         data = JSON.parse(data);
 
-        if (data.type === "init") {
-            // send the current settings to the window
-            _webWindow.eventBridge.emitScriptEvent(JSON.stringify({
-                type: "update",
-                armsFree: avatar.armsFree,
-                makesFootStepSounds: avatar.makesFootStepSounds,
-                mixamoPreRotations: avatar.mixamoPreRotations,
-                animationSets: walkAssets.getAnimationSets()
-            }));
-        } else if (data.type === "powerToggle") {
-            motion.isLive = !motion.isLive;
-        } else if (data.type === "update") {
-            // receive settings from the window
-            avatar.armsFree = data.armsFree;
-            avatar.makesFootStepSounds = data.makesFootStepSounds;
-            avatar.mixamoPreRotations = data.mixamoPreRotations;
-            walkAssets.setAnimationSet(data.animationSet);
-        } else if (data.type === "walkToolsDisplay" && walkTools) {
-			walkToolsToolBar.setVisible(data.walkToolsOn);
-		}
+        if (data.type === "walkSettings") {
+            
+            switch (data.action) {
+                
+                case "initialise": 
+                    // send the current settings to the window
+                    _webWindow.eventBridge.emitScriptEvent(JSON.stringify({
+                        type: "walkSettings",
+                        action: "initialParameters",
+                        armsNotAnimated: avatar.armsNotAnimated,
+                        makesFootStepSounds: avatar.makesFootStepSounds,
+                        preRotations: avatar.isMissingPreRotations,
+                        currentAnimationSet: walkAssets.getCurrentAnimationSet(),
+                        animationSets: walkAssets.getAnimationSets(),
+                        pathToAssets: pathToAssets
+                    }));  
+                    return;    
+
+                case "powerToggle":
+                    motion.isLive = !motion.isLive;
+                    return;
+                    
+                case "armsNotAnimated":
+                    avatar.armsNotAnimated = data.armsNotAnimated;
+                    return;
+                    
+                case "makesFootStepSounds":
+                    avatar.makesFootStepSounds = data.makesFootStepSounds;
+                    return;
+
+                case "isMissingPreRotations":
+                    avatar.isMissingPreRotations = data.preRotations;
+                    return;
+
+                case "currentAnimationSet":
+                    walkAssets.setAnimationSet(data.animationSet);
+                    return;
+
+                case "walkToolsDisplay":
+                    walkToolsToolBar.setVisible(data.walkToolsOn);
+                    return;
+
+                case "calibrate":
+                    avatar.calibrate(true);
+                    return;
+                    
+                case "pathToAssets":
+                    if (Window.confirm("Change assets path to:\n"+data.pathToAssets+"?")) {
+                        pathToAssets = data.pathToAssets;
+                        walkAssets.setPathToAssets(data.pathToAssets);
+                    }
+                    return;            
+            }
+        }
     });
     
     that.setVisible = function(visible) {
@@ -109,7 +143,6 @@ WalkSettings = function() {
         _webWindow.setVisible(_visible);
         if (_visible) {
             Window.setFocus();
-            _webWindow.raise();
         }
     };
     

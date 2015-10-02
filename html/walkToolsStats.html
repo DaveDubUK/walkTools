@@ -40,6 +40,8 @@
                 elWheelAngularVelocity = document.getElementById("wheel-angular-velocity-stat");
                 elDegreesToTurn = document.getElementById("degrees-to-turn-stat");
                 elDistanceTravelled = document.getElementById("distance-travelled-stat");
+                elStrideMax = document.getElementById("stride-max");
+                elStrideMaxAt = document.getElementById("stride-max-at");
 
 				// script event received handler
                 if (window.EventBridge !== undefined) {
@@ -147,6 +149,14 @@
                             if (data.stats.distanceTravelled !== undefined) {
                                 elDistanceTravelled.innerHTML = data.stats.distanceTravelled.toFixed(3);
                             }
+                            if (data.stats.strideInfo !== undefined) {
+                                if (data.stats.strideInfo.rightFootStrideMax !== undefined) {
+                                    elStrideMax.innerHTML = data.stats.strideInfo.strideMax;
+                                }
+                                if (data.stats.strideInfo.rightFootStrideMaxAt !== undefined) {
+                                    elStrideMaxAt.innerHTML = data.stats.strideInfo.strideMaxAt;
+                                }
+                            }
                         }
                     });
                 }
@@ -198,6 +208,8 @@
                 <tr><td class="stats-column-1">Wheel angular velocity</td><td id="wheel-angular-velocity-stat" class="stats-column-2">not set</td><td>rad/s</td></tr>
                 <tr><td class="stats-column-1">Degrees to turn</td><td id="degrees-to-turn-stat" class="stats-column-2">not set</td><td>degrees</td></tr>
                 <tr><td class="stats-column-1">Distance per step</td><td id="distance-travelled-stat" class="stats-column-2">not set</td><td>m</td></tr>
+                <tr><td class="stats-column-1">Stride max</td><td id="stride-max" class="stats-column-2">not set</td><td>m</td></tr>
+                <tr><td class="stats-column-1">Stride max at</td><td id="stride-max-at" class="stats-column-2">not set</td><td>degrees</td></tr>
             </table>
     </div>
     </body>

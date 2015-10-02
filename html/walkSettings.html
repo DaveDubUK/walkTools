@@ -3,20 +3,9 @@
         <link rel="stylesheet" type="text/css" href="walkStyle.css">
         <script>
         
-            var powerOn = true;
-			var walkToolsOn = false;
+            var walkToolsOn = false;
             var animationSets = [];
-            var currentAnimationSet = "Male";        
-
-            function emitUpdate() {
-                EventBridge.emitWebEvent(JSON.stringify({
-                    type: "update",
-                    armsFree: elArmsFree.checked,
-                    makesFootStepSounds: elFootstepSounds.checked,
-                    mixamoPreRotations: elMixamoPreRotations.checked,
-                    animationSet: elAnimationCharacterSelect.value
-                }));
-            }
+            var currentAnimationSet = "Male";
             
             function updateAnimationSets() {
                 for (set in animationSets) {
@@ -30,68 +19,94 @@
             }
 
             function loaded() {
-                //elPower = document.getElementById("power");
                 elArmsFree = document.getElementById("arms-free");
                 elFootstepSounds = document.getElementById("footstep-sounds");
-                elMixamoPreRotations = document.getElementById("mixamo-pre-rotations");
+                elPreRotations = document.getElementById("pre-rotations");
                 elAnimationCharacterSelect = document.getElementById("animation-character-select");
-				elWalkToolsButton = document.getElementById("walk-tools-button");
-            
+                elCalibrateButton = document.getElementById("calibrate-button");
+                elPathToAssets = document.getElementById("path-to-assets");
 
                 // messages from walkSettings.js come in here
                 if (window.EventBridge !== undefined) {
                     EventBridge.scriptEventReceived.connect(function(data) {
                         data = JSON.parse(data);
+                        
+                        if (data.type === "walkSettings") {
 
-                        if (data.type == "update") {
-                            if (data.armsFree !== undefined) {
-                                elArmsFree.checked = data.armsFree;
-                            }
-                            if (data.makesFootStepSounds !== undefined) {
-                                elFootstepSounds.checked = data.makesFootStepSounds;
-                            }
-                            if (data.mixamoPreRotations !== undefined) {
-                                elMixamoPreRotations.checked = data.mixamoPreRotations;
-                            }
-                            if (data.animationSets !== undefined) { 
-                                animationSets = [];
-                                for (set in data.animationSets) {
-                                    animationSets.push(data.animationSets[set]);
+                            if (data.action === "initialParameters") {
+                                if (data.armsNotAnimated !== undefined) {
+                                    elArmsFree.checked = data.armsNotAnimated;
                                 }
-								animationSets.pop();
-                                updateAnimationSets();
-                                
+                                if (data.makesFootStepSounds !== undefined) {
+                                    elFootstepSounds.checked = data.makesFootStepSounds;
+                                }
+                                if (data.preRotations !== undefined) {
+                                    elPreRotations.checked = data.preRotations;
+                                }
+                                if (data.animationSets !== undefined) { 
+                                    animationSets = [];
+                                    for (set in data.animationSets) {
+                                        animationSets.push(data.animationSets[set]);
+                                    }
+                                }
+                                if (data.currentAnimationSet !== undefined) {
+                                    currentAnimationSet = data.currentAnimationSet;
+                                    updateAnimationSets();
+                                }
+                                if (data.pathToAssets !== undefined) {
+                                    elPathToAssets.value = data.pathToAssets;
+                                }
                             }
                         }
                     });
                 }
-                elArmsFree.addEventListener("change", emitUpdate);
-                elFootstepSounds.addEventListener("change", emitUpdate);
-                elMixamoPreRotations.addEventListener("change", emitUpdate);
-                elAnimationCharacterSelect.addEventListener("change", emitUpdate);
-				elWalkToolsButton.addEventListener("click", function() {
+                
+                // event listeners
+                elArmsFree.addEventListener("change", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "walkSettings",
+                        action: "armsNotAnimated",
+                        armsNotAnimated: elArmsFree.checked
+                    }));                
+                });
+                elFootstepSounds.addEventListener("change", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "walkSettings",
+                        action: "makesFootStepSounds",
+                        makesFootStepSounds: elFootstepSounds.checked
+                    }));                
+                });
+                elPreRotations.addEventListener("change", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "walkSettings",
+                        action: "isMissingPreRotations",
+                        preRotations: elPreRotations.checked
+                    }));                
+                });
+                elAnimationCharacterSelect.addEventListener("change", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "walkSettings",
+                        action: "currentAnimationSet",
+                        animationSet: elAnimationCharacterSelect.value
+                    }));                
+                }); 
+                elCalibrateButton.addEventListener("click", function() {
                     walkToolsOn = !walkToolsOn;
 					EventBridge.emitWebEvent(JSON.stringify({
-						type: "walkToolsDisplay",
-						walkToolsOn: walkToolsOn
+                        type: "walkSettings",
+						action: "calibrate"
 					}));					
-					
+                });  
+                elPathToAssets.addEventListener("change", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "walkSettings",
+						action: "pathToAssets",
+                        pathToAssets: elPathToAssets.value
+					}));	
                 });
               
-                
-                /*elPower.addEventListener("click", function() {
-                    EventBridge.emitWebEvent(JSON.stringify({
-                        type: "powerToggle"
-                    }));
-                    powerOn = !powerOn;
-                    if (powerOn) {
-                        elPower.value = "Turn Animation Off";
-                    } else {
-                        elPower.value = "Turn Animation On";
-                    }
-                });*/
                 // request initial values
-                EventBridge.emitWebEvent(JSON.stringify({ type: 'init' }));
+                EventBridge.emitWebEvent(JSON.stringify({ type: "walkSettings", action: "initialise" }));
             }
         </script>
     </head>
@@ -102,35 +117,39 @@
             </div>        
             
             <div class="settings-section">
-                <!--input type="button" id="power" value="Turn Animation Off" style="margin-left:30px; margin-top:10px; display:none;"></button-->
                 <label>Character</label>
                 <select class="editor-select-input" id="animation-character-select"></select>
-            </div>            
+            </div>  
 
             <div class="settings-section">
-                <label>Arms free</label>
+                <label>Path to assets</label>
+                <input type="text" id="path-to-assets" value="Loading...">
+            </div>               
+
+            <div class="settings-section">
+                <label>Don't animate arms</label>
                 <span>
                     <input type='checkbox' id="arms-free">
                 </span>
             </div>
 
             <div class="settings-section">
-                <label>Footstep sounds</label>
+                <label>Play footstep sounds</label>
                 <span>
                     <input type='checkbox' id="footstep-sounds">
                 </span>
             </div>
 
             <div class="settings-section">
-                <label>Mixamo pre-rotations</label>
+                <label>Add pre-rotations</label>
                 <span>
-                    <input type='checkbox' id="mixamo-pre-rotations">
+                    <input type='checkbox' id="pre-rotations">
                 </span>
             </div>
 
             <div class="settings-section">
 				<div class="button-group">
-					<input type="button" id="walk-tools-button" value="walkTools"></button>
+					<input type="button" class="settings-button" id="calibrate-button" value="Calibrate"></button>
 				</div>
             </div>			
 

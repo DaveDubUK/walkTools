@@ -14,8 +14,9 @@
                 var _elEditingFree = document.getElementById("editing-free");
                 var _elEditingSymmetrical = document.getElementById("editing-symmetrical");
                 var _elEditingOppositeSymmetrical = document.getElementById("editing-opposite-symmetrical");
-                var _elEditingRotations = document.getElementById("editing-rotations");
-                var _elEditingTranslations = document.getElementById("editing-translations");
+                var _elEditingRotation = document.getElementById("editing-rotations");
+                var _elEditingTranslation = document.getElementById("editing-translations");
+                var _elEditingPreRotation = document.getElementById("editing-pre-rotations");
                 
                 // dropdown selects
                 var _elAnimationSelect = document.getElementById("animation-select");
@@ -28,6 +29,9 @@
                 var _rightHandJoints = null;
                 var _sliderRangeOptions = ['Animation', 'Full Range'];
                 var _sliderRanges = null;
+                
+                // button
+                var _elDumpDataButton = document.getElementById("dump-data-button");
                 
                 // slider values
                 var _animationParamsTextInputs = [];
@@ -82,7 +86,9 @@
                 
                 var _editMode = {
                     editing: false,
+					editingRotation: false,
                     editingTranslation: false,
+					editingPreRotation: false,
                     symmetricalEditing: false,
                     opposingSymmetricalEditing: false,
                     editingFingersLeft: false,
@@ -175,7 +181,7 @@
                 var faceNorthWest = new selector("NorthWest", null, 48, 29, 70, 54);
                 _directionSelectors.push(faceNorthWest);
                 var goHome = new selector("GoHome", null, 67, 51, 86, 69);
-                _directionSelectors.push(goHome);
+                _directionSelectors.push(goHome);             
                 
                 // animation parameter sliders
                 var pitchSlider = $("#pitch-oscillation");
@@ -196,6 +202,18 @@
                 _sliders.push(yawOffsetSlider);
                 var rollOffsetSlider = $("#roll-offset");
                 _sliders.push(rollOffsetSlider);
+                
+                
+                // dump button event handler
+				_elDumpDataButton.addEventListener("click", function() {
+                    EventBridge.emitWebEvent(
+                        JSON.stringify({
+                            type: "editorEvent",
+                            action: "dumpData",
+                            editMode: _editMode
+                        })
+                    );          
+                });	                   
 
                 turnOn = function() {
                     EventBridge.emitWebEvent(JSON.stringify({
@@ -254,23 +272,42 @@
                 // call after any changes made */
                 updateBuffer = function() {
                     if (_dataReady) {
-                        EventBridge.emitWebEvent(JSON.stringify({
-                            type: "editorEvent",
-                            action: "setJointData",
-                            joint: _joint,
-                            jointData: _jointData,
-                            harmonicData: _harmonicData
-                        }));
-                        if (_pairedJoint !== "None" &&
-                           (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing)) {
-                            EventBridge.emitWebEvent(JSON.stringify({
-                                type: "editorEvent",
-                                action: "setJointData",
-                                joint: _pairedJoint,
-                                jointData: _pairedJointData,
-                                harmonicData: _pairedHarmonicData
-                            }));
-                        }
+					
+						if (_editMode.editingPreRotation) {
+							EventBridge.emitWebEvent(JSON.stringify({
+								type: "editorEvent",
+								action: "setPreRotations",
+								joint: _joint,
+								jointData: _jointData
+							}));
+							if (_pairedJoint !== "None" &&
+							   (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing)) {
+								EventBridge.emitWebEvent(JSON.stringify({
+									type: "editorEvent",
+									action: "setPreRotations",
+									joint: _pairedJoint,
+									jointData: _pairedJointData
+								}));
+							}
+						} else {
+							EventBridge.emitWebEvent(JSON.stringify({
+								type: "editorEvent",
+								action: "setJointData",
+								joint: _joint,
+								jointData: _jointData,
+								harmonicData: _harmonicData
+							}));
+							if (_pairedJoint !== "None" &&
+							   (_editMode.opposingSymmetricalEditing || _editMode.symmetricalEditing)) {
+								EventBridge.emitWebEvent(JSON.stringify({
+									type: "editorEvent",
+									action: "setJointData",
+									joint: _pairedJoint,
+									jointData: _pairedJointData,
+									harmonicData: _pairedHarmonicData
+								}));
+							}
+						}
                     }
                 }
 
@@ -289,7 +326,7 @@
                         $("#pitch-harmonics-label").html("Sway");
                         $("#yaw-harmonics-label").html("Bob");
                         $("#roll-harmonics-label").html("Thrust");              
-                    } else {
+                    } else if (_editMode.editingRotation) {
                         $("#pitchOsc").html("Pitch Osc");
                         $("#yawOsc").html("Yaw Osc");
                         $("#rollOsc").html("Roll Osc");
@@ -302,6 +339,19 @@
                         $("#pitch-harmonics-label").html("Pitch");
                         $("#yaw-harmonics-label").html("Yaw");
                         $("#roll-harmonics-label").html("Roll");    
+                    } else if (_editMode.editingPreRotation) {
+                        $("#pitchOsc").html("");
+                        $("#yawOsc").html("");
+                        $("#rollOsc").html("");
+                        $("#pitchPhase").html("");
+                        $("#yawPhase").html("");
+                        $("#rollPhase").html("");
+                        $("#pitchOffset").html("Pre-rotate X");
+                        $("#yawOffset").html("Pre-rotate Y");
+                        $("#rollOffset").html("Pre-rotate Z");
+                        $("#pitch-harmonics-label").html("");
+                        $("#yaw-harmonics-label").html("");
+                        $("#roll-harmonics-label").html("");    
                     }
                     updateJointValues();
                 }                
@@ -437,6 +487,7 @@
                             handle: $('.ui-slider-handle', jointDataSlider), value: jointData
                         });
                 }
+				
                 updateJointValues = function() {
                 
                     if (_editMode.editingTranslation) {                
@@ -463,7 +514,7 @@
                             -_sliderRanges["Hips"].bobOffsetRange, _sliderRanges["Hips"].bobOffsetRange);
                         updateSlider($('#roll-offset'), _jointData.thrustOffset,
                             -_sliderRanges["Hips"].thrustOffsetRange, _sliderRanges["Hips"].thrustOffsetRange);
-                    } else {
+                    } else if (_editMode.editingRotation){
                         _elPitchOscillation.value = _jointData.pitch.toFixed(SHOW_DP);
                         _elYawOscillation.value = _jointData.yaw.toFixed(SHOW_DP);
                         _elRollOscillation.value = _jointData.roll.toFixed(SHOW_DP);
@@ -500,14 +551,36 @@
                             updateSlider($('#roll-offset'), _jointData.rollOffset,
                                 -_sliderRanges[_joint].rollOffsetRange, _sliderRanges[_joint].rollOffsetRange);
                         }
-                    }                        
+                    } else if (_editMode.editingPreRotation){
+                        _elPitchOscillation.value = 0;
+                        _elYawOscillation.value = 0;
+                        _elRollOscillation.value = 0;
+                        _elPitchPhase.value = 0;
+                        _elYawPhase.value = 0;
+                        _elRollPhase.value = 0;
+                        _elPitchOffset.value = _jointData.x.toFixed(SHOW_DP);
+                        _elYawOffset.value = _jointData.y.toFixed(SHOW_DP);
+                        _elRollOffset.value = _jointData.z.toFixed(SHOW_DP);                
+                        
+                        // update slider values and positions
+						updateSlider($('#pitch-oscillation'), 0, 0, 0);
+						updateSlider($('#yaw-oscillation'), 0, 0, 0);
+						updateSlider($('#roll-oscillation'), 0, 0, 0);
+						updateSlider($('#pitch-phase'), 0, 0, 0);
+						updateSlider($('#yaw-phase'), 0, 0, 0);
+						updateSlider($('#roll-phase'), 0, 0, 0);
+						updateSlider($('#pitch-offset'), _jointData.x, -180, 180);
+						updateSlider($('#yaw-offset'), _jointData.y, -180, 180);
+						updateSlider($('#roll-offset'), _jointData.z, -180, 180);
+                    }                    
                 }
 
                 updateRadios = function() {
                     if (_editMode.editing) {
                         _elEditingOff.checked = false;
-                        _elEditingRotations.checked = !_editMode.editingTranslation;
-                        _elEditingTranslations.checked = _editMode.editingTranslation;
+                        _elEditingRotation.checked = _editMode.editingRotation;
+                        _elEditingTranslation.checked = _editMode.editingTranslation;
+						_elEditingPreRotation.checked = _editMode.editingPreRotation;
                         if (_editMode.opposingSymmetricalEditing) {
                             _elEditingFree.checked = false;
                             _elEditingSymmetrical.checked = false;
@@ -522,8 +595,9 @@
                             _elEditingOppositeSymmetrical.checked = false;
                         }
                     } else {
-                        _elEditingRotations.checked = false;
-                        _elEditingTranslations.checked = false;
+                        _elEditingRotation.checked = false;
+                        _elEditingTranslation.checked = false;
+						_elEditingPreRotation.checked = false;
                         _elEditingOff.checked = true;
                         _elEditingFree.checked = false;
                         _elEditingSymmetrical.checked = false;
@@ -577,7 +651,7 @@
                     }
                     _elAnimationSelect.value = _animationBeingEdited;
                     for (var i = 0; i < _leftHandJoints.length; i++) {
-                        var opt = _leftHandJoints[i].name;
+                        var opt = _leftHandJoints[i];
                         var el = document.createElement("option");
                         el.textContent = opt;
                         el.value = opt;
@@ -585,7 +659,7 @@
                     }
                     _elLeftHandSelect.value = "None";
                     for (var i = 0; i < _rightHandJoints.length; i++) {
-                        var opt = _rightHandJoints[i].name;
+                        var opt = _rightHandJoints[i];
                         var el = document.createElement("option");
                         el.textContent = opt;
                         el.value = opt;
@@ -710,36 +784,42 @@
                         case "pitch-offset":
                             if (_editMode.editingTranslation) {
                                 _jointData.swayOffset = value;
-                            } else {                           
+                            } else if (_editMode.editingRotation) {              
                                 _jointData.pitchOffset = value;
                                 if (_pairedJoint !== "None" && updatePair) {
                                     _pairedJointData.pitchOffset = determinePairedValue(value, false);
                                 }
-                            }
+                            } else if (_editMode.editingPreRotation) {
+								_jointData.x = value;
+							}
                             _elPitchOffset.value = value.toFixed(SHOW_DP);
                             break;
 
                         case "yaw-offset":
                             if (_editMode.editingTranslation) {
                                 _jointData.bobOffset = value;
-                            } else {                           
-                                _jointData.yawOffset = value;
+                            } else if (_editMode.editingRotation) {
+								_jointData.yawOffset = value;
                                 if (_pairedJoint !== "None" && updatePair) {
                                     _pairedJointData.yawOffset = determinePairedValue(value);
                                 }
-                            }
+                            } else if (_editMode.editingPreRotation) {
+								_jointData.y = value;
+							}
                             _elYawOffset.value = value.toFixed(SHOW_DP);
                             break;
 
                         case "roll-offset":
                             if (_editMode.editingTranslation) {
                                 _jointData.thrustOffset = value;
-                            } else {                          
+                            } else if (_editMode.editingRotation) {
                                 _jointData.rollOffset = value;
                                 if (_pairedJoint !== "None" && updatePair) {
                                     _pairedJointData.rollOffset = determinePairedValue(value);
                                 }
-                            }
+                            } else if (_editMode.editingPreRotation) {
+								_jointData.z = value;
+							}
                             _elRollOffset.value = value.toFixed(SHOW_DP);
                             break;
 
@@ -794,41 +874,64 @@
                         turnOn();
                     }
                 });
-                _elEditingRotations.addEventListener("click", function() {
+                _elEditingRotation.addEventListener("click", function() {
                     if (this.checked) {
                         lockData(true);
                         _editMode.editingTranslation = false;
+						_editMode.editingRotation = true;
+						_editMode.editingPreRotation = false;
                         _elLeftHandSelect.value = "None";
                         _elRightHandSelect.value = "None";
                         _elLeftHandSelect.disabled = true;
                         _elRightHandSelect.disabled = true;
-                        lockData(true);
                         EventBridge.emitWebEvent(JSON.stringify({
                             type: "editorEvent",
                             action: "getJointData",
-                            selectedJoint: _joint
+                            selectedJoint: _joint,
+							editMode: 'rotation'
                         }));                        
                         turnOn();
                     }
                 });
-                _elEditingTranslations.addEventListener("click", function() {
+                _elEditingTranslation.addEventListener("click", function() {
                     if (this.checked) {
                         lockData(true);
                         _editMode.editingTranslation = true;
+						_editMode.editingRotation = false;
+						_editMode.editingPreRotation = false;
                         _elLeftHandSelect.value = "None";
                         _elRightHandSelect.value = "None";
                         _elLeftHandSelect.disabled = true;
                         _elRightHandSelect.disabled = true;   
                         _joint = "Hips";
-                        lockData(true);
                         EventBridge.emitWebEvent(JSON.stringify({
                             type: "editorEvent",
                             action: "getJointData",
-                            selectedJoint: _joint
+                            selectedJoint: _joint,
+							editMode: 'translation'
                         }));                        
                         turnOn();
                     }
                 });
+                _elEditingPreRotation.addEventListener("click", function() {
+                    if (this.checked) {
+                        lockData(true);
+                        _editMode.editingTranslation = false;
+						_editMode.editingRotation = false;
+						_editMode.editingPreRotation = true;
+                        _elLeftHandSelect.value = "None";
+                        _elRightHandSelect.value = "None";
+                        _elLeftHandSelect.disabled = true;
+                        _elRightHandSelect.disabled = true;
+                        EventBridge.emitWebEvent(JSON.stringify({
+                            type: "editorEvent",
+                            action: "getJointPreRotations",
+                            selectedJoint: _joint,
+							editMode: 'pre-rotation'
+                        }));                        
+                        turnOn();
+                    }
+                });				
 
                 // dropdown select handlers
                 _elAnimationSelect.onchange = function(){
@@ -1013,7 +1116,7 @@
                         _harmonicData.rollHarmonics.numHarmonics = _elNumRollHarmonics.value;
                     }
                     updateBuffer();
-                };                
+                };       
                 
                 // text input event handlers
                 for (i in _animationParamsTextInputs) {
@@ -1023,19 +1126,19 @@
                             case "pitch-oscillation-text":
                                 if (_editMode.editingTranslation) {
                                     _jointData.sway = value;
-                                } else {
+                                } else if (_editMode.editingRotation) {
                                     _jointData.pitch = value;
                                     if (_pairedJoint !== "None") {
                                         _pairedJointData.pitch = determinePairedValue(value, false);
                                     }
-                                }                                
+                                }                            
                                 updateJointValues();
                                 break;
 
                             case "yaw-oscillation-text":
                                 if (_editMode.editingTranslation) {
                                     _jointData.bob = value;
-                                } else {                            
+                                } else if (_editMode.editingRotation) {
                                     _jointData.yaw = value;
                                     if (_pairedJoint !== "None") {
                                         _pairedJointData.yaw = determinePairedValue(value);
@@ -1047,7 +1150,7 @@
                             case "roll-oscillation-text":
                                 if (_editMode.editingTranslation) {
                                     _jointData.thrust = value;
-                                } else {                                   
+                                } else if (_editMode.editingRotation) {
                                     _jointData.roll = value;
                                     if (_pairedJoint !== "None") {
                                         _pairedJointData.roll = determinePairedValue(value);
@@ -1095,36 +1198,42 @@
                             case "pitch-offset-text":
                                 if (_editMode.editingTranslation) {
                                     _jointData.swayOffset = value;
-                                } else {                                 
+                                } else if (_editMode.editingRotation) {
                                     _jointData.pitchOffset = value;
                                     if (_pairedJoint !== "None") {
                                         _pairedJointData.pitchOffset = determinePairedValue(value, false);
                                     }
-                                }                                
+                                } else if (_editMode.editingPreRotation) {
+									_jointData.x = value;
+								}                               
                                 updateJointValues();
                                 break;
 
                             case "yaw-offset-text":
                                 if (_editMode.editingTranslation) {
                                     _jointData.bobOffset = value;
-                                } else {                               
+                                } else if (_editMode.editingRotation) {
                                     _jointData.yawOffset = value;
                                     if (_pairedJoint !== "None") {
                                         _pairedJointData.yawOffset = determinePairedValue(value);
                                     }
-                                }                                
+                                } else if (_editMode.editingPreRotation) {
+									_jointData.y = value;
+								} 
                                 updateJointValues();
                                 break;                                
                                 
                             case "roll-offset-text":
                                 if (_editMode.editingTranslation) {
                                     _jointData.thrustOffset = value;
-                                } else {                               
+                                } else if (_editMode.editingRotation) {
                                     _jointData.rollOffset = value;
                                     if (_pairedJoint !== "None") {
                                         _pairedJointData.rollOffset = determinePairedValue(value);
                                     }
-                                }                                
+                                } else if (_editMode.editingPreRotation) {
+									_jointData.z = value;
+								} 
                                 updateJointValues();
                                 break;   
                                 
@@ -1246,11 +1355,21 @@
                                 _elRightHandSelect.value = "None";
                                 _joint = _jointSelectors[selector].name;
                                 lockData(true);
-                                EventBridge.emitWebEvent(JSON.stringify({
-                                    type: "editorEvent",
-                                    action: "getJointData",
-                                    selectedJoint: _joint
-                                }));
+								if (_editMode.editingPreRotation) {
+									EventBridge.emitWebEvent(JSON.stringify({
+										type: "editorEvent",
+										action: "getJointPreRotations",
+										selectedJoint: _joint,
+										editMode: 'pre-rotation'
+									}));								
+								} else {
+									EventBridge.emitWebEvent(JSON.stringify({
+										type: "editorEvent",
+										action: "getJointData",
+										selectedJoint: _joint,
+										editMode: _editMode.editingTranslation ? 'translation' : 'rotation'
+									}));
+								}
                             }
                         }
                         return false;
@@ -1321,6 +1440,19 @@
                                     updateLabels();
                                     lockData(false);
                                     return;
+									
+								case "jointPreRotations":
+                                    _joint = data.joint;
+                                    _jointData = data.jointData;
+                                    _pairedJoint = data.pairedJoint;
+                                    _pairedJointData = data.pairedJointData;
+                                    _IKChain = data.IKChain;
+                                    _elFrequencySlider.slider('option', 'value', data.frequency);
+                                    updateJointValues();
+                                    initialiseHarmonicsInputs();
+                                    updateLabels();
+                                    lockData(false);
+                                    return;
 
                                 case "update":
                                     _ftWheelPosition = data.ftWheelPosition;
@@ -1368,6 +1500,8 @@
                     <input type="radio" id="editing-rotations" value="enabled" class="rotations-translations-radio" > Rotation
                     <br />
                     <input type="radio" id="editing-translations" value="disabled" class="rotations-translations-radio" > Translation
+					<br />
+                    <input type="radio" id="editing-pre-rotations" value="disabled" class="rotations-translations-radio" > Pre-rotations
                 </div>
 
                 <label>Animation</label>
@@ -1519,6 +1653,10 @@
                     </div>    
                 </div>
             </div>
+			
+            <div class="button-group" id="editor-buttons">
+                <input type="button" id="dump-data-button" value="Dump data"></button>
+            </div>            
             
         </div>
     </body>

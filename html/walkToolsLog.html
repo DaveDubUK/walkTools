@@ -2,13 +2,17 @@
     <head>
         <link rel="stylesheet" type="text/css" href="walkToolsStyle.css">
         <script>
+        
+            var _loggingEnabled = true;
+            var _logs = [];
+            const MAX_LINES = 4096;
+        
+            function clearLog() {
+                _logs = [];
+                elLogDisplay.innerHTML = "";
+            }
 
             function loaded() {
-
-                var _loggingEnabled = true;
-                var _logs = [];
-                const MAX_LINES = 120;
-                //_logs.length = 120;
 
                 // assign form elements to vars
                 elLogDisplay = document.getElementById("log-display");
@@ -19,13 +23,17 @@
                 if (window.EventBridge !== undefined) {
                     EventBridge.scriptEventReceived.connect(function(data) {
                         data = JSON.parse(data);
-                        if (data.type == "log" && _loggingEnabled) {
-                            if (data.logEntry !== undefined) {
-                                _logs.push(data.logEntry);
-                                if (_logs.length > MAX_LINES) {
-                                    _logs.shift();
+                        if (data.type === "logEvent") {
+                            if (data.action === "newLogEntry" && _loggingEnabled) {
+                                if (data.logEntry !== undefined) {
+                                    _logs.push(data.logEntry);
+                                    if (_logs.length > MAX_LINES) {
+                                        _logs.shift();
+                                    }
+                                    elLogDisplay.innerHTML = _logs.join("");
                                 }
-                                elLogDisplay.innerHTML = _logs.join("");
+                            } else if (data.action === "clearLog") {
+                                clearLog();
                             }
                         }
                     });
@@ -42,8 +50,7 @@
                 });
 
                 elClearLog.addEventListener("click", function() {
-                    _logs = [];
-                    elLogDisplay.innerHTML = "";
+                    clearLog();
                 });
 
             }

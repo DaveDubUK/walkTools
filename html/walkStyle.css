@@ -25,8 +25,8 @@ body {
 .settings-section {
 	position: relative;
     display: block;
-    margin: 10 10;
-    height: 22.5pt;
+    margin: 10px 10px 16px;
+    padding: 0 10px 0 10px;
 }
 
 .settings-section label {
@@ -38,7 +38,7 @@ body {
 }
 
 #animation-character-select {
-    width:85px;
+    width:75px;
     float: right;    
 }
 
@@ -53,15 +53,15 @@ input[type=button] {
     background-color: #608e96;
     border-color: #608e96;
     border-radius: 3.75pt;
-    padding: 3.75pt 7.5pt;
+    margin: 5px 0 5px;
+    padding: 5px 0px 7px;
     border: 0;
     color: #fff;
     font-weight: bold;
 	text-align: center;
 }
 
-#walk-tools-button {
-	margin: 0 auto;
-	float:none;
-	width:150px;
+.settings-button {
+    float: none;
+    width: 100%;  
 }

@@ -17,28 +17,28 @@ WalkToolsToolBar = function() {
     var that = {};
 
     // web window
-	var _innerWidth = Window.innerWidth;
-	var _innerHeight = Window.innerHeight;
-	const TOOLBAR_WIDTH = 665;
-	const TOOLBAR_HEIGHT = 70;	
-	const MARGIN_TOP = 0;
+    var _innerWidth = Window.innerWidth;
+    var _innerHeight = Window.innerHeight;
+    const TOOLBAR_WIDTH = 670;
+    const TOOLBAR_HEIGHT = 70;
+    const MARGIN_TOP = 0;
     var url = Script.resolvePath('html/walkToolsToolBar.html');
     var webView = new WebWindow('walkToolsToolBar', url, TOOLBAR_WIDTH, TOOLBAR_HEIGHT, false); // 965 for full range
-	webView.setPosition((_innerWidth / 2) - (TOOLBAR_WIDTH / 2), MARGIN_TOP);
+    webView.setPosition((_innerWidth / 2) - (TOOLBAR_WIDTH / 2), MARGIN_TOP);
     webView.setVisible(true);
 
     webView.eventBridge.webEventReceived.connect(function(data) {
         data = JSON.parse(data);
-        
+
         if (data.type === "action") {
             switch (data.action) {
-                
+
                 case "animationPower":
                     motion.isLive = data.animationPower;
                     return;
                 case "walkToolsPower":
                     walkTools.enableWalkTools(data.walkToolsPower);
-                    return;                    
+                    return;
                 case "editorOn":
                     walkTools.visibility.editorVisible = true; //!walkTools.visibility.editorVisible;
                     walkToolsEditor.setVisible(walkTools.visibility.editorVisible);
@@ -58,7 +58,7 @@ WalkToolsToolBar = function() {
                 case "bvhPlayerOn":
                     walkTools.visibility.bvhPlayerVisible = true; //!walkTools.visibility.bvhPlayerVisible;
                     walkToolsBVHPlayer.setVisible(walkTools.visibility.bvhPlayerVisible);
-                    return;                    
+                    return;
                 case "statsOn":
                     walkTools.visibility.statsVisible = true; //!walkTools.visibility.statsVisible;
                     walkToolsStats.setVisible(walkTools.visibility.statsVisible);
@@ -66,7 +66,7 @@ WalkToolsToolBar = function() {
                 case "ftWheelOn":
                     walkTools.visibility.ftWheelVisible = true; //!walkTools.visibility.ftWheelVisible;
                     // waiting for 3D overlays to get fixed...
-                    return;   
+                    return;
                 case "gridOn":
                     walkTools.visibility.ftWheelVisible = true; //!walkTools.visibility.ftWheelVisible;
                     // waiting for 3D overlays to get fixed...
@@ -76,7 +76,7 @@ WalkToolsToolBar = function() {
                     walkSettings.setVisible(walkTools.visibility.settingsVisible);
                     return;
             }
-            
+
         } else if (data.type==="changeCamera") {
             walkToolsCameras.setCamera(data.selectedCamera);
         }

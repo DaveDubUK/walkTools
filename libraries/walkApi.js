@@ -43,7 +43,7 @@ Avatar = function() {
     this.hasAnimatedFingers = true;
     this.makesFootStepSounds = true;
     this.isMissingPreRotations = false; // temporary fix
-    
+
     // references to current animations
     this.loadAnimations = function() {
         this.selectedIdle = walkAssets.getAnimation("Idle");
@@ -86,7 +86,7 @@ Avatar = function() {
 
                 // only need to zero right leg IK chain and hips
                 if (IKChain === "RightLeg" || joint === "Hips" ) {
-                    MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
+                    MyAvatar.setJointRotation(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
                 }
             }
             this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightToeBase").y;
@@ -101,26 +101,26 @@ Avatar = function() {
                 extraAttempts++;// Interface can sometimes report zero for hips to feet. if so, we try again.
             }
         } while (attempts-- > 1)
-        
+
         // measure the various stride lengths
         var animationsToCalibrate = ["Walk", "WalkBackwards", "SideStepLeft", "SideStepRight"];
         motion.state = EDIT;
-        
+
         if (quickCalibration) {
             // if the max stride angle has already been calibrated
             // then we just need to calibrate stride length for this avatar
-            
+
             for (animation in animationsToCalibrate) {
-                var repeatedMeasurements = 0;    
+                var repeatedMeasurements = 0;
                 do { // a few times for accuracy
                     this.currentAnimation = walkAssets.getAnimation(animationsToCalibrate[animation]);
                     for (jointName in this.currentAnimation.joints) {
                         var joint = null;
                         var jointRotations = {x:0, y:0, z:0};
-                        
+
                         if (walkAssets.animationReference.joints[jointName]) {
                             joint = walkAssets.animationReference.joints[jointName];
-                        }  
+                        }
                         jointRotations = animationOperations.calculateRotations(jointName,
                                                             this.currentAnimation,
                                                             avatar.currentAnimation.calibration.strideMaxAt
@@ -136,7 +136,7 @@ Avatar = function() {
                 } while (++repeatedMeasurements < 3);
             }
         } else {
-            // if the max stride angle has not yet been calibrated then do all 
+            // if the max stride angle has not yet been calibrated then do all
             const ACCURACY = 0.2;
             for (animation in animationsToCalibrate) {
                 this.currentAnimation = walkAssets.getAnimation(animationsToCalibrate[animation]);
@@ -146,10 +146,10 @@ Avatar = function() {
                     for (jointName in this.currentAnimation.joints) {
                         var joint = null;
                         var jointRotations = {x:0, y:0, z:0};
-                        
+
                         if (walkAssets.animationReference.joints[jointName]) {
                             joint = walkAssets.animationReference.joints[jointName];
-                        }  
+                        }
                         jointRotations = animationOperations.calculateRotations(jointName,
                                                             this.currentAnimation,
                                                             angle,
@@ -169,22 +169,22 @@ Avatar = function() {
                 }
             }
         }
-        
+
         // final checks
         for (animation in animationsToCalibrate) {
             print('walk.js info: Stride length for '+walkAssets.getAnimation(animationsToCalibrate[animation]).name+
                   ' is ' + walkAssets.getAnimation(animationsToCalibrate[animation]).calibration.strideLength.toFixed(4)+
                   ' at ' + walkAssets.getAnimation(animationsToCalibrate[animation]).calibration.strideMaxAt.toFixed(1)+
                   ' degreees');
-        }        
+        }
         if (this.calibration.hipsToFeet <= 0 || isNaN(this.calibration.hipsToFeet)) {
             this.calibration.hipsToFeet = 1;
             print('walk.js error: Unable to get a non-zero measurement for the avatar hips to feet measure. Hips to feet set to default value ('+
                   this.calibration.hipsToFeet.toFixed(3)+'m). This will cause some foot sliding. If your avatar has only just appeared, it is recommended that you re-load the walk script.');
         } else {
             print('walk.js info: Hips to feet calibrated to '+this.calibration.hipsToFeet.toFixed(3)+'m');
-        }   
-                
+        }
+
         // resume
         motion.state = STATIC;
         this.currentAnimation = this.selectedIdle;
@@ -206,7 +206,7 @@ Avatar = function() {
             position: Vec3.sum(MyAvatar.position, {x:0, y: -this.calibration.hipsToFeet, z:0}),
             volume: volume
         };
-        
+
         if (this.nextStep === RIGHT) {
             if (this.rightAudioInjector === null) {
                 this.rightAudioInjector = Audio.playSound(walkAssets.getSound("FootStepLeft").audioData, options);
@@ -247,7 +247,7 @@ Motion = function() {
 
     // the current transition (any previous, unfinished transitions are nested within this transition)
     this.currentTransition = null;
-    
+
     // holds a list of live, pre (state change) reach poses
     this.preReachPoses = [];
     this.addPreReachPose = function(reachPoseName) {
@@ -261,7 +261,7 @@ Motion = function() {
         var activeReachPose = new ReachPoseWrapper(reachPoseName, true);
         this.preReachPoses.push(activeReachPose);
         //walkTools.toLog('Added new pre reach pose: '+activeReachPose.animation.name+'. Now have '+this.preReachPoses.length+' in queue');
-    }    
+    }
 
     // orientation, locomotion and timing
     this.velocity = {x:0, y:0, z:0};
@@ -399,7 +399,7 @@ Motion = function() {
                 //walkTools.toLog('Pre reach pose '+this.preReachPoses[pose].name + ' is complete');
                 this.preReachPoses.splice(pose, 1);
             }
-        }       
+        }
 
         // we now have enough information to set the appropriate locomotion mode
         switch (this.state) {
@@ -456,7 +456,7 @@ Motion = function() {
                         }
                     }
                 }
-                
+
                 if (airMotionToSurfaceMotion){
                     this.nextState = SURFACE_MOTION;
                 } else if (airMotionToStatic) {
@@ -467,26 +467,26 @@ Motion = function() {
                 break;
         }
     }
-    
+
     this.surfaceAnimationFromDirection = function(direction) {
         var walkName = null;
         switch (direction) {
-            
+
             case FORWARDS:
                 return "Walk";
-                
+
             case BACKWARDS:
                 return "WalkBackwards";
-                
+
             case LEFT:
                 return "SideStepLeft";
-                
+
             case RIGHT:
                 return "SideStepRight";
 
             case DOWN:
                 return "Idle";
-        } 
+        }
     }
 
     // frequency time wheel (foot / ground speed matching)
@@ -539,7 +539,7 @@ animationOperations = (function() {
 
             // gather modifiers and multipliers
             modifiers = new FrequencyMultipliers(joint, direction);
-            
+
             // sway (oscillation on the x-axis)
             if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].swayHarmonics) {
                 jointTranslations.x = joint.sway * animation.harmonics[jointName].swayHarmonics.calculate
@@ -564,7 +564,7 @@ animationOperations = (function() {
                 jointTranslations.z = joint.thrust * Math.sin
                     (filter.degToRad(modifiers.thrustFrequencyMultiplier * ft + joint.thrustPhase)) + joint.thrustOffset;
             }
-            } catch(e) {print ('Exception caught in walkApi - AnimationOperations - calculateTranslations: '+e.toString());} 
+            } catch(e) {print ('Exception caught in walkApi - AnimationOperations - calculateTranslations: '+e.toString());}
             return jointTranslations;
         },
 
@@ -572,18 +572,18 @@ animationOperations = (function() {
         calculateRotations: function(jointName, animation, ft, direction) {
             var jointRotations = {x:0, y:0, z:0};
             var joint = animation.joints[jointName];
-            
+
             if (joint) {
 
                 if (avatar.isMissingPreRotations) {
                     jointRotations = Vec3.sum(jointRotations, walkAssets.preRotations.joints[jointName]);
                 }
 
-                // gather frequency multipliers for this joint - TODO: phase these out, no need if using harmonics 
+                // gather frequency multipliers for this joint - TODO: phase these out, no need if using harmonics
                 modifiers = new FrequencyMultipliers(joint, direction);
 
                 // calculate pitch
-                if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].pitchHarmonics) { 
+                if (animation.harmonics.hasOwnProperty(jointName) && animation.harmonics[jointName].pitchHarmonics) {
                     jointRotations.x += joint.pitch * animation.harmonics[jointName].pitchHarmonics.calculate
                         (filter.degToRad(ft * modifiers.pitchFrequencyMultiplier + joint.pitchPhase)) + joint.pitchOffset;
                 } else {
@@ -606,7 +606,7 @@ animationOperations = (function() {
                     jointRotations.z += joint.roll * Math.sin
                         (filter.degToRad(ft * modifiers.rollFrequencyMultiplier + joint.rollPhase)) + joint.rollOffset;
                 }
-            } 
+            }
             return jointRotations;
         },
 
@@ -621,14 +621,14 @@ animationOperations = (function() {
         // blend source animation into target animation by given percentage
         // note: does NOT blend harmonic information
         blendAnimation: function(sourceAnimation, targetAnimation, percent) {
-            
+
             // blend harmonics (with a degree of uncertainty...)
             for (joint in sourceAnimation.harmonics) {
                 if (targetAnimation.harmonics[joint] === undefined) {
                     targetAnimation.harmonics[joint] = {};
                 }
                 for (harmonic in sourceAnimation.harmonics[joint]) {
-                    
+
                     if (!targetAnimation.harmonics[joint][harmonic]) {
                         targetAnimation.harmonics[joint][harmonic] = {
                             "magnitudes": [],
@@ -640,19 +640,19 @@ animationOperations = (function() {
                             targetAnimation.harmonics[joint][harmonic].phaseAngles.push(0);
                         }
                         targetAnimation.harmonics[joint][harmonic] =
-                            filter.createHarmonicsFilter(numHarmonics, 
+                            filter.createHarmonicsFilter(numHarmonics,
                                 targetAnimation.harmonics[joint][harmonic].magnitudes,
                                 targetAnimation.harmonics[joint][harmonic].phaseAngles);
-                    }                    
+                    }
                     for (magnitude in sourceAnimation.harmonics[joint][harmonic].magnitudes) {
                         targetAnimation.harmonics[joint][harmonic][magnitude] += percent * sourceAnimation.harmonics[joint][harmonic][magnitude];
                     }
                     //for (phaseAngle in sourceAnimation.harmonics[joint][harmonic].phaseAngles) {
                     //    targetAnimation.harmonics[joint][harmonic][magnitude] += percent * sourceAnimation.harmonics[joint][harmonic][magnitude];
-                    //}                    
+                    //}
                 }
             }
-            
+
             // blend joint values
             for (joint in sourceAnimation.joints) {
                 targetAnimation.joints[joint].pitch += percent * sourceAnimation.joints[joint].pitch;
@@ -675,7 +675,7 @@ animationOperations = (function() {
                     targetAnimation.joints[joint].thrustOffset += percent * sourceAnimation.joints[joint].thrustOffset;
                     targetAnimation.joints[joint].swayOffset += percent * sourceAnimation.joints[joint].swayOffset;
                     targetAnimation.joints[joint].bobOffset += percent * sourceAnimation.joints[joint].bobOffset;
-                    
+
                     /*walkTools.toLog('\n'+sourceAnimation.name+':'+
                                     ' pitch: '+sourceAnimation.joints[joint].pitch.toFixed(1) +
                                     ' yaw: '+sourceAnimation.joints[joint].yaw.toFixed(1) +
@@ -689,13 +689,13 @@ animationOperations = (function() {
                                     ' roll: '+targetAnimation.joints[joint].roll.toFixed(1) +
                                     ' sway: '+targetAnimation.joints[joint].sway.toFixed(1) +
                                     ' bob: '+targetAnimation.joints[joint].bob.toFixed(1) +
-                                    ' thrust: '+targetAnimation.joints[joint].thrust.toFixed(1));  */                  
+                                    ' thrust: '+targetAnimation.joints[joint].thrust.toFixed(1));  */
                 }
             }
         },
 
         deepCopy: function(sourceAnimation, targetAnimation) {
-            
+
             // calibration
             targetAnimation.calibration = JSON.parse(JSON.stringify(sourceAnimation.calibration));
 
@@ -718,7 +718,7 @@ ReachPoseWrapper = function(reachPoseName, sustainHold) {
     this.sustainHold = sustainHold | false;
     this.progress = 0;
     this.smoothingFilter = filter.createAveragingFilter(this.reachPoseParameters.smoothing);
-    
+
     this.updateProgress = function(increment) {
         if (this.progress < this.reachPoseParameters.sustain.timing || !this.sustainHold) {
             this.progress += increment;
@@ -727,7 +727,7 @@ ReachPoseWrapper = function(reachPoseName, sustainHold) {
     this.release = function() {
         this.sustainHold = false;
     }
-    
+
     // returns the current strength (i.e. influence) of this reach pose (based on the current progress value)
     this.currentStrength = function() {
         // apply optionally smoothed (D)ASDR envelope to reach pose's strength / influence whilst active
@@ -783,7 +783,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
     if (playTransitionReachPoses === undefined) {
         playTransitionReachPoses = true;
     }
-    
+
     // record the current state of animation
     this.nextAnimation = nextAnimation;
     this.lastAnimation = lastAnimation;
@@ -808,20 +808,20 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         var next = nextAnimation.name;
         if (this.nextAnimation.name === "WalkBlend") {
             next = motion.surfaceAnimationFromDirection(this.direction)
-        }   
+        }
         var last = lastAnimation.name;
         if (this.lastAnimation.name === "WalkBlend") {
             last = motion.surfaceAnimationFromDirection(this.direction)
-        }         
+        }
         //walkTools.toLog('Transition from '+last+' to '+next+' instantiated');
         this.parameters = walkAssets.getTransitionParameters(last, next);
-        
+
         // fire up any post event reach poses for this transition
         if (playTransitionReachPoses) {
-            if (this.parameters.postReachPoses) 
+            if (this.parameters.postReachPoses)
                 //walkTools.toLog('Transition from '+last+' to '+next+' has '+this.parameters.postReachPoses.length+' post reach poses');
-                            
-            for (pose in this.parameters.postReachPoses) {                         
+
+            for (pose in this.parameters.postReachPoses) {
                 this.liveReachPoses.push(new ReachPoseWrapper(this.parameters.postReachPoses[pose], false));
             }
         }
@@ -884,7 +884,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
             this.lastTransition.incrementRecursion();
             if (this.lastTransition.recursionDepth > MAX_TRANSITION_RECURSION) {
                 //walkTools.toLog('Transition from '+this.lastTransition.lastAnimation.name+
-                //' to '+this.lastTransition.nextAnimation.name+' deleted due to excessive recursion.'); 
+                //' to '+this.lastTransition.nextAnimation.name+' deleted due to excessive recursion.');
                 this.lastTransition = nullTransition;
             }
         }
@@ -951,19 +951,19 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
         if (this.lastTransition !== nullTransition) {
             if (this.lastTransition.updateProgress() === TRANSITION_COMPLETE) {
                 //walkTools.toLog('Transition from '+this.lastTransition.lastAnimation.name+
-                //' to '+this.lastTransition.nextAnimation.name+' (nested) complete.');                 
+                //' to '+this.lastTransition.nextAnimation.name+' (nested) complete.');
                 // the previous transition is now complete
                 this.lastTransition = nullTransition;
             }
         }
-    
+
         if (this.progress >= 1) {
             // release any pre-state change reach poses
             for (reachPose in motion.preReachPoses) {
                 //walkTools.toLog(motion.preReachPoses[reachPose].name + ' sustain hold released');
                 motion.preReachPoses[reachPose].release();
-            }       
-        }            
+            }
+        }
 
         // update any post-state change reach poses
         for (pose in this.liveReachPoses) {
@@ -974,7 +974,7 @@ Transition = function(nextAnimation, lastAnimation, lastTransition, playTransiti
                 this.liveReachPoses.splice(pose, 1);
             }
         }
-        
+
         // update transition progress
         this.filteredProgress = filter.bezier(this.progress, this.parameters.easingLower, this.parameters.easingUpper);
         return this.progress >= 1 ? TRANSITION_COMPLETE : false;

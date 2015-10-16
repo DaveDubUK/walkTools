@@ -86,7 +86,7 @@ Avatar = function() {
 
                 // only need to zero right leg IK chain and hips
                 if (IKChain === "RightLeg" || joint === "Hips" ) {
-                    MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
+                    MyAvatar.setJointRotation(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
                 }
             }
             this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightToeBase").y;
@@ -126,7 +126,7 @@ Avatar = function() {
                                                             avatar.currentAnimation.calibration.strideMaxAt
                                                             , "None");
                         // apply rotations
-                        MyAvatar.setJointData(jointName, Quat.fromVec3Degrees(jointRotations));
+                        MyAvatar.setJointRotation(jointName, Quat.fromVec3Degrees(jointRotations));
                     }
                     // measure and save stride length
                     var footRPos = MyAvatar.getJointPosition("RightFoot");
@@ -155,7 +155,7 @@ Avatar = function() {
                                                             angle,
                                                             "None");
                         // apply rotations
-                        MyAvatar.setJointData(jointName, Quat.fromVec3Degrees(jointRotations));
+                        MyAvatar.setJointRotation(jointName, Quat.fromVec3Degrees(jointRotations));
                     }
                     // measure and save stride length
                     var footRPos = MyAvatar.getJointPosition("RightFoot");
@@ -314,7 +314,7 @@ Motion = function() {
         avatar.distanceFromSurface = distanceFromSurface - avatar.calibration.hipsToFeet;
 
         // determine principle direction of locomotion
-        var FWD_BACK_BIAS = 1; // helps prevent false sidestep condition detection when banking hard
+        var FWD_BACK_BIAS = 100; // helps prevent false sidestep condition detection when banking hard
         if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y) &&
             Math.abs(this.velocity.x) > FWD_BACK_BIAS * Math.abs(this.velocity.z)) {
             if (this.velocity.x < 0) {

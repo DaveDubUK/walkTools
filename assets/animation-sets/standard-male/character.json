@@ -149,8 +149,8 @@
             },
             "Walk": {
                 "duration": 1.0,
-                "easingLower": {"x":0.5, "y":0.0},
-                "easingUpper": {"x":0.5, "y":1.0},
+                "easingLower": {"x":0.0, "y":1.0},
+                "easingUpper": {"x":0.0, "y":1.0},
                 "preReachPoses": ["FlyToWalk"],
                 "postReachPoses": ["FlyToWalkPost"]
             },
@@ -165,11 +165,11 @@
     "reachPoses": {
         "FlyToWalk": {
             "path": "animation-sets/standard-male/reach-poses/male-fly-to-walk-reach-pose.json",
-            "duration": 0.9,
+            "duration": 0.75,
             "delay": {"timing":0, "strength":0},
             "attack": {"timing":0.3, "strength":1},
             "decay": {"timing":0.4, "strength":1},
-            "sustain": {"timing":0.95, "strength":0},
+            "sustain": {"timing":0.8, "strength":0},
             "release": {"timing":1, "strength":0},
             "smoothing": 50
         },

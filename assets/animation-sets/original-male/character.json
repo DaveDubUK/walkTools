@@ -35,13 +35,13 @@
             "path": "animation-sets/original-male/animations/fly-down-animation.json"
         },
         "FlySlow": {
-            "path": "animation-sets/standard-male/animations/fly-slow-animation.json"
+            "path": "animation-sets/original-male/animations/fly-slow-animation.json"
         },
         "FlyTurning": {
-            "path": "animation-sets/standard-male/animations/fly-turning-animation.json"
+            "path": "animation-sets/original-male/animations/fly-turning-animation.json"
         },
         "FlyBackwards": {
-            "path": "animation-sets/standard-male/animations/fly-backwards-animation.json"
+            "path": "animation-sets/original-male/animations/fly-backwards-animation.json"
         }
     },
     "sounds": {

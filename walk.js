@@ -618,7 +618,7 @@ function renderMotion() {
                 scopeProbe2 = jointRotations.y * scopePreAmp;
                 scopeProbe3 = jointRotations.z * scopePreAmp;
             }
-        }/**/
+        }
 
         // apply rotations
         MyAvatar.setJointRotation(jointName, Quat.fromVec3Degrees(jointRotations));

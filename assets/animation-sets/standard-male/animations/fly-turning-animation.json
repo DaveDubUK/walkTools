@@ -1256,7 +1256,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":7.263,
+            "pitchOffset":-9.575,
             "yawOffset":1.5141808350817882,
             "rollOffset":1.165
         },
@@ -1300,7 +1300,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":3.9911315399222076,
+            "pitchOffset":-9.575,
             "yawOffset":1.222379352041571,
             "rollOffset":-1.165
         },
@@ -1337,7 +1337,7 @@
             "yawOffset":1.0217232395563711e-13,
             "rollOffset":6.149145523825193e-12
         },
-        "LeftHandPinky1": {
+        "LeftHandPinky1":{
             "pitch":0,
             "yaw":0,
             "roll":0,

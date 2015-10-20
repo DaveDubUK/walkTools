@@ -1190,9 +1190,9 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-19.507,
-            "yawOffset":-52.245,
-            "rollOffset":8.213
+            "pitchOffset":-2.7,
+            "yawOffset":-56.16,
+            "rollOffset":9.81
         },
         "LeftHand":{
             "pitch":0.8343418202409676,
@@ -1234,9 +1234,9 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-19.507,
-            "yawOffset":52.245,
-            "rollOffset":-8.213
+            "pitchOffset":-2.813,
+            "yawOffset":45.157,
+            "rollOffset":-12.42
         },
         "RightHand":{
             "pitch":0.886237923413902,
@@ -1256,7 +1256,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":5.663,
+            "pitchOffset":-13.538,
             "yawOffset":1.5141808350817882,
             "rollOffset":1.155
         },
@@ -1300,7 +1300,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":2.825,
+            "pitchOffset":-13.538,
             "yawOffset":1.222379352041571,
             "rollOffset":-3.805
         },
@@ -1337,7 +1337,7 @@
             "yawOffset":1.0217232395563711e-13,
             "rollOffset":6.149145523825193e-12
         },
-        "LeftHandPinky1": {
+        "LeftHandPinky1":{
             "pitch":0,
             "yaw":0,
             "roll":0,

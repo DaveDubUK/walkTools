@@ -1,9 +1,12 @@
 {
     "name":"FlyBackwards",
+    "version":"1.0",
     "calibration":{
         "frequency":0.5
     },
-    "harmonics":{},
+    "harmonics":{
+
+    },
     "joints":{
         "Hips":{
             "pitch":0,
@@ -32,7 +35,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":64.5,
+            "pitchOffset":53.325,
             "yawOffset":-20,
             "rollOffset":7.93
         },
@@ -43,7 +46,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":64,
+            "pitchOffset":53.325,
             "yawOffset":20,
             "rollOffset":-7.93
         },
@@ -256,7 +259,7 @@
             "yawOffset":0,
             "rollOffset":0
         },
-        "LeftHandPinky1": {
+        "LeftHandPinky1":{
             "pitch":0,
             "yaw":0,
             "roll":0,

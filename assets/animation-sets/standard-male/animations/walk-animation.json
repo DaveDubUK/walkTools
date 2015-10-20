@@ -3,7 +3,7 @@
     "version":"1.0",
     "calibration":{
         "frequency":5.309734062405283,
-        "strideLength": 0.8372,
+        "strideLength":0.8372,
         "strideMaxAt":276.8
     },
     "harmonics":{
@@ -4507,7 +4507,7 @@
             "pitchPhase":161.43500000000003,
             "yawPhase":161.43500000000003,
             "rollPhase":161.43500000000003,
-            "pitchOffset":17.302714236546308,
+            "pitchOffset":9.725,
             "yawOffset":-4.727162905037403,
             "rollOffset":-3.497112966142595
         },
@@ -4518,7 +4518,7 @@
             "pitchPhase":161.43500000000003,
             "yawPhase":161.43500000000003,
             "rollPhase":161.43500000000003,
-            "pitchOffset":16.887929768068716,
+            "pitchOffset":9.725,
             "yawOffset":10.128336273133755,
             "rollOffset":-1.9713758068392053
         },
@@ -4595,7 +4595,7 @@
             "pitchPhase":161.43500000000003,
             "yawPhase":161.43500000000003,
             "rollPhase":161.43500000000003,
-            "pitchOffset":4.9736132472753525,
+            "pitchOffset":-1.44,
             "yawOffset":-0.7446082386886701,
             "rollOffset":-0.9292483864119276
         },
@@ -4629,7 +4629,7 @@
             "yawPhase":161.43500000000003,
             "rollPhase":161.43500000000003,
             "pitchOffset":6.268577732145786,
-            "yawOffset":2.846378415822983,
+            "yawOffset":-0.27,
             "rollOffset":-2.222357055714383
         },
         "RightShoulder":{
@@ -4640,7 +4640,7 @@
             "yawPhase":161.43500000000003,
             "rollPhase":161.43500000000003,
             "pitchOffset":3.5258047115057707,
-            "yawOffset":-1.2866648444905877,
+            "yawOffset":0.27,
             "rollOffset":7.678064748644829
         },
         "LeftArm":{

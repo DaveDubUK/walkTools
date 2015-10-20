@@ -2,9 +2,11 @@
     "name":"FlyUp",
     "version":"1.0",
     "calibration":{
-        "frequency":3.0
+        "frequency":3
     },
-    "harmonics":{},
+    "harmonics":{
+
+    },
     "joints":{
         "Hips":{
             "pitch":0.01,
@@ -13,7 +15,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-3.30189,
+            "pitchOffset":-0.72,
             "yawOffset":0,
             "rollOffset":0,
             "sway":0,
@@ -33,7 +35,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-2.83019,
+            "pitchOffset":-5.594,
             "yawOffset":0,
             "rollOffset":-0.5283
         },
@@ -44,7 +46,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-2.83019,
+            "pitchOffset":-5.594,
             "yawOffset":0,
             "rollOffset":0.5283
         },
@@ -257,7 +259,7 @@
             "yawOffset":0,
             "rollOffset":0
         },
-        "LeftHandPinky1": {
+        "LeftHandPinky1":{
             "pitch":0,
             "yaw":0,
             "roll":0,

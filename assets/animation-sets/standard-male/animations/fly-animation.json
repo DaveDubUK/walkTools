@@ -1,5 +1,6 @@
 {
     "name":"Fly",
+    "version":"1.0",
     "calibration":{
         "frequency":0.5
     },
@@ -1092,7 +1093,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":82.204,
+            "pitchOffset":78.007,
             "yawOffset":-0.6744397495640442,
             "rollOffset":1.7416555364616215,
             "sway":0.00728574144276256,
@@ -1255,7 +1256,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":7.994,
+            "pitchOffset":-6.775,
             "yawOffset":1.5141808350817882,
             "rollOffset":5.79
         },
@@ -1299,7 +1300,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":3.9911315399222076,
+            "pitchOffset":-6.775,
             "yawOffset":1.222379352041571,
             "rollOffset":-7.05
         },
@@ -1336,7 +1337,7 @@
             "yawOffset":1.0217232395563711e-13,
             "rollOffset":6.149145523825193e-12
         },
-        "LeftHandPinky1": {
+        "LeftHandPinky1":{
             "pitch":0,
             "yaw":0,
             "roll":0,

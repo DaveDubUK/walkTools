@@ -4505,7 +4505,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":14.296234108507633,
+            "pitchOffset":9.131,
             "yawOffset":-17.736324958503246,
             "rollOffset":6.039274375885725
         },
@@ -4516,7 +4516,7 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":3.882617940194905,
+            "pitchOffset":-1.681,
             "yawOffset":10.660307228565216,
             "rollOffset":3.756415879353881
         },
@@ -4626,8 +4626,8 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":-1.1458481211141134,
-            "yawOffset":5.724081248044968,
+            "pitchOffset":1.868,
+            "yawOffset":0.225,
             "rollOffset":11.201466228812933
         },
         "RightShoulder":{
@@ -4638,7 +4638,7 @@
             "yawPhase":0,
             "rollPhase":0,
             "pitchOffset":0.7521037716635419,
-            "yawOffset":-5.187239898368716,
+            "yawOffset":6.458,
             "rollOffset":-7.98080544359982
         },
         "LeftArm":{
@@ -4670,9 +4670,9 @@
             "pitchPhase":0,
             "yawPhase":0,
             "rollPhase":0,
-            "pitchOffset":8.405644066631794,
-            "yawOffset":0.4590038397582248,
-            "rollOffset":-5.22793962713331
+            "pitchOffset":-0.113,
+            "yawOffset":-16.695,
+            "rollOffset":10.733
         },
         "RightForeArm":{
             "pitch":0.18698657652139164,

@@ -3,7 +3,7 @@
 //  version 0.1
 //
 //  Created by David Wooldridge, Summer 2015
-//  Copyright Â© 2015 David Wooldridge.
+//  Copyright © 2015 David Wooldridge.
 //
 //  Presents options as a button menu for walkTools
 //
@@ -19,7 +19,7 @@ WalkToolsToolBar = function() {
     // web window
     var _innerWidth = Window.innerWidth;
     var _innerHeight = Window.innerHeight;
-    const TOOLBAR_WIDTH = 670;
+    const TOOLBAR_WIDTH = 675;
     const TOOLBAR_HEIGHT = 70;
     const MARGIN_TOP = 0;
     var url = Script.resolvePath('html/walkToolsToolBar.html');

@@ -20,16 +20,7 @@ Avatar = function() {
     // if Hydras are connected, the only way to enable use is to never set any arm joint rotation
     this.hydraCheck = function() {
         // function courtesy of Thijs Wenker (frisbee.js)
-        var numberOfButtons = Controller.getNumberOfButtons();
-        var numberOfTriggers = Controller.getNumberOfTriggers();
-        var numberOfSpatialControls = Controller.getNumberOfSpatialControls();
-        const HYDRA_BUTTONS = 12;
-        const HYDRA_TRIGGERS = 2;
-        const HYDRA_CONTROLLERS_PER_TRIGGER = 2;
-        var controllersPerTrigger = numberOfSpatialControls / numberOfTriggers;
-        if (numberOfButtons == HYDRA_BUTTONS &&
-            numberOfTriggers == HYDRA_TRIGGERS &&
-            controllersPerTrigger == HYDRA_CONTROLLERS_PER_TRIGGER) {
+        if (Controller.Hardware.Hydra !== undefined) {
             print('walk.js info: Razer Hydra detected. Setting arms free (not controlled by script)');
             return true;
         } else {

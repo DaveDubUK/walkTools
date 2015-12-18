@@ -22,6 +22,7 @@
                 elArmsFree = document.getElementById("arms-free");
                 elFootstepSounds = document.getElementById("footstep-sounds");
                 elPreRotations = document.getElementById("pre-rotations");
+                elHiFiPreRotations = document.getElementById("hifi-pre-rotations");
                 elAnimationCharacterSelect = document.getElementById("animation-character-select");
                 elCalibrateButton = document.getElementById("calibrate-button");
                 elPathToAssets = document.getElementById("path-to-assets");
@@ -43,6 +44,9 @@
                                 if (data.preRotations !== undefined) {
                                     elPreRotations.checked = data.preRotations;
                                 }
+                                if (data.hiFiPreRotations !== undefined) {
+                                    elHiFiPreRotations.checked = data.hiFiPreRotations;
+                                }                                
                                 if (data.animationSets !== undefined) { 
                                     animationSets = [];
                                     for (set in data.animationSets) {
@@ -81,6 +85,13 @@
                         type: "walkSettings",
                         action: "isMissingPreRotations",
                         preRotations: elPreRotations.checked
+                    }));                
+                });
+                elHiFiPreRotations.addEventListener("change", function() {
+                    EventBridge.emitWebEvent(JSON.stringify({
+                        type: "walkSettings",
+                        action: "isUsingHiFiPreRotations",
+                        preRotations: elHiFiPreRotations.checked
                     }));                
                 });
                 elAnimationCharacterSelect.addEventListener("change", function() {
@@ -141,11 +152,18 @@
             </div>
 
             <div class="settings-section">
-                <label>Add pre-rotations</label>
+                <label>Use davedub pre-rots</label>
                 <span>
                     <input type='checkbox' id="pre-rotations">
                 </span>
             </div>
+            
+            <div class="settings-section">
+                <label>Use HiFi pre-rots</label>
+                <span>
+                    <input type='checkbox' id="hifi-pre-rotations">
+                </span>
+            </div>            
 
             <div class="settings-section">
 				<div class="button-group">

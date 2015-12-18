@@ -65,3 +65,7 @@ input[type=button] {
     float: none;
     width: 100%;  
 }
+
+#path-to-assets {
+    width: 100%;
+}

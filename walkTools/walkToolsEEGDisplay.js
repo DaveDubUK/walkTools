@@ -20,7 +20,7 @@ WalkToolsEEGDisplay = function() {
 	const DISPLAY_WIDTH = 688;
 	const DISPLAY_HEIGHT = 350;	
 	const MARGIN_TOP = 0;
-    var url = Script.resolvePath('html/walkToolsEEGDisplay.html');
+    var url = Script.resolvePath('../html/walkToolsEEGDisplay.html');
     var webView = new WebWindow('walkToolsEEGDisplay', url, DISPLAY_WIDTH, DISPLAY_HEIGHT, false); // 965 for full range
 	webView.setPosition((_innerWidth / 2) - (DISPLAY_WIDTH / 2), MARGIN_TOP);
     webView.setVisible(true);

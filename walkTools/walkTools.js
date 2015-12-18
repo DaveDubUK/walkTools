@@ -12,16 +12,16 @@
 //
 
 // load up the tools
-Script.include("./walkTools/walkToolsToolBar.js");
-Script.include("./walkTools/walkToolsStats.js");
-Script.include("./walkTools/walkToolsEditor.js");
-Script.include("./walkTools/walkToolsLog.js");
-Script.include("./walkTools/walkToolsOscilloscope.js");
-//Script.include("./walkTools/walkToolsBezierEditor.js");
-Script.include("./walkTools/walkToolsCameras.js");
-//Script.include("./walkTools/walkToolsGrid.js");
-Script.include("./walkTools/walkToolsBVHPlayer.js");
-//Script.include("./walkTools/walkToolsEEGDisplay.js");
+Script.include("walkToolsToolBar.js");
+Script.include("walkToolsStats.js");
+Script.include("walkToolsEditor.js");
+Script.include("walkToolsLog.js");
+Script.include("walkToolsOscilloscope.js");
+//Script.include("walkToolsBezierEditor.js");
+Script.include("walkToolsCameras.js");
+//Script.include("walkToolsGrid.js");
+Script.include("walkToolsBVHPlayer.js");
+//Script.include("walkToolsEEGDisplay.js");
 
 walkTools = (function () {
 
@@ -50,7 +50,7 @@ walkTools = (function () {
     var _yawDeltaAccelerationPeak = 0;
     var _nFrames = 0;
     var _globalPhase = 0;
-    
+
     var _stride = {
         animationName: "",
         rightFootStrideMax: 0,
@@ -96,15 +96,15 @@ walkTools = (function () {
                 return 'Unknown';
         }
     };
-    
+
     function dumpCurrentAnimation(optimise) {
         // can either produce smaller, optimised animation file (rounded parameters, no un-used harmonics, Ctrl-Shift-Q)
         // or a larger 'raw' animation file (no rounding, keep all un-used harmonics for later editing, Shift-Q)
         const JOINTS_DP = 5; // TODO: experiment reducing this once animations get to polished standard
-        const HARMONICS_DP = 16; // TODO: experiment reducing this once animations get to polished standard            
-        
+        const HARMONICS_DP = 16; // TODO: experiment reducing this once animations get to polished standard
+
         try {
-            
+
             if (optimise) {
                 // clear out any un-used harmonics in the actual animation file
                 for (joint in avatar.currentAnimation.harmonics) {
@@ -114,7 +114,7 @@ walkTools = (function () {
                         var phaseAngles = [];
                         for (i = 0 ; i < numHarmonics ; i++) {
                             var magnitude = avatar.currentAnimation.harmonics[joint][harmonicData].magnitudes[i];
-                            var phaseAngle = avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles[i];                           
+                            var phaseAngle = avatar.currentAnimation.harmonics[joint][harmonicData].phaseAngles[i];
                             magnitudes.push(magnitude);
                             phaseAngles.push(phaseAngle);
                         }
@@ -131,7 +131,7 @@ walkTools = (function () {
                     }
                 }
             }
-            
+
             // export avatar.currentAnimation as json string when q key is pressed.
             // reformat result at http://jsonformatter.curiousconcept.com/
             print('___________________________________\n');
@@ -142,18 +142,18 @@ walkTools = (function () {
             }
             print('___________________________________\n');
             print(JSON.stringify(avatar.currentAnimation, function(key, val) {
-                
+
                 if (optimise) {
-                    
+
                     if (isNaN(Number(key))) {
                         // shorten joint parameters
                         if (!isNaN(val)) {
-                            val = Number(val).toFixed(JOINTS_DP); 
+                            val = Number(val).toFixed(JOINTS_DP);
                         }
                     } else {
                         // shorten harmonics parameters
                         if (!isNaN(val)) {
-                            val = Number(val).toFixed(HARMONICS_DP);              
+                            val = Number(val).toFixed(HARMONICS_DP);
                         }
                     }
                 }
@@ -163,23 +163,23 @@ walkTools = (function () {
             print('___________________________________\n');
             print(avatar.currentAnimation.name + ' animation dumped\n');
             print('___________________________________\n');
-        
+
             // dump to walkTools log also
             walkToolsLog.clearLog();
             walkToolsLog.setVisible(true);
             walkToolsLog.logMessage(JSON.stringify(avatar.currentAnimation, function(key, val) {
-                
+
                 if (optimise) {
-                    
+
                     if (isNaN(Number(key))) {
                         // shorten joint parameters
                         if (!isNaN(val)) {
-                            val = Number(val).toFixed(JOINTS_DP); 
+                            val = Number(val).toFixed(JOINTS_DP);
                         }
                     } else {
                         // shorten harmonics parameters
                         if (!isNaN(val)) {
-                            val = Number(val).toFixed(HARMONICS_DP);              
+                            val = Number(val).toFixed(HARMONICS_DP);
                         }
                     }
                 }
@@ -189,9 +189,9 @@ walkTools = (function () {
             print('Error dumping animation file: ' + error.toString() + '\n');
             walkToolsLog.logMessage('Error dumping animation file: ' + error.toString());
             return;
-        }  
+        }
     }
-    
+
     function dumpPreRotations() {
         try {
             // export avatar pre rotations as json string
@@ -206,7 +206,7 @@ walkTools = (function () {
             print('___________________________________\n');
             print('pre-rotations dumped\n');
             print('___________________________________\n');
-        
+
             // dump to walkTools log also
             walkToolsLog.clearLog();
             walkToolsLog.setVisible(true);
@@ -219,7 +219,7 @@ walkTools = (function () {
             return;
         }
     }
-    
+
     var _shift = false;
     var _control = false;
     function keyPressEvent(event) {
@@ -228,10 +228,10 @@ walkTools = (function () {
         }
         if (event.text === "CONTROL") {
             _control = true;
-        }        
+        }
         if (_shift && (event.text === 'q' || event.text === 'Q')) {
             dumpCurrentAnimation(_control);
-        }        
+        }
     }
     function keyReleaseEvent(event) {
         if (event.text === "SHIFT") {
@@ -239,10 +239,10 @@ walkTools = (function () {
         }
         if (event.text === "CONTROL") {
             _control = false;
-        }        
+        }
     }
     Controller.keyPressEvent.connect(keyPressEvent);
-    Controller.keyReleaseEvent.connect(keyReleaseEvent);    
+    Controller.keyReleaseEvent.connect(keyReleaseEvent);
 
     // public methods
     return {
@@ -282,7 +282,7 @@ walkTools = (function () {
             if (_walkToolsEnabled) {
                 //if (deltaTime > 0.02) {
                 //    print('Warning: (walkTools) deltaTime excessive: '+(deltaTime*1000).toFixed(1)+'mS');
-                //}                    
+                //}
                 _frameStartTime = new Date().getTime();
                 _cumulativeTime += deltaTime;
                 _nFrames = _nFrames++ >= Number.MAX_SAFE_INTEGER ? 0 : _nFrames++;
@@ -393,7 +393,7 @@ walkTools = (function () {
 
         updateFrequencyTimeWheelStats: function(deltaTime, speed, wheelRadius, degreesTurnedSinceLastFrame) {
             if (_visibility.visible && _walkToolsEnabled) {
-                
+
                 // stride calibration
                 if (avatar.currentAnimation.name !== _stride.animationName) {
                     _stride = {
@@ -402,7 +402,7 @@ walkTools = (function () {
                         rightFootStrideMaxAt: 0,
                         leftFootStrideMax: 0,
                         leftFootStrideMaxAt: 0,
-                    }    
+                    }
                 }/*
                 var footRPos = MyAvatar.getJointPosition("RightFoot");
                 var footLPos = MyAvatar.getJointPosition("LeftFoot");
@@ -420,7 +420,7 @@ walkTools = (function () {
                         _stride.leftFootStrideMaxAt = motion.frequencyTimeWheelPos;
                     }
                 }*/
-                
+
                 var distanceTravelled = speed * deltaTime;
                 var ftWheelAngularVelocity = speed / wheelRadius;
 

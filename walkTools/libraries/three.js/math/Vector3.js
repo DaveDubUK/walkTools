@@ -18,7 +18,7 @@ THREE.Vector3 = function ( x, y, z ) {
 THREE.Vector3.prototype = {
 
 	constructor: THREE.Vector3,
-
+/*
 	set: function ( x, y, z ) {
 
 		this.x = x;
@@ -28,7 +28,7 @@ THREE.Vector3.prototype = {
 		return this;
 
 	},
-
+*/
 	setX: function ( x ) {
 
 		this.x = x;

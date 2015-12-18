@@ -71,11 +71,11 @@ WalkSettings = function() {
     Controller.keyReleaseEvent.connect(keyReleaseEvent);
 
     // web windows
-    const PANEL_WIDTH = 180;
-    const PANEL_HEIGHT = 265;
+    const PANEL_WIDTH = 200;
+    const PANEL_HEIGHT = 290;
 	const PANEL_RIGHT = 75;
 	const PANEL_BOTTOM = 160;
-    var _url = Script.resolvePath('html/walkSettings.html');
+    var _url = Script.resolvePath('../html/walkSettings.html');
     var _webWindow = new WebWindow('Settings', _url, PANEL_WIDTH, PANEL_HEIGHT, false);
     _webWindow.setVisible(false);
 	_webWindow.setPosition(_innerWidth - PANEL_RIGHT - PANEL_WIDTH, _innerHeight - PANEL_HEIGHT - PANEL_BOTTOM); 
@@ -94,6 +94,7 @@ WalkSettings = function() {
                         armsNotAnimated: avatar.armsNotAnimated,
                         makesFootStepSounds: avatar.makesFootStepSounds,
                         preRotations: avatar.isMissingPreRotations,
+                        hiFiPreRotations: avatar.isUsingHiFiPreRotations,
                         currentAnimationSet: walkAssets.getCurrentAnimationSet(),
                         animationSets: walkAssets.getAnimationSets(),
                         pathToAssets: pathToAssets
@@ -114,6 +115,10 @@ WalkSettings = function() {
 
                 case "isMissingPreRotations":
                     avatar.isMissingPreRotations = data.preRotations;
+                    return;
+                    
+                case "isUsingHiFiPreRotations":
+                    avatar.isUsingHiFiPreRotations = data.preRotations;
                     return;
 
                 case "currentAnimationSet":

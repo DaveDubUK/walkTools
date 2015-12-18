@@ -1,0 +1,28 @@
+* {
+}
+
+body {
+    margin: 0;
+    padding: 0;
+
+    background-color: rgb(76, 76, 76);
+    color: rgb(204, 204, 204);
+    font-family: Arial;
+    font-size: 9pt;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.dance-slider {
+    margin:18px 18px 0;
+    height: 150px !important;
+}
+
+.slider-container {
+    margin: 0 auto;
+}

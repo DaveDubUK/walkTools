@@ -16,21 +16,21 @@
 WalkToolsLog = function() {
     // web window
     var _visible = false;
-    var _url = Script.resolvePath('html/walkToolsLog.html');
+    var _url = Script.resolvePath('../html/walkToolsLog.html');
     var _innerWidth = Window.innerWidth;
-	var _innerHeight = Window.innerHeight;
-	const PLAYER_WIDTH = 637;
-	const PLAYER_HEIGHT = 900;
+    var _innerHeight = Window.innerHeight;
+    const PLAYER_WIDTH = 637;
+    const PLAYER_HEIGHT = 900;
     const TOP = 0;
     const LEFT = 0;
-    var _url = Script.resolvePath('html/walkToolsLog.html');
+    var _url = Script.resolvePath('../html/walkToolsLog.html');
     var _webView = new WebWindow('walkTools Log', _url, PLAYER_WIDTH, PLAYER_HEIGHT, false);
-	_webView.setPosition(LEFT, TOP);
+    _webView.setPosition(LEFT, TOP);
     _webView.setVisible(_visible);
 
     // public
     var that = {};
-    
+
     that.setVisible = function(visible) {
         _visible = visible;
         _webView.setVisible(_visible);
@@ -39,24 +39,25 @@ WalkToolsLog = function() {
             //_webView.raise();
         }
     }
-    
+
     that.logMessage = function(newLogEntry, decorate) {
         if (decorate === undefined) {
             decorate = true;
         }
         if (decorate) {
-            newLogEntry = walkTools.framesElapsed() + ': '+newLogEntry + '\n';
-        }        
+            //newLogEntry = walkTools.framesElapsed() + ': '+newLogEntry + '\n';
+            newLogEntry = newLogEntry + '\n';
+        }
         _webView.eventBridge.emitScriptEvent(JSON.stringify({
-            type: "logEvent",         
+            type: "logEvent",
             action: "newLogEntry",
             logEntry: newLogEntry
         }));
     }
-    
+
     that.clearLog = function() {
         _webView.eventBridge.emitScriptEvent(JSON.stringify({
-            type: "logEvent",         
+            type: "logEvent",
             action: "clearLog"
         }));
     }

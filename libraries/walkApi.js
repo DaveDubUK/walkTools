@@ -14,7 +14,7 @@
 //
 
 // included here to ensure walkApi.js can be used as an API, separate from walk.js
-Script.include("./libraries/walkConstants.js");
+Script.include("walkConstants.js");
 
 Avatar = function() {
     // if Hydras are connected, the only way to enable use is to never set any arm joint rotation
@@ -33,7 +33,8 @@ Avatar = function() {
     this.armsNotAnimated = this.hydraCheck(); // automatically sets true to enable Hydra support - temporary fix
     this.hasAnimatedFingers = true;
     this.makesFootStepSounds = true;
-    this.isMissingPreRotations = false; // temporary fix
+    this.isMissingPreRotations = true; // temporary fix
+    this.isUsingHiFiPreRotations = false; // temporary fix
 
     // references to current animations
     this.loadAnimations = function() {
@@ -75,17 +76,44 @@ Avatar = function() {
             for (joint in walkAssets.animationReference.joints) {
                 var IKChain = walkAssets.animationReference.joints[joint].IKChain;
 
-                // only need to zero right leg IK chain and hips
-                if (IKChain === "RightLeg" || joint === "Hips" ) {
+                    // only need to zero right leg IK chain and hips
+                    if (IKChain === "RightLeg" || joint === "Hips" ) {
+                        
+                    var jointRotations = { x:0, y:0, z:0 };
+                        
+                    if (avatar.isMissingPreRotations) {
+                        // using my pre-rotation definitions
+                        jointRotations = Vec3.sum(jointRotations, walkAssets.preRotations.joints[jointName]);
+                    }
+                    
+                    if (avatar.isUsingHiFiPreRotations) {
+                        // using the HiFi supplied pre-rotations
+                        var jointNumber = undefined;
+                        for (j in MyAvatar.jointNames) {
+                            if ( MyAvatar.jointNames[j] === jointName ) {
+                                jointNumber = j;
+                                break;
+                            }
+                        }
+                        if ( jointNumber === undefined ) {
+                            print('walkApi.js Error: joint number is not defined');
+                        } else {
+                            jointRotations = Vec3.sum(jointRotations, MyAvatar.getDefaultJointRotation(jointNumber));
+                        }
+                        jointRotations.x = filter.radToDeg(jointRotations.x);
+                        jointRotations.y = filter.radToDeg(jointRotations.y);
+                        jointRotations.z = filter.radToDeg(jointRotations.z);
+                        //print('Pre-rots for '+jointName+'(joint #'+jointNumber+') are '+jointRotations.x.toFixed(5)+', '+jointRotations.y.toFixed(5)+', '+jointRotations.z.toFixed(5));
+                    }                      
                     MyAvatar.setJointRotation(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
                 }
             }
             this.calibration.hipsToFeet = MyAvatar.getJointPosition("Hips").y - MyAvatar.getJointPosition("RightToeBase").y;
 
             // maybe measuring avatar with no pre-rotations?
-            if (this.calibration.hipsToFeet < 0 && this.isMissingPreRotations) {
-                this.calibration.hipsToFeet *= -1;
-            }
+            //if (this.calibration.hipsToFeet < 0 && this.isMissingPreRotations) {
+            //    this.calibration.hipsToFeet *= -1;
+            //}
 
             if (this.calibration.hipsToFeet === 0 && extraAttempts < 100) {
                 attempts++;
@@ -567,8 +595,32 @@ animationOperations = (function() {
             if (joint) {
 
                 if (avatar.isMissingPreRotations) {
+                    
+                    // using my pre-rotation definitions
                     jointRotations = Vec3.sum(jointRotations, walkAssets.preRotations.joints[jointName]);
                 }
+                
+                if (avatar.isUsingHiFiPreRotations) {
+                    
+                    // using the HiFi supplied pre-rotations
+                    var jointNumber = undefined;
+                    for (j in MyAvatar.jointNames) {
+                        if ( MyAvatar.jointNames[j] === jointName ) {
+                            jointNumber = j;
+                            break;
+                        }
+                        //print('Joint '+j+' is '+MyAvatar.jointNames[j]);
+                    }
+                    if ( jointNumber === undefined ) {
+                        print('walkApi.js Error: joint number is not defined');
+                    } else {
+                        jointRotations = Vec3.sum(jointRotations, MyAvatar.getDefaultJointRotation(jointNumber));
+                    }
+                    jointRotations.x = filter.radToDeg(jointRotations.x);
+                    jointRotations.y = filter.radToDeg(jointRotations.y);
+                    jointRotations.z = filter.radToDeg(jointRotations.z);
+                    //print('Pre-rots for '+jointName+'(joint #'+jointNumber+') are '+jointRotations.x.toFixed(5)+', '+jointRotations.y.toFixed(5)+', '+jointRotations.z.toFixed(5));
+                }                
 
                 // gather frequency multipliers for this joint - TODO: phase these out, no need if using harmonics
                 modifiers = new FrequencyMultipliers(joint, direction);

@@ -18,7 +18,7 @@ WalkToolsStats = function() {
     var _visible = false;
 
     // web window
-    var url = Script.resolvePath('html/walkToolsStats.html');
+    var url = Script.resolvePath('../html/walkToolsStats.html');
     var webView = new WebWindow('walkTools Stats', url, 390, 940, false);
     webView.setPosition(200, 0);
     webView.setVisible(_visible);

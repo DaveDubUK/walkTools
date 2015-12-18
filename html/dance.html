@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="walkStyle.css">
+        <link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.min.css">
+        <script src="jquery-2.1.4.min.js"></script>
+        <script src="jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+        <script>
+            function loaded() {
+
+            	var _thresholdOffset = 0;
+            	var _beatMultiplier = 1;
+
+                // jQueryUI stuff
+                $(function() {
+                    $( "#dance-beat-threshold" ).slider({
+                        min: 0.01,
+                        max: 4,
+                        value: 0,
+                        step: 0.01,
+                        orientation: "vertical",
+                        slide: function(event, ui) {
+                            _thresholdOffset = ui.value;
+                            EventBridge.emitWebEvent(JSON.stringify({
+                            		type: "danceEvent",
+                            		action: "setThresholdMultiplier",
+                            		value: _thresholdOffset
+                            	}
+                            ));
+                        }
+                    })
+                    $( "#dance-beat-multiplier" ).slider({
+                        min: 0,
+                        max: 6,
+                        value: 0,
+                        step: 0.5,
+                        orientation: "vertical",
+                        slide: function(event, ui) {
+                            _beatMultiplier = ui.value;
+                            EventBridge.emitWebEvent(JSON.stringify({
+                            		type: "danceEvent",
+                            		action: "setBeatMultiplier",
+                            		value: _beatMultiplier
+                            	}
+                            ));
+                        }
+                    })
+                });
+
+                // request initial values
+                EventBridge.emitWebEvent(JSON.stringify({ type: "danceEvent", action: "initialise" }));
+
+                // receive script events
+                if (window.EventBridge !== undefined) {
+                    EventBridge.scriptEventReceived.connect(function(data) {
+                        data = JSON.parse(data);
+
+                        if (data.type === 'danceEvent') {
+
+							switch (data.action) {
+
+								case 'updateParameters':
+									_thresholdOffset = data.value;
+                            		$( "#dance-beat-threshold" ).slider('value',_thresholdOffset);
+									break;
+							}
+                        }
+                    });
+                }
+            }
+        </script>
+    </head>
+    <body onload='loaded();'>
+        <div>
+            <div class="slider-container">
+                <label>Threshold</label>
+                <div name="dance-beat-threshold" id="dance-beat-threshold" class="dance-slider"></div>
+            </div>
+            <div class="slider-container">
+                <label>Beat Multiplier</label>
+                <div name="dance-beat-multiplier" id="dance-beat-multiplier" class="dance-slider"></div>
+            </div>
+		</div>
+    </body>
+</html>

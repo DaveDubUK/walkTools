@@ -12,15 +12,15 @@
 //
 
 // Include choice of two BVH parser libraries
-Script.include("./walkTools/libraries/jaanga-bvh-parser-hifi-version.js");
-Script.include("./walkTools/libraries/murayama-bvh-parser-hifi-version.js");
+Script.include("./libraries/jaanga-bvh-parser-hifi-version.js");
+Script.include("./libraries/murayama-bvh-parser-hifi-version.js");
 
 // Borrow a couple of classes from Three.js
 // Used for Euler rotations to Pitch / Yaw / Roll angles conversion
 THREE = {};
-Script.include("./walkTools/libraries/three.js/math/Quaternion.js");
-Script.include("./walkTools/libraries/three.js/math/Euler.js");
-Script.include("./walkTools/libraries/three.js/math/Vector3.js");
+Script.include("./libraries/three.js/math/Quaternion.js");
+Script.include("./libraries/three.js/math/Euler.js");
+Script.include("./libraries/three.js/math/Vector3.js");
 
 
 // ECMAScript 6 specification ready string.contains() function
@@ -47,7 +47,7 @@ WalkToolsBVHPlayer = function() {
 	const PLAYER_WIDTH = 665;
 	const PLAYER_HEIGHT = 316;
 	const MARGIN_TOP = 107;
-    var _url = Script.resolvePath('html/walkToolsBVHPlayer.html');
+    var _url = Script.resolvePath('../html/walkToolsBVHPlayer.html');
     var _webView = new WebWindow('walkTools BVH Player', _url, PLAYER_WIDTH, PLAYER_HEIGHT, false);
 	_webView.setPosition((_innerWidth / 4) - (PLAYER_WIDTH / 2), MARGIN_TOP);
     _webView.setVisible(_visible);
@@ -245,13 +245,13 @@ WalkToolsBVHPlayer = function() {
                     return;
 					
 				case "export":
-                    Window.alert('Unable to export BVH file. The exporter is not installed.');              
-					/*if (_rawBVHData) {
+                    /*Window.alert('Unable to export BVH file. The exporter is not installed.'); */             
+					if (_rawBVHData) {
                         Script.include("./walkTools/walkToolsBVHConverter.js");
 						walkToolsBVHConverter.exportJaanga(_rawBVHData, _translationScale);
 					} else {
 						alert('Unable to export BVH file. Please load a BVH file using the Jaanga parser to continue.');
-					}*/
+					}
 					return;
 					
 				case "preRotationIgnore":
@@ -321,7 +321,7 @@ WalkToolsBVHPlayer = function() {
 							if (avatar.isMissingPreRotations) {
 								rotation = Vec3.sum(rotation, walkAssets.preRotations.joints[joint]);
 							}
-							MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(rotation.x, rotation.y, rotation.z));
+							MyAvatar.setJointRotation(joint, Quat.fromPitchYawRollDegrees(rotation.x, rotation.y, rotation.z));
 						}
 					}
 				} catch(e) {

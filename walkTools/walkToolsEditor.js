@@ -11,7 +11,7 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-Script.include('./walkTools/walkToolsEditorSliderRanges.js');
+Script.include('walkToolsEditorSliderRanges.js');
 
 WalkToolsEditor = function() {
     var that = {};
@@ -32,7 +32,7 @@ WalkToolsEditor = function() {
 	const EDITOR_HEIGHT = 900;
 	var _innerWidth = Window.innerWidth;
 	var _innerHeight = Window.innerHeight;	
-    var url = Script.resolvePath('html/walkToolsEditor.html');
+    var url = Script.resolvePath('../html/walkToolsEditor.html');
     var _webView = new WebWindow('walkTools Editor', url, EDITOR_WIDTH, EDITOR_HEIGHT, false);
 	_webView.setPosition(_innerWidth - EDITOR_WIDTH, 0);
     _webView.setVisible(_visible);

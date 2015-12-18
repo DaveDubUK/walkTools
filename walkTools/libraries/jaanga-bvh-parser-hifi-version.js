@@ -207,7 +207,7 @@ Bvh.animate = function(frame, preRotations) {
 				}
 			);            
         }
-        MyAvatar.setJointData(joint, Quat.fromPitchYawRollDegrees(rotation.x, rotation.y, rotation.z));
+        MyAvatar.setJointRotation(joint, Quat.fromPitchYawRollDegrees(rotation.x, rotation.y, rotation.z));
     }
 };
 

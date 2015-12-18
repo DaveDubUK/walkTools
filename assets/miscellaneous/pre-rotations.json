@@ -8,34 +8,70 @@
             "z":0
         },
         "LeftUpLeg":{
-            "x":-7.09188,
-            "y":-0.78665,
-            "z":-179.621
+            "x":0,
+            "y":0,
+            "z":-180,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "RightUpLeg":{
-            "x":-7.15367,
-            "y":0.688027,
-            "z":179.041
+            "x":0,
+            "y":0,
+            "z":180,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "LeftLeg":{
-            "x":-0.167499,
+            "x":0,
             "y":0,
-            "z":-1.43863
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "RightLeg":{
-            "x":-0.0998994,
-            "y":0.0708097,
-            "z":1.43884
+            "x":0,
+            "y":0,
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "LeftFoot":{
-            "x":66.735,
-            "y":-18.585,
-            "z":-1.42214
+            "x":80,
+            "y":0,
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "RightFoot":{
-            "x":67.815,
-            "y":17.842,
-            "z":2.18241
+            "x":80,
+            "y":0,
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "LeftToeBase":{
             "x":28.5194,
@@ -48,9 +84,15 @@
             "z":-0.687243
         },
         "Spine":{
-            "x":-7.7576,
+            "x":0,
             "y":0,
-            "z":-0.0141293
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "Spine1":{
             "x":0,
@@ -63,56 +105,110 @@
             "z":0
         },
         "LeftShoulder":{
-            "x":-70.51,
-            "y":86.02,
-            "z":179.48
+            "x":-75,
+            "y":85,
+            "z":180,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "RightShoulder":{
-            "x":-70.47,
-            "y":-86.30,
-            "z":-179.47
+            "x":-75,
+            "y":-85,
+            "z":-180,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "LeftArm":{
-            "x":-13,
+            "x":-17,
             "y":0,
-            "z":0
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "RightArm":{
-            "x":-13,
+            "x":-17,
             "y":0,
-            "z":0
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "LeftForeArm":{
-            "x":-0.446116,
+            "x":0,
             "y":0,
-            "z":0.0543075
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "RightForeArm":{
-            "x":-0.0495589,
-            "y":0.571645,
-            "z":-4.9561
+            "x":0,
+            "y":0,
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "LeftHand":{
-            "x":-7.07806,
-            "y":10.8063,
-            "z":-7.72736
+            "x":0,
+            "y":0,
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "RightHand":{
-            "x":-5.97455,
-            "y":-7.66117,
-            "z":21.0545
+            "x":0,
+            "y":0,
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "Neck":{
-            "x":7.7576,
+            "x":0,
             "y":0,
-            "z":0
+            "z":0,
+            "pitch":0,
+            "yaw":0,
+            "roll":0,
+            "pitchPhase":0,
+            "yawPhase":0,
+            "rollPhase":0
         },
         "Head":{
             "x":0,
             "y":0,
             "z":0
         },
-        "LeftHandPinky1": {
+        "LeftHandPinky1":{
             "x":-1.59,
             "y":0,
             "z":1.34
@@ -173,12 +269,12 @@
             "z":0
         },
         "LeftHandIndex1":{
-            "x":3.80,
+            "x":3.8,
             "y":0,
             "z":0.48
         },
         "LeftHandIndex2":{
-            "x":3.00,
+            "x":3,
             "y":0,
             "z":0
         },
@@ -213,9 +309,9 @@
             "z":0
         },
         "RightHandPinky1":{
-            "x":-3.80,
+            "x":-3.8,
             "y":0,
-            "z":-3.10
+            "z":-3.1
         },
         "RightHandPinky2":{
             "x":0.85,

@@ -14,10 +14,7 @@
 //
 
 // animations, reach poses, reach pose parameters, transitions, transition parameters, sounds, image/s and reference files
-//const HIFI_PUBLIC_BUCKET = "https://hifi-public.s3.amazonaws.com/";
-//var pathToAssets = HIFI_PUBLIC_BUCKET + "procedural-animator/assets/";
-var pathToAssets = 'http://localhost/downloads/hf/scripts/walk-2.0-beta/assets/'; // path to local copy of assets folder - REMOVE_FOR_RELEASE
-//var pathToAssets = "https://s3-us-west-2.amazonaws.com/davedub/high-fidelity/walkTools/assets/"
+var pathToAssets = "https://hifi-content.s3.amazonaws.com/dave/walk-tools/assets/"
 
 print('walk.js: Loading assets from ' + pathToAssets);
 

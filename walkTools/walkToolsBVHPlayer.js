@@ -245,13 +245,13 @@ WalkToolsBVHPlayer = function() {
                     return;
 					
 				case "export":
-                    /*Window.alert('Unable to export BVH file. The exporter is not installed.'); */             
-					if (_rawBVHData) {
+                    Window.alert('Unable to export BVH file. The exporter is not installed.');              
+					/*if (_rawBVHData) {
                         Script.include("./walkTools/walkToolsBVHConverter.js");
 						walkToolsBVHConverter.exportJaanga(_rawBVHData, _translationScale);
 					} else {
 						alert('Unable to export BVH file. Please load a BVH file using the Jaanga parser to continue.');
-					}
+					}*/
 					return;
 					
 				case "preRotationIgnore":

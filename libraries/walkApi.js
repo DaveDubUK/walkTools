@@ -87,22 +87,13 @@ Avatar = function() {
                     }
                     
                     if (avatar.isUsingHiFiPreRotations) {
-                        // using the HiFi supplied pre-rotations
-                        var jointNumber = undefined;
-                        for (j in MyAvatar.jointNames) {
-                            if ( MyAvatar.jointNames[j] === jointName ) {
-                                jointNumber = j;
-                                break;
-                            }
-                        }
-                        if ( jointNumber === undefined ) {
+                        var jointNumber = MyAvatar.getJointIndex(jointName);
+                        if (jointNumber < 0) {
                             print('walkApi.js Error: joint number is not defined');
                         } else {
-                            jointRotations = Vec3.sum(jointRotations, MyAvatar.getDefaultJointRotation(jointNumber));
+                            var q = MyAvatar.getDefaultJointRotation(jointNumber);
+                            jointRotations = Vec3.sum(jointRotations, Quat.safeEulerAngles(q));
                         }
-                        jointRotations.x = filter.radToDeg(jointRotations.x);
-                        jointRotations.y = filter.radToDeg(jointRotations.y);
-                        jointRotations.z = filter.radToDeg(jointRotations.z);
                         //print('Pre-rots for '+jointName+'(joint #'+jointNumber+') are '+jointRotations.x.toFixed(5)+', '+jointRotations.y.toFixed(5)+', '+jointRotations.z.toFixed(5));
                     }                      
                     MyAvatar.setJointRotation(joint, Quat.fromPitchYawRollDegrees(0, 0, 0));
@@ -601,24 +592,14 @@ animationOperations = (function() {
                 }
                 
                 if (avatar.isUsingHiFiPreRotations) {
-                    
-                    // using the HiFi supplied pre-rotations
-                    var jointNumber = undefined;
-                    for (j in MyAvatar.jointNames) {
-                        if ( MyAvatar.jointNames[j] === jointName ) {
-                            jointNumber = j;
-                            break;
-                        }
-                        //print('Joint '+j+' is '+MyAvatar.jointNames[j]);
-                    }
-                    if ( jointNumber === undefined ) {
+
+                    var jointNumber = MyAvatar.getJointIndex(jointName);
+                    if (jointNumber < 0) {
                         print('walkApi.js Error: joint number is not defined');
                     } else {
-                        jointRotations = Vec3.sum(jointRotations, MyAvatar.getDefaultJointRotation(jointNumber));
+                        var q = MyAvatar.getDefaultJointRotation(jointNumber);
+                        jointRotations = Vec3.sum(jointRotations, Quat.safeEulerAngles(q));
                     }
-                    jointRotations.x = filter.radToDeg(jointRotations.x);
-                    jointRotations.y = filter.radToDeg(jointRotations.y);
-                    jointRotations.z = filter.radToDeg(jointRotations.z);
                     //print('Pre-rots for '+jointName+'(joint #'+jointNumber+') are '+jointRotations.x.toFixed(5)+', '+jointRotations.y.toFixed(5)+', '+jointRotations.z.toFixed(5));
                 }                
 
